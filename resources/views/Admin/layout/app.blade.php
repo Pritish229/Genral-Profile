@@ -78,6 +78,12 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__display {
+            cursor: default;
+            padding-left: 20px !important;
+            padding-right: 5px;
+        }
     </style>
 
     @yield('style')

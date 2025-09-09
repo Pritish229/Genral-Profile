@@ -65,4 +65,9 @@ class Student extends Model
         return $this->hasOne(StudentPaymentAccount::class, 'student_id')
             ->where('is_default_payout', true);
     }
+
+    public function profile()
+    {
+        return $this->hasOne(StudentProfile::class, 'student_id', 'id');
+    }
 }

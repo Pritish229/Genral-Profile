@@ -1,12 +1,12 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Address')
+@section('title', 'Home | Students | Contact')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Address"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist', 'Address' => '']" />
+        title="Contact"
+        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist', 'Contact' => '']" />
 
     <div class="mt-2">
         <div class="card">
@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <h5>Add Permanent Address</h5>
+    <h5>Add Contact</h5>
     <hr style="color:#5156be">
 
     <div id="alert-box" class="mt-2"></div>
@@ -26,49 +26,25 @@
         <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="progressBar">0%</div>
     </div>
 
-    <form id="studentAddressForm">
+    <form id="studentContactForm">
         <div class="row">
-            <div class="col-md-3">
-                <x-inputbox id="state" label="State" type="text" placeholder="Enter State Name" name="state"
-                    value="{{ old('state') }}" :required="false" helpertxt="State Name Max 120 character" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="district" label="District" type="text" placeholder="Enter District Name" name="district"
-                    value="{{ old('district') }}" :required="false" helpertxt="District Name Max 120 character" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="city" label="City" type="text" placeholder="Enter City Name" name="city"
-                    value="{{ old('city') }}" :required="false" helpertxt="City Name Max 120 character" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="pincode" label="Pincode" type="text" placeholder="Enter Pincode" name="pincode"
-                    value="{{ old('pincode') }}" :required="false" helpertxt="Pincode must be 6 digits" />
+            <div class="col-md-4">
+                <label for="contact_type" class="form-label">Contact Type</label>
+                <select id="contact_type" name="contact_type" class="form-control" >
+                    <option value="">-- Select Type --</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="telegram">Telegram</option>
+                </select>
             </div>
             <div class="col-md-4">
-                <x-inputbox id="line_1" label="Line 1" type="text" placeholder="Enter Line 1" name="line_1"
-                    value="{{ old('line_1') }}" :required="false" helpertxt="Line 1 Name Max 120 character" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="line_2" label="Line 2" type="text" placeholder="Enter Line 2" name="line_2"
-                    value="{{ old('line_2') }}" :required="false" helpertxt="Line 2 Name Max 120 character" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="landmark" label="Landmark" type="text" placeholder="Enter Landmark" name="landmark"
-                    value="{{ old('landmark') }}" :required="false" helpertxt="Landmark Max 150 character" />
+                <x-inputbox id="value" label="Value" type="text" placeholder="Enter Value" name="value"
+                    value="{{ old('value') }}" :required="false" helpertxt="Enter phone, email, etc." />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="label" label="Label" type="text" placeholder="Enter Label" name="label"
-                    value="{{ old('label') }}" :required="false" helpertxt="Ex: Parents Address" />
+                    value="{{ old('label') }}" :required="false" helpertxt="Optional label (e.g. Father's Phone)" />
             </div>
-            <div class="col-md-4">
-                <x-inputbox id="longitude" label="Longitude (Optional)" type="text" placeholder="Enter Longitude Code" name="longitude"
-                    value="{{ old('longitude') }}" :required="false" helpertxt="Ex: 19.32642" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="latitude" label="Latitude (Optional)" type="text" placeholder="Enter Latitude Code" name="latitude"
-                    value="{{ old('latitude') }}" :required="false" helpertxt="Ex: 19.32642" />
-            </div>
-            <div class="col-lg-12">
+            <div class="col-lg-12 mt-3">
                 <button type="submit" class="btn btn-primary">Save & Continue</button>
                 <button type="button" class="btn btn-secondary" id="skipBtn">Skip</button>
             </div>
@@ -124,22 +100,22 @@
     $(document).ready(function() {
         fetchDetails();
 
-        // Show progress at 30% for Address step
-        updateProgress(30);
+        // Show progress at 40% for Contact step
+        updateProgress(40);
 
-        $("#studentAddressForm").on("submit", function(e) {
+        $("#studentContactForm").on("submit", function(e) {
             e.preventDefault();
 
             Swal.fire({
                 title: 'Saving...',
-                text: 'Please wait while we save the address.',
+                text: 'Please wait while we save the contact.',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/Address/Update`,
+                url: `${baseUrl}/${student_id}/Address/storeContact`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -148,11 +124,11 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'Saved!',
-                            text: response.message,
+                            text: "Contact saved successfully",
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = `${baseUrl}/${student_id}/Contact`;
+                            window.location.href = `${baseUrl}/${student_id}/Bank`;
                         });
                     }
                 },
@@ -183,7 +159,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Contact`;
+                window.location.href = `${baseUrl}/${student_id}/Bank`;
             });
         });
     });

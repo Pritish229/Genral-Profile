@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('nationality', 80)->nullable();
             $table->string('mother_tongue', 60)->nullable();
 
-            $table->string('avatar_url', 500);
+            $table->string('avatar_url', 500)->nullable();
 
             // Guardian Info
             $table->string('guardian_name', 150)->nullable();
@@ -40,7 +40,7 @@ return new class extends Migration
             $table->decimal('parent_income', 12, 2)->nullable();
 
             // Academic Info
-            $table->string('current_class', 40);
+            $table->string('current_class', 40)->nullable();
             $table->string('section', 10)->nullable();
             $table->string('roll_no', 30)->nullable();
             $table->enum('enrollment_status', ['regular', 'transfer', 'provisional'])->default('regular');

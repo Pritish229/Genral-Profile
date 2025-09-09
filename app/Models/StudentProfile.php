@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class StudentProfile extends Model
 {
-     use HasFactory, SoftDeletes;
-     protected $table = 'student_profiles';
-     
-     protected $fillable = [
+    use HasFactory, SoftDeletes;
+    protected $table = 'student_profiles';
+
+    protected $fillable = [
         'tenant_id',
         'student_id',
         'first_name',
@@ -52,4 +52,6 @@ class StudentProfile extends Model
     {
         return $this->belongsTo(Student::class);
     }
+
+  
 }

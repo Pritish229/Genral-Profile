@@ -1,77 +1,176 @@
-/*! Image Uploader - v1.0.0 - 15/07/2019
- * Copyright (c) 2019 Christian Bayer; Licensed MIT */
+/* Base uploader */
 .image-uploader {
-    min-height: 20rem;
-    border: 2px dashed #5156be;
-    position: relative;
+  min-height: 10rem;
+  border: 2px dashed #5156be;
+  border-radius: 5px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #fff;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 .image-uploader.drag-over {
-    background-color: #f3f3f3;
+  background-color: #f3f3f3;
+  border-color: #5156be;
 }
+
+/* Hide native file input */
 .image-uploader input[type="file"] {
-    width: 0;
-    height: 0;
-    position: absolute;
-    z-index: -1;
-    opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
 }
+
+/* Centered label overlay when empty */
 .image-uploader .upload-text {
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  pointer-events: none;
 }
-.image-uploader .upload-text i {
-    display: block;
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-    color: #5156be;
-}
-.image-uploader .upload-text span,
-.image-uploader .uploaded .uploaded-image:hover .delete-image {
-    display: block;
+.image-uploader .upload-text .upload-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  color: #5156be;
 }
 .image-uploader.has-files .upload-text {
-    display: none;
+  display: none;
 }
+
+/* MULTIPLE: grid of squares */
 .image-uploader .uploaded {
-    padding: 0.5rem;
-    line-height: 0;
+  padding: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns default */
+  gap: 0.5rem;
+  justify-items: stretch;
+  align-items: stretch;
+  line-height: 0;
 }
-.image-uploader .uploaded .uploaded-image {
-    display: inline-block;
-    width: calc(16.6666667% - 1rem);
-    padding-bottom: calc(16.6666667% - 1rem);
-    height: 0;
-    position: relative;
-    margin: 0.5rem;
-    background: #f3f3f3;
-    cursor: default;
+
+.image-uploader:not(.single-uploader) .uploaded .uploaded-image {
+  position: relative;
+  aspect-ratio: 1 / 1;   /* perfect square tiles */
+  width: 100%;
+  background: #f3f3f3;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: default;
+  transition: transform 0.2s;
 }
-.image-uploader .uploaded .uploaded-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
+.image-uploader:not(.single-uploader) .uploaded .uploaded-image:hover {
+  transform: scale(1.03);
 }
-.image-uploader .uploaded .uploaded-image .delete-image {
-    display: none;
-    cursor: pointer;
-    position: absolute;
-    top: 0.2rem;
-    right: 0.2rem;
-    border-radius: 50%;
-    padding: 0.3rem;
-    background-color: rgba(0, 0, 0, 0.5);
-    -webkit-appearance: none;
-    border: none;
+.image-uploader:not(.single-uploader) .uploaded .uploaded-image img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* full-bleed crop */
 }
-.image-uploader .uploaded .uploaded-image .delete-image i {
-    color: #fff;
-    font-size: 1.4rem;
+
+/* MULTIPLE: delete button on hover */
+.image-uploader:not(.single-uploader) .uploaded .uploaded-image .delete-image {
+  display: none;
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: rgba(231, 23, 23, 0.9);
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.8rem;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-uploader:not(.single-uploader) .uploaded .uploaded-image:hover .delete-image {
+  display: inline-flex;
+}
+
+/* SINGLE: fixed square box with full-bleed, centered image */
+.single-uploader {
+  width: 100%;
+  height: 14rem;                 /* fixed square */
+  margin: auto;
+  border-radius: 10px;
+  display: block;                /* simpler box model */
+}
+
+.single-uploader .uploaded {
+  padding: 0;                    /* no inner padding that would shrink image */
+  width: 100%;
+  height: 100%;
+}
+
+.single-uploader .uploaded .uploaded-image {
+
+  width: 100%;
+  height: 100%;                  /* tile fills the box */
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.single-uploader .uploaded .uploaded-image img {
+  position: absolute;
+  inset: 0;                      /* top/right/bottom/left: 0 */
+  width: 100%;
+  height: 100%;
+  object-fit: contain;             /* fill without distortion */
+  object-position: center;       /* center crop to avoid left strip */
+}
+
+/* SINGLE: delete button always visible */
+.single-uploader .uploaded .uploaded-image .delete-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background-color: rgba(231, 23, 23, 0.95);
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  line-height: 2.1rem;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+
+/* Responsive columns: 4 -> 3 -> 2 */
+@media (max-width: 900px) {
+  .image-uploader .uploaded {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .image-uploader .uploaded {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .single-uploader {
+    width: 12rem;
+    height: 12rem;
+  }
 }

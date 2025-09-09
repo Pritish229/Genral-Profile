@@ -18,15 +18,15 @@
                 
                 <li class="menu-title mt-2" data-key="t-components">Profile Pages</li>
                 
-                <li class="{{ in_array(Route::currentRouteName(), ['students.create']) ? 'mm-active' : '' }}">
+                <li class="{{ in_array(Route::currentRouteName(), ['students.create','students.Basicinfo','students.Address','students.Bank','students.Document','students.Media','students.Studentlist.studentDetailsPage']) ? 'mm-active' : '' }}">
                     <a href=" javascript: void(0);" class="has-arrow">
                         <i class="fas fa-user-graduate" style="color: #545a6d;font-size: 0.99rem;"></i>
                         <span data-key="t-authentication">Students</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
                         <li class="{{ in_array(Route::currentRouteName(), ['students.create',]) ? 'active' : '' }}"><a href="{{ route('students.create') }}" data-key="t-alerts" aria-expanded="false"><span>Add Student</span></a></li>
-                       
-                        
+                        <li class="{{ in_array(Route::currentRouteName(), ['students.Studentlist','students.Studentlist.studentDetailsPage']) ? 'active' : '' }}"><a href="{{ route('students.Studentlist') }}" data-key="t-alerts" aria-expanded="false"><span>Students</span></a></li>
+                    </ul>
                     </ul>
                 </li>
                 
