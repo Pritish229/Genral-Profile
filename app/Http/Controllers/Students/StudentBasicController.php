@@ -27,6 +27,12 @@ class StudentBasicController extends Controller
             'id' => $student_id
         ]);
     }
+    public function manageDetail($student_id)
+    {
+        return view('Admin.Students.StudentProfile.ManageBasicinfo', [
+            'id' => $student_id
+        ]);
+    }
 
     public function basicDetails($student_id)
     {
@@ -63,7 +69,6 @@ class StudentBasicController extends Controller
 
     public function updateDetails(Request $request, $student_id)
     {
-        // Validation rules
         $rules = [
             'first_name'          => 'sometimes|string|max:70',
             'middle_name'         => 'nullable|string|max:70',
@@ -99,24 +104,42 @@ class StudentBasicController extends Controller
             ], 422);
         }
 
-        // Find profile
-        $profile = StudentProfile::where('student_id', $student_id)->first();
+        // Student with profile (so we can use student_uid)
+        $student = Student::with('profile')->find($student_id);
 
-        if (!$profile) {
+        if (!$student || !$student->profile) {
             return response()->json([
                 'success' => false,
                 'message' => 'Student profile not found'
             ], 404);
         }
+
+        $profile = $student->profile;
         $data = $request->only(array_keys($rules));
 
+        // Handle avatar update
         if ($request->hasFile('avatar_url')) {
-            $file      = $request->file('avatar_url');
+            $file = $request->file('avatar_url');
             $extension = $file->getClientOriginalExtension();
-            $fileName = ($profile->student_uid ?? 'student') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->move(public_path('StudentImages'), $fileName);
-            $data['avatar_url'] = "/StudentImages/{$fileName}";
+
+            // Filename = student_uid + datetime + extension
+            $fileName = ($student->student_uid ?? 'student') . '_' . now()->format('Ymd_His') . '.' . $extension;
+
+            // Delete old file if exists
+            if (!empty($profile->avatar_url)) {
+                $oldPath = storage_path('app/public/' . $profile->avatar_url);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+
+            // Store new file
+            $file->storeAs('StudentImages', $fileName, 'public');
+
+            // Save relative path (without /storage prefix in DB)
+            $data['avatar_url'] = "StudentImages/{$fileName}";
         }
+
         if (!empty($data)) {
             $profile->update($data);
         }
@@ -127,6 +150,8 @@ class StudentBasicController extends Controller
             'data'    => $profile
         ]);
     }
+
+
 
 
     public function listAll()

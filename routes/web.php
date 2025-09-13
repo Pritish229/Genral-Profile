@@ -15,39 +15,62 @@ Route::get('/', [DashboardController::class, 'dashBoardPage'])->name('Admin.Dash
 
 // Students Module 
 
-Route::get('/students/create', [StudentController::class, 'create'])->name('students.create');
-Route::post('/students/store', [StudentController::class, 'store'])->name('students.store');
+Route::prefix('students/')->group(function () {
 
-// Student Basic info 
-Route::get('/students/{id}/Basicinfo', [StudentBasicController::class, 'index'])->name('students.Basicinfo');
-Route::get('/students/Basicinfo/List', [StudentBasicController::class, 'studentlist'])->name('students.Studentlist');
-Route::get('/students/List/All', [StudentBasicController::class, 'listAll'])->name('students.Studentlist.all');
-Route::get('/students/Details/{student_id}/page', [StudentBasicController::class, 'studentDetails'])->name('students.Studentlist.studentDetailsPage');
+    Route::get('create', [StudentController::class, 'create'])->name('students.create');
+    Route::post('store', [StudentController::class, 'store'])->name('students.store');
 
-Route::get('/students/{student_id}/Basicinfo/Details', [StudentBasicController::class, 'basicDetails'])->name('students.BasicDetails');
-Route::post('/students/{student_id}/Basicinfo/Update', [StudentBasicController::class, 'updateDetails'])->name('students.UpdateDetails');
+    // Student Basic info 
+    Route::get('{id}/Basicinfo', [StudentBasicController::class, 'index'])->name('students.Basicinfo');
+    Route::get('Basicinfo/List', [StudentBasicController::class, 'studentlist'])->name('students.Studentlist');
+    Route::get('List/All', [StudentBasicController::class, 'listAll'])->name('students.Studentlist.all');
+    Route::get('Details/{student_id}/page', [StudentBasicController::class, 'studentDetails'])->name('students.Studentlist.studentDetailsPage');
 
-// Student Address
-Route::get('/students/{id}/Address', [StudentAddressController::class, 'index'])->name('students.Address');
-Route::get('/students/{student_id}/Address/Permanent', [StudentAddressController::class, 'permanentAddress'])->name('students.Address.Permanent');
-Route::post('/students/{student_id}/Address/Update', [StudentAddressController::class, 'update'])->name('students.address.Update');
+    Route::get('{student_id}/Basicinfo/Manage', [StudentBasicController::class, 'manageDetail'])->name('students.manageDetail');
+    Route::get('{student_id}/Basicinfo/Details', [StudentBasicController::class, 'basicDetails'])->name('students.BasicDetails');
+    Route::post('{student_id}/Basicinfo/Update', [StudentBasicController::class, 'updateDetails'])->name('students.UpdateDetails');
 
-// 
-Route::get('/students/{id}/Contact', [StudentContactController::class, 'index'])->name('students.Contact');
-Route::post('/students/{student_id}/Address/storeContact', [StudentContactController::class, 'storeContact'])->name('students.address.StoreContact');
-Route::get('/students/{id}/Contact/Permanent', [StudentContactController::class, 'permanentContact'])->name('students.Contact.Permanent');
+    // Student Address
+    Route::get('{id}/Address', [StudentAddressController::class, 'index'])->name('students.Address');
+    Route::get('{id}/Manage/Addresses', [StudentAddressController::class, 'manageAddress'])->name('students.addresses.manage');
+    Route::get('{id}/Get/Addresses', [StudentAddressController::class, 'getAddresses'])->name('students.addresses.list');
 
-// Student Bank
-Route::get('/students/{id}/Bank', [StudentBankController::class, 'index'])->name('students.Bank');
-Route::post('/students/{id}/storeBank', [StudentBankController::class, 'storeBank'])->name('students.Bank.StoreBank');
+    Route::post('{student_id}/Manage/Addresses', [StudentAddressController::class, 'storeAddress'])->name('students.addresses.store');
+    Route::put('{student}/addresses/{address}', [StudentAddressController::class, 'updateAddress'])->name('students.addresses.update');
+    Route::delete('{student}/addresses/{address}', [StudentAddressController::class, 'deleteAddress'])->name('students.addresses.delete');
 
-// Student Document
-Route::get('/students/{id}/Document', [StudentDocumentsController::class, 'index'])->name('students.Document');
-Route::post('/students/{id}/storeDocument', [StudentDocumentsController::class, 'storeDocument'])->name('students.Bank.StoreDocument');
+    Route::get('{student_id}/Address/Permanent', [StudentAddressController::class, 'permanentAddress'])->name('students.Address.Permanent');
 
 
-// Student Media
-Route::get('/students/{id}/Media', [StudentMediaController::class, 'index'])->name('students.Media');
-Route::post('/students/{id}/storeMedia', [StudentMediaController::class, 'storeMedia'])->name('students.Bank.storeMedia');
+    Route::get('{id}/Contact', [StudentContactController::class, 'index'])->name('students.Contact');
+    Route::post('{student_id}/Address/storeContact', [StudentContactController::class, 'storeContact'])->name('students.address.StoreContact');
+    Route::get('{id}/Contact/Permanent', [StudentContactController::class, 'permanentContact'])->name('students.Contact.Permanent');
+
+    Route::get('{id}/Manage/Contacts', [StudentContactController::class, 'manageContact'])->name('students.contacts.manageContact');
+    Route::get('{id}/Get/Contacts', [StudentContactController::class, 'getContacts'])->name('students.contacts.list');
+    Route::post('{student_id}/Manage/Contacts', [StudentContactController::class, 'storeContact'])
+        ->name('students.contacts.store');
+    Route::put('{student}/contacts/{contact}', [StudentContactController::class, 'updateContact'])
+        ->name('students.contacts.update');
+    Route::delete('{student}/contacts/{contact}', [StudentContactController::class, 'deleteContact'])
+        ->name('students.contacts.delete');
 
 
+    // Student Bank
+    Route::get('{id}/Bank', [StudentBankController::class, 'index'])->name('students.Bank');
+    Route::post('{id}/saveBank', [StudentBankController::class, 'saveBank'])->name('students.Bank.saveBank');
+    Route::get('{id}/bank-list', [StudentBankController::class, 'studentBankList'])->name('students.bank.list');
+    Route::get('{id}/manageBank', [StudentBankController::class, 'manageBankForm'])->name('students.bank.manage');
+    Route::get('{id}/manageBank/{account_id}', [StudentBankController::class, 'editBank'])->name('students.bank.manage.edit');
+    Route::delete('{id}/deleteBank/{account_id}', [StudentBankController::class, 'deleteBank'])->name('students.bank.delete');
+
+
+    // Student Document
+    Route::get('{id}/Document', [StudentDocumentsController::class, 'index'])->name('students.Document');
+    Route::post('{id}/storeDocument', [StudentDocumentsController::class, 'storeDocument'])->name('students.Bank.StoreDocument');
+
+
+    // Student Media
+    Route::get('{id}/Media', [StudentMediaController::class, 'index'])->name('students.Media');
+    Route::post('{id}/storeMedia', [StudentMediaController::class, 'storeMedia'])->name('students.Bank.storeMedia');
+});

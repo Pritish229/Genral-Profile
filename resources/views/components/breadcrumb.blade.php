@@ -7,13 +7,23 @@
                 <div class="page-title-right">
                     <ol class="breadcrumb m-0">
                         @foreach ($links as $label => $route)
-                        @if ($loop->last)
-                        <li class="breadcrumb-item active">{{ $label }}</li>
-                        @else
-                        <li class="breadcrumb-item">
-                            <a href="{{ $route ? route($route) : '#' }}">{{ $label }}</a>
-                        </li>
-                        @endif
+                            @if ($loop->last)
+                                <li class="breadcrumb-item active">{{ $label }}</li>
+                            @else
+                                @php
+                                    // Check if route is an array with parameters
+                                    if(is_array($route)){
+                                        $routeName = $route[0] ?? null;
+                                        $params = $route[1] ?? [];
+                                        $url = $routeName && Route::has($routeName) ? route($routeName, $params) : '#';
+                                    } else {
+                                        $url = $route && Route::has($route) ? route($route) : '#';
+                                    }
+                                @endphp
+                                <li class="breadcrumb-item">
+                                    <a href="{{ $url }}">{{ $label }}</a>
+                                </li>
+                            @endif
                         @endforeach
                     </ol>
                 </div>

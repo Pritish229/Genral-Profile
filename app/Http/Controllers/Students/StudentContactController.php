@@ -15,6 +15,11 @@ class StudentContactController extends Controller
         return view('Admin.Students.StudentProfile.AddContact', ['id' => $id]);
     }
 
+    public function manageContact($id)
+    {
+        return view('Admin.Students.StudentProfile.ManageContact', ['id' => $id]);
+    }
+
 
     public function storeContact(Request $request, $student_id)
     {
@@ -39,6 +44,59 @@ class StudentContactController extends Controller
             'success' => true,
             'data'    => $contact
         ], 201);
+    }
+
+    public function getContacts($id)
+    {
+        $studentcontact = StudentContact::where('student_id', $id)->get();
+        return response()->json([
+            'success' => true,
+            'data' => $studentcontact
+        ]);
+    }
+
+
+
+    // ✅ Update existing contact
+    public function updateContact(Request $request, Student $student, StudentContact $contact)
+    {
+        if ($contact->student_id !== $student->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This contact does not belong to the student.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'contact_type' => 'required|string|max:120',
+            'value'        => 'required|string|max:120',
+            'label'        => 'nullable|string|max:120',
+        ]);
+
+        $contact->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $contact
+        ]);
+    }
+
+    // ✅ Delete (Soft Delete)
+    public function deleteContact(Student $student, StudentContact $contact)
+    {
+        if ($contact->is_primary) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Primary contact cannot be deleted.'
+            ], 403);
+        }
+
+        $contact->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact deleted successfully.'
+        ]);
     }
 
     public function permanentContact($student_id)

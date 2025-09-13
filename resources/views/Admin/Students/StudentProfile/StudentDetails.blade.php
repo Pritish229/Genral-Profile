@@ -20,7 +20,7 @@
         <div class="card">
             <h5 class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
                 Basic information
-                <a href="#" class="text-primary" data-toggle="tooltip" title="Edit">
+                <a href="{{ url('students/' . $id . '/Basicinfo/Manage') }}" class="text-primary" data-toggle="tooltip" title="Edit">
                     <i class="fas fa-edit"></i>
                 </a>
             </h5>
@@ -80,12 +80,12 @@
         <div class="card-grid">
             <!-- Card 1 -->
             <div class="card p-2">
-                <h5 class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
+                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
                     Administration information
-                    <a href="#" class="text-primary" data-toggle="tooltip" title="Edit">
+                    <!-- <a href="#" class="text-primary" data-toggle="tooltip" title="Edit">
                         <i class="fas fa-edit"></i>
-                    </a>
-                </h5>
+                    </a> -->
+                </h6>
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
                     <div class="mb-3 d-flex"><strong class="me-2">Student Name:</strong>
@@ -114,17 +114,16 @@
 
             <!-- Card 2 -->
             <div class="card">
-                <div class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    <h5>
+                <div class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
+                    <h6>
                         Address information
-                        <a href="#" class="badge bg-secondary" style="font-size: 0.700rem;">Primary</a>
-                    </h5>
+                    </h6>
                     <div>
-                        <a href="#" class="text-primary me-3" data-toggle="tooltip" title="Add Address">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                        <a href="#" class="text-primary" data-toggle="tooltip" title="Edit Address">
-                            <i class="fas fa-edit"></i>
+                        <a href="{{ url('/students/' . $id . '/Manage/Addresses') }}"
+                            class="text-primary me-3"
+                            data-toggle="tooltip"
+                            title="Manage Address">
+                            <i class="fas fa-plus-circle"></i>
                         </a>
                     </div>
                 </div>
@@ -160,17 +159,17 @@
             <!-- Card 3 -->
             <div class="card">
                 <div class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    <h5>
+                    <h6>
                         Contact information
-                        <a href="#" class="badge bg-secondary" style="font-size: 0.700rem;">Primary</a>
-                    </h5>
+                    </h6>
                     <div>
-                        <a href="#" class="text-primary me-3" data-toggle="tooltip" title="Add Contact">
-                            <i class="fas fa-plus"></i>
+                        <a href="{{ url('/students/' . $id . '/Manage/Contacts') }}"
+                            class="text-primary me-3"
+                            data-toggle="tooltip"
+                            title="Manage Contact">
+                            <i class="fas fa-plus-circle"></i>
                         </a>
-                        <a href="#" class="text-primary" data-toggle="tooltip" title="Edit Contact">
-                            <i class="fas fa-edit"></i>
-                        </a>
+
                     </div>
                 </div>
                 <hr style="color:#5156be">
@@ -195,59 +194,7 @@
         </div>
     </section>
 
-    <section id="bank_details ">
-        <div class="card">
-            <div class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                <h5>
-                    Bank Details
-                </h5>
-                <div>
-                    <a href="#" class="text-primary me-3" data-toggle="tooltip" title="Add Contact">
-                        <i class="fas fa-plus"></i>
-                    </a>
-                    <a href="#" class="text-primary" data-toggle="tooltip" title="Edit Contact">
-                        <i class="fas fa-edit"></i>
-                    </a>
-                </div>
 
-            </div>
-            <hr style="color:#5156be">
-            <table class="table table-bordered">
-                <thead>
-                    <th>slNo</th>
-                    <th>method</th>
-                    <th>Account Holder</th>
-                    <th>Bank Name</th>
-                    <th>Branch</th>
-                    <th>IFSC Code</th>
-                    <th>SWIFT Code</th>
-                    <th>UPI VPA</th>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>bank</td>
-                        <td>bank</td>
-                        <td>SBI</td>
-                        <td>Ambapua</td>
-                        <td>SBIBN22390</td>
-                        <td>7876453435</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>upi</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>test@oksbibank</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
 </div>
 @endsection
 
@@ -261,7 +208,7 @@
         // Fallback helper
         const safe = (val) => val ? val : 'Not Provided';
 
-        $('#f_name').text( ': ' + safe(info.full_name));
+        $('#f_name').text(': ' + safe(info.full_name));
         $('#dob').text(': ' + safe(info.dob));
         $('#gender').text(': ' + safe(info.gender));
         $('#caste').text(': ' + safe(info.caste));
@@ -296,41 +243,46 @@
                     primaryinfo(response.primary_details, response.data);
 
                     let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/students/${response.data.id}/manageBank`; // Fixed URL
+
                     $("#student-details").html(`
-                        <div class="d-flex align-items-start justify-content-between">
-                            <!-- Profile + Info -->
-                            <div class="d-flex align-items-start gap-3">
-                                <div style="flex: 0 0 160px;">
-                                    <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                                </div>
-                                <div class="flex-grow-1">
-                                    <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
-                                    <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                    <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
-                                    <p><strong>Phone:</strong> ${response.primary_details.primary_phone}</p>
-                                    <p><strong>Admission No:</strong> ${response.primary_details.admission_no}</p>
-                                    <p><strong>Admission Date:</strong> ${response.primary_details.admission_date}</p>
-                                </div>
+                    <div class="d-flex align-items-start justify-content-between">
+                        <!-- Profile + Info -->
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="flex: 0 0 160px;">
+                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
-                                    
-                            <!-- Status badge on top-right -->
-                            <div>
-                                <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
-                                    ${response.primary_details.status}
-                                </span>
+                            <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>Name:</strong> ${response.data.full_name}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
+                                <p><strong>Phone:</strong> ${response.primary_details.primary_phone}</p>
+                                <p><strong>Admission No:</strong> ${response.primary_details.admission_no}</p>
+                                <p><strong>Admission Date:</strong> ${response.primary_details.admission_date}</p>
                             </div>
                         </div>
 
-                        <!-- Footer with Documents & Media -->
-                        <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
-                            <a href="#" class="text-decoration-none">
-                                <i class="fas fa-file-alt me-1"></i> Documents
-                            </a>
-                            <a href="#" class="text-decoration-none">
-                                <i class="fas fa-photo-video me-1"></i> Medias
-                            </a>
+                        <!-- Status badge on top-right -->
+                        <div>
+                            <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                                ${response.primary_details.status}
+                            </span>
                         </div>
-                    `);
+                    </div>
+
+                    <!-- Footer with Documents & Media -->
+                    <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
+                        <a href="${manageBankUrl}" class="text-decoration-none">
+                            <i class="fas fa-university me-1"></i> Bank Details
+                        </a>
+                        <a href="#" class="text-decoration-none">
+                            <i class="fas fa-file-alt me-1"></i> Documents
+                        </a>
+                        <a href="#" class="text-decoration-none">
+                            <i class="fas fa-photo-video me-1"></i> Medias
+                        </a>
+                    </div>
+                `);
 
                 } else {
                     $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
@@ -342,6 +294,7 @@
             }
         });
     }
+
 
     function permanentAddress() {
         $.ajax({
@@ -361,6 +314,7 @@
             }
         });
     }
+
     function permanentContact() {
         $.ajax({
             type: "GET",
@@ -372,7 +326,7 @@
                 $('#contact_value').text(response.data.value)
                 $('#country_code').text(response.data.country_code)
                 $('#label').text(response.data.label)
-                $('#is_emergency').text(response.data.is_emergency == '1' ? 'Yes' : 'No' )
+                $('#is_emergency').text(response.data.is_emergency == '1' ? 'Yes' : 'No')
                 $('#addr_1').text(response.data.line1)
                 $('#addr_2').text(response.data.line2)
                 $('#land_mark').text(response.data.landmark)
@@ -380,14 +334,77 @@
         });
     }
 
+    function studentbanklist() {
+        $.ajax({
+            url: `${baseUrl}/${student_id}/bank-list`,
+            type: 'GET',
+            success: function(res) {
+                if (res.success) {
+                    let rows = '';
+                    $.each(res.data, function(index, account) {
+                        rows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${account.method}</td>
+                            <td>${account.account_holder || '-'}</td>
+                            <td>${account.bank_name || '-'}</td>
+                            <td>${account.branch_name || '-'}</td>
+                            <td>${account.ifsc_code || '-'}</td>
+                            <td>${account.swift_code || '-'}</td>
+                            <td>${account.upi_id || '-'}</td>
+                            <td>
+                                <a href="${baseUrl}/${student_id}/manageBank/${account.id}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger" onclick="deleteBank(${student_id}, ${account.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    });
+                    $('#bank-list').html(rows);
+                }
+            }
+        });
+    }
 
+    // Delete account
+    function deleteBank(student_id, account_id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `${baseUrl}/${student_id}/deleteBank/${account_id}`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            Swal.fire('Deleted!', res.message, 'success');
+                            studentbanklist(); // Refresh table
+                        } else {
+                            Swal.fire('Error!', res.message, 'error');
+                        }
+                    }
+                });
+            }
+        });
+    }
 
-
+    // Initial loa
 
     $(document).ready(function() {
         fetchDetails()
         permanentAddress()
         permanentContact()
+        studentbanklist();
     });
 </script>
 @endsection
