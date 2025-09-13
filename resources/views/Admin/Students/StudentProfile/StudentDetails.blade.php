@@ -120,7 +120,7 @@
                     </h6>
                     <div>
                         <a href="{{ url('/students/' . $id . '/Manage/Addresses') }}"
-                            class="text-primary me-3"
+                            class="text-primary"
                             data-toggle="tooltip"
                             title="Manage Address">
                             <i class="fas fa-plus-circle"></i>
@@ -164,7 +164,7 @@
                     </h6>
                     <div>
                         <a href="{{ url('/students/' . $id . '/Manage/Contacts') }}"
-                            class="text-primary me-3"
+                            class="text-primary "
                             data-toggle="tooltip"
                             title="Manage Contact">
                             <i class="fas fa-plus-circle"></i>
