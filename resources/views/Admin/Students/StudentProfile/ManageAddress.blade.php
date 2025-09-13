@@ -34,12 +34,12 @@
                     value="{{ old('pincode') }}" :required="false" helpertxt="6 digits only" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="line_1" label="Line 1" type="text" placeholder="Enter Line 1" name="line_1"
-                    value="{{ old('line_1') }}" :required="false" />
+                <x-inputbox id="line1" label="Line 1" type="text" placeholder="Enter Line 1" name="line1"
+                    value="{{ old('line1') }}" :required="false" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="line_2" label="Line 2" type="text" placeholder="Enter Line 2" name="line_2"
-                    value="{{ old('line_2') }}" :required="false" />
+                <x-inputbox id="line2" label="Line 2" type="text" placeholder="Enter Line 2" name="line2"
+                    value="{{ old('line2') }}" :required="false" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="landmark" label="Landmark" type="text" placeholder="Enter Landmark" name="landmark"
