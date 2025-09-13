@@ -119,10 +119,12 @@
             } else {
                 $('#sav-btn').prop('diabled', false).text('Save');
                 alert("Error saving contact");
-            }
-        }).fail(err => {
-            alert("Validation failed");
-            console.error(err.responseJSON);
+                 $('#sav-btn').prop('diabled', false).text('Save');
+                }
+            }).fail(err => {
+                alert("Validation failed");
+                console.error(err.responseJSON);
+                $('#sav-btn').prop('diabled', false).text('Save');
         });
     });
 
