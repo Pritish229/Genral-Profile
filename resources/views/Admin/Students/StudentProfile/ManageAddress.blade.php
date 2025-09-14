@@ -5,12 +5,12 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-    title="Manage Address"
+    title="Manage Addresses"
     :links="[
         'Home' => 'Admin.Dashboard',
         'Students' => 'students.Studentlist',
         'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
-        'Manage Address' => ''
+        'Manage Addresses' => ''
     ]"
 />
     <!-- Address Form -->

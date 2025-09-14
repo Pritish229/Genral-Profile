@@ -63,11 +63,18 @@ Route::prefix('students/')->group(function () {
     Route::get('{id}/manageBank', [StudentBankController::class, 'manageBankForm'])->name('students.bank.manage');
     Route::get('{id}/manageBank/{account_id}', [StudentBankController::class, 'editBank'])->name('students.bank.manage.edit');
     Route::delete('{id}/deleteBank/{account_id}', [StudentBankController::class, 'deleteBank'])->name('students.bank.delete');
-
-
+    
+    
     // Student Document
     Route::get('{id}/Document', [StudentDocumentsController::class, 'index'])->name('students.Document');
     Route::post('{id}/storeDocument', [StudentDocumentsController::class, 'storeDocument'])->name('students.Bank.StoreDocument');
+    Route::get('{id}/manageDocument', [StudentDocumentsController::class, 'managedocument'])->name('students.document.manage');
+
+    Route::get('{id}/documents', [StudentDocumentsController::class, 'getDocuments']);
+    Route::get('{student_id}/documents/{doc_id}', [StudentDocumentsController::class, 'getDocument']);
+    Route::delete('{student_id}/documents/{doc_id}', [StudentDocumentsController::class, 'deleteDocument']);
+    Route::put('{student_id}/documents/{doc_id}', [StudentDocumentsController::class, 'updateDocument']);
+
 
 
     // Student Media

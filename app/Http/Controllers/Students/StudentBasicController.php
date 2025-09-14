@@ -104,7 +104,6 @@ class StudentBasicController extends Controller
             ], 422);
         }
 
-        // Student with profile (so we can use student_uid)
         $student = Student::with('profile')->find($student_id);
 
         if (!$student || !$student->profile) {
@@ -115,14 +114,24 @@ class StudentBasicController extends Controller
         }
 
         $profile = $student->profile;
+
+        // Extract only valid fields
         $data = $request->only(array_keys($rules));
+
+        // Build full_name (if first/middle/last available)
+        $data['full_name'] = trim(preg_replace(
+            '/\s+/',
+            ' ',
+            ($data['first_name'] ?? '') . ' ' .
+                (!empty($data['middle_name']) ? $data['middle_name'] . ' ' : '') .
+                ($data['last_name'] ?? '')
+        ));
 
         // Handle avatar update
         if ($request->hasFile('avatar_url')) {
             $file = $request->file('avatar_url');
             $extension = $file->getClientOriginalExtension();
 
-            // Filename = student_uid + datetime + extension
             $fileName = ($student->student_uid ?? 'student') . '_' . now()->format('Ymd_His') . '.' . $extension;
 
             // Delete old file if exists
@@ -136,7 +145,7 @@ class StudentBasicController extends Controller
             // Store new file
             $file->storeAs('StudentImages', $fileName, 'public');
 
-            // Save relative path (without /storage prefix in DB)
+            // Save relative path
             $data['avatar_url'] = "StudentImages/{$fileName}";
         }
 
@@ -150,6 +159,7 @@ class StudentBasicController extends Controller
             'data'    => $profile
         ]);
     }
+
 
 
 

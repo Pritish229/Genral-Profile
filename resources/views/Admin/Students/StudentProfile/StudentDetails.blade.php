@@ -47,6 +47,9 @@
                 <div class="col-md-6 mb-3 info-row"><strong>Section</strong>
                     <div id="section">...</div>
                 </div>
+                <div class="col-md-6 mb-3 info-row"><strong>Mother Tongue</strong>
+                    <div id="mother_tongue">...</div>
+                </div>
                 <div class="col-md-6 mb-3 info-row"><strong>Guardian Name</strong>
                     <div id="guardian_name">...</div>
                 </div>
@@ -113,20 +116,19 @@
             </div>
 
             <!-- Card 2 -->
-            <div class="card">
-                <div class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    <h6>
+            <div class="card p-2">
+                
+                    <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
                         Address information
-                    </h6>
-                    <div>
                         <a href="{{ url('/students/' . $id . '/Manage/Addresses') }}"
                             class="text-primary"
                             data-toggle="tooltip"
-                            title="Manage Address">
+                            title="Manage Addresses">
                             <i class="fas fa-plus-circle"></i>
                         </a>
-                    </div>
-                </div>
+                    </h6>
+                    
+                
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
                     <div class="mb-3 d-flex"><strong class="me-2">Country:</strong>
@@ -157,21 +159,17 @@
             </div>
 
             <!-- Card 3 -->
-            <div class="card">
-                <div class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    <h6>
-                        Contact information
-                    </h6>
-                    <div>
+            <div class="card p-2">
+                
+                    <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
+                        Address information
                         <a href="{{ url('/students/' . $id . '/Manage/Contacts') }}"
-                            class="text-primary "
+                            class="text-primary"
                             data-toggle="tooltip"
                             title="Manage Contact">
                             <i class="fas fa-plus-circle"></i>
                         </a>
-
-                    </div>
-                </div>
+                    </h6>
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
                     <div class="mb-3 d-flex"><strong class="me-2">Contact Type:</strong>
@@ -230,6 +228,7 @@
         $('#admin_status').text(': ' + safe(data.status));
         $('#note').text(': ' + safe(data.note));
         $('#student_f_name').text(': ' + safe(info.full_name));
+        $('#mother_tongue').text(': ' + safe(info.mother_tongue));
 
     }
     // Fetch student basic info
@@ -243,46 +242,47 @@
                     primaryinfo(response.primary_details, response.data);
 
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    let manageBankUrl = `/students/${response.data.id}/manageBank`; // Fixed URL
+                    let manageBankUrl = `/students/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/students/${response.data.id}/manageDocument`;
 
                     $("#student-details").html(`
-                    <div class="d-flex align-items-start justify-content-between">
-                        <!-- Profile + Info -->
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 160px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
-                                <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
-                                <p><strong>Phone:</strong> ${response.primary_details.primary_phone}</p>
-                                <p><strong>Admission No:</strong> ${response.primary_details.admission_no}</p>
-                                <p><strong>Admission Date:</strong> ${response.primary_details.admission_date}</p>
-                            </div>
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                         </div>
-
-                        <!-- Status badge on top-right -->
-                        <div>
-                            <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
-                                ${response.primary_details.status}
-                            </span>
+                        <div class="flex-grow-1">
+                            <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                            <p><strong>Name:</strong> ${response.data.full_name}</p>
+                            <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
+                            <p><strong>Phone:</strong> ${response.primary_details.primary_phone}</p>
+                            <p><strong>Admission No:</strong> ${response.primary_details.admission_no}</p>
+                            <p><strong>Admission Date:</strong> ${response.primary_details.admission_date}</p>
                         </div>
                     </div>
 
-                    <!-- Footer with Documents & Media -->
-                    <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
-                        <a href="${manageBankUrl}" class="text-decoration-none">
-                            <i class="fas fa-university me-1"></i> Bank Details
-                        </a>
-                        <a href="#" class="text-decoration-none">
-                            <i class="fas fa-file-alt me-1"></i> Documents
-                        </a>
-                        <a href="#" class="text-decoration-none">
-                            <i class="fas fa-photo-video me-1"></i> Medias
-                        </a>
+                    <!-- Status badge on top-right -->
+                    <div>
+                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                            ${response.primary_details.status}
+                        </span>
                     </div>
-                `);
+                </div>
+
+                <!-- Footer with Documents & Media -->
+                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
+                    <a href="${manageBankUrl}" class="text-decoration-none">
+                        <i class="fas fa-university me-1"></i> Bank Details
+                    </a>
+                    <a href="${manageDocUrl}" class="text-decoration-none">
+                        <i class="fas fa-file-alt me-1"></i> Documents
+                    </a>
+                    <a href="#" class="text-decoration-none">
+                        <i class="fas fa-photo-video me-1"></i> Medias
+                    </a>
+                </div>
+            `);
 
                 } else {
                     $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
