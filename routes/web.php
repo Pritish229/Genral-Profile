@@ -79,5 +79,11 @@ Route::prefix('students/')->group(function () {
 
     // Student Media
     Route::get('{id}/Media', [StudentMediaController::class, 'index'])->name('students.Media');
+    Route::get('{id}/Media/manage', [StudentMediaController::class, 'manageindex'])->name('students.manageindex');
     Route::post('{id}/storeMedia', [StudentMediaController::class, 'storeMedia'])->name('students.Bank.storeMedia');
+    Route::get('{student}/{media}/medias/details', [StudentMediaController::class, 'show'])->name('students.medias.show');
+    Route::put('/{media}', [StudentMediaController::class, 'updateMedia'])->name('students.medias.update');
+    Route::delete('/{media}', [StudentMediaController::class, 'destroy'])->name('students.medias.destroy');
+     Route::get('{id}/medias/list', [StudentMediaController::class, 'getMedias'])->name('students.medias.list');
+
 });

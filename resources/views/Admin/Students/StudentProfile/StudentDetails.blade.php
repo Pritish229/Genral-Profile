@@ -244,6 +244,7 @@
                     let imgSrc = `/storage/${response.data.avatar_url}`;
                     let manageBankUrl = `/students/${response.data.id}/manageBank`;
                     let manageDocUrl = `/students/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/students/${response.data.id}/Media/manage`;
 
                     $("#student-details").html(`
                 <div class="d-flex align-items-start justify-content-between">
@@ -278,7 +279,7 @@
                     <a href="${manageDocUrl}" class="text-decoration-none">
                         <i class="fas fa-file-alt me-1"></i> Documents
                     </a>
-                    <a href="#" class="text-decoration-none">
+                    <a href="${managemediaUrl}" class="text-decoration-none">
                         <i class="fas fa-photo-video me-1"></i> Medias
                     </a>
                 </div>
