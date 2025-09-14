@@ -149,7 +149,7 @@ function editBank(account) {
 // Fetch bank list
 function studentbanklist() {
     $.ajax({
-        url: `/students/${student_id}/bank-list`,
+        url: `{{url('/students/${student_id}/bank-list)}}`,
         type: 'GET',
         success: function(res) {
             if (res.success) {
@@ -199,7 +199,7 @@ function deleteBank(account_id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `/students/${student_id}/deleteBank/${account_id}`,
+                url: `{{url('/students/${student_id}/deleteBank/${account_id}')}}`,
                 type: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                 success: function(res) {
@@ -219,7 +219,7 @@ function deleteBank(account_id) {
 $('#bankDetailsForm').on('submit', function(e) {
     e.preventDefault();
     $.ajax({
-        url: `/students/${student_id}/saveBank`,
+        url: `{{url('/students/${student_id}/saveBank')}}`,
         type: 'POST',
         data: $(this).serialize(),
         success: function(res) {

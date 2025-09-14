@@ -70,7 +70,6 @@
             </div>
             <div class="col-lg-12">
                 <button type="submit" class="btn btn-primary">Save & Continue</button>
-                <button type="button" class="btn btn-secondary" id="skipBtn">Skip</button>
             </div>
         </div>
     </form>
@@ -139,7 +138,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/Address/Update`,
+                url: `${baseUrl}/${student_id}/Manage/Addresses`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();

@@ -210,7 +210,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/NextStep`; // change NextStep to your next route
+                window.location.href = `${baseUrl}/${student_id}/Document`; // change NextStep to your next route
             });
         });
 
