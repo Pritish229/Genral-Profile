@@ -63,8 +63,8 @@ Route::prefix('students/')->group(function () {
     Route::get('{id}/manageBank', [StudentBankController::class, 'manageBankForm'])->name('students.bank.manage');
     Route::get('{id}/manageBank/{account_id}', [StudentBankController::class, 'editBank'])->name('students.bank.manage.edit');
     Route::delete('{id}/deleteBank/{account_id}', [StudentBankController::class, 'deleteBank'])->name('students.bank.delete');
-    
-    
+
+
     // Student Document
     Route::get('{id}/Document', [StudentDocumentsController::class, 'index'])->name('students.Document');
     Route::post('{id}/storeDocument', [StudentDocumentsController::class, 'storeDocument'])->name('students.Bank.StoreDocument');
@@ -82,8 +82,12 @@ Route::prefix('students/')->group(function () {
     Route::get('{id}/Media/manage', [StudentMediaController::class, 'manageindex'])->name('students.manageindex');
     Route::post('{id}/storeMedia', [StudentMediaController::class, 'storeMedia'])->name('students.Bank.storeMedia');
     Route::get('{student}/{media}/medias/details', [StudentMediaController::class, 'show'])->name('students.medias.show');
-    Route::put('/{media}', [StudentMediaController::class, 'updateMedia'])->name('students.medias.update');
-    Route::delete('/{media}', [StudentMediaController::class, 'destroy'])->name('students.medias.destroy');
-     Route::get('{id}/medias/list', [StudentMediaController::class, 'getMedias'])->name('students.medias.list');
+    Route::put('{student}/{media}/update', [StudentMediaController::class, 'updateMedia'])->name('students.medias.update');
+    Route::delete('{student_id}/{media}/delete', [StudentMediaController::class, 'destroy'])->name('students.medias.destroy');
+    Route::get('{id}/medias/list', [StudentMediaController::class, 'getMedias'])->name('students.medias.list');
+});
 
+Route::prefix('employees/')->group(function () {
+Route::get('create', [StudentController::class, 'create'])->name('students.create');
+    Route::post('store', [StudentController::class, 'store'])->name('students.store');
 });

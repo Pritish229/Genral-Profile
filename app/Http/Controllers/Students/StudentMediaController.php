@@ -48,7 +48,7 @@ class StudentMediaController extends Controller
 
         // Ensure tags are stored as JSON
         $validated['tags'] = $validated['tags'] ?? [];
-        
+
         // Create media
         $media = StudentMedia::create([
             'tenant_id'     => $student->tenant_id,
@@ -58,7 +58,7 @@ class StudentMediaController extends Controller
             'file_name'     => $validated['file_name'] ?? $file->getClientOriginalName(),
             'file_url'      => $validated['file_url'],
             'caption'       => $validated['caption'] ?? null,
-            'tags'          => json_encode($validated['tags']),
+            'tags'          => json_encode($this->normalizeTags($validated['tags'] ?? [])),
             'status'        => 'active',
         ]);
 
@@ -82,7 +82,7 @@ class StudentMediaController extends Controller
         return response()->json(['data' => $this->formatMedia($media)]);
     }
 
-    public function update(Request $request, $student_id, $media_id)
+    public function updateMedia(Request $request, $student_id, $media_id)
     {
         $media = StudentMedia::where('student_id', $student_id)->findOrFail($media_id);
 
@@ -147,7 +147,7 @@ class StudentMediaController extends Controller
             'tenant_id'   => $media->tenant_id,
             'student_id'  => $media->student_id,
             'media_usage' => $media->media_usage,
-            'subject_name'=> $media->subject_name,
+            'subject_name' => $media->subject_name,
             'file_name'   => $media->file_name,
             'file_url'    => asset('storage/' . $media->file_url),
             'caption'     => $media->caption,
@@ -156,5 +156,19 @@ class StudentMediaController extends Controller
             'created_at'  => $media->created_at,
             'updated_at'  => $media->updated_at,
         ];
+    }
+
+    private function normalizeTags($tags)
+    {
+        if (is_array($tags)) {
+            return array_values(array_filter($tags, fn($t) => !empty(trim($t)))); // clean empties
+        }
+
+        if (is_string($tags)) {
+            $decoded = json_decode($tags, true);
+            return is_array($decoded) ? $decoded : [$tags]; // fallback: wrap string in array
+        }
+
+        return [];
     }
 }
