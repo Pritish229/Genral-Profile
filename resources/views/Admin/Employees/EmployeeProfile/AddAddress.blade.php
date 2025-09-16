@@ -79,7 +79,7 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
+    let baseUrl = "{{ url('/employees') }}";
     let student_id = "{{ $id }}";
 
     function fetchDetails() {
@@ -89,6 +89,8 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
+                    console.log(response);
+
                     let imgSrc = `/storage/${response.data.avatar_url}`;
                     $("#student-details").html(`
                         <div class="d-flex align-items-start gap-3">
@@ -96,11 +98,9 @@
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.employee_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Status:</strong> ${response.primary_details.status}</p>
                             </div>
                         </div>
                     `);

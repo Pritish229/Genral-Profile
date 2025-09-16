@@ -27,52 +27,66 @@
     <form id="studentForm">
         <div class="row">
             <div class="col-md-6">
-                <x-inputbox id="guardian_name" label="Guardian Name" type="text" placeholder="Enter Guardian Name" name="guardian_name"
-                    value="{{ old('guardian_name') }}" :required="false" helpertxt="Guardian Name" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_relation" label="Guardian Relation" type="text" placeholder="Enter Guardian Relation" name="guardian_relation"
-                    value="{{ old('guardian_relation') }}" :required="false" helpertxt="Guardian Relation" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_occupation" label="Guardian Occupation" type="text" placeholder="Enter Guardian Occupation" name="guardian_occupation"
-                    value="{{ old('guardian_occupation') }}" :required="false" helpertxt="Guardian Occupation" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_phone" label="Guardian Phone no" type="text" placeholder="Enter Guardian Phone no" name="guardian_phone"
-                    value="{{ old('guardian_phone') }}" :required="false" helpertxt="Phone number must be 10 Digits" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_email" label="Guardian Email" type="email" placeholder="Enter Guardian Email" name="guardian_email"
-                    value="{{ old('guardian_email') }}" :required="false" helpertxt="Guardian email must be valid email" />
+                <x-inputbox id="designation" label="Designation" type="text" placeholder="Enter Designation" name="designation"
+                    value="{{ old('designation') }}" :required="false" helpertxt="Designation" />
             </div>
             <div class="col-md-6">
-                <x-inputbox id="parent_income" label="Annual income" type="text" placeholder="Enter Annual income" name="parent_income"
-                    value="{{ old('parent_income') }}" :required="false" helpertxt="Annual income Must Be Number" />
+                <x-inputbox id="department" label="Department" type="text" placeholder="Enter Department" name="department"
+                    value="{{ old('department') }}" :required="false" helpertxt="Department" />
             </div>
             <div class="col-md-3">
-                <x-inputbox id="nationality" label="Nationality " type="text" placeholder="Enter Nationality" name="nationality"
-                    value="{{ old('nationality') }}" :required="false" helpertxt="Maximum 70 Character" />
+                <div class="mb-2">
+                    <label for="employment_type" class="mb-2 labeltxt">Employment Type</label>
+                    <select name="employment_type" class="form-select" id="employment_type">
+                        <option value="full_time">Full time</option>
+                        <option value="part_time">Part time</option>
+                        <option value="contract">Contract</option>
+                        <option value="intern">Intern</option>
+                        <option value="consultant">Consultant</option>
+                    </select>
+                    <small class="mb-3 pt-1 helpertxt">Select Employment Type</small>
+                </div>
             </div>
             <div class="col-md-3">
-                <x-inputbox id="mother_tongue" label="Mother Tongue" type="text" placeholder="Enter Mother Tongue" name="mother_tongue"
-                    value="{{ old('mother_tongue') }}" :required="false" helpertxt="Maximum 70 Character" />
+                <x-inputbox id="salary_currency" label="Salary Currency" type="text" placeholder="Enter Salary Currency" name="salary_currency"
+                    value="{{ old('salary_currency') }}" :required="false" helpertxt="Salary currency  Max 3 Digits" />
             </div>
+            <div class="col-md-3">
+                <x-inputbox id="base_salary" label="Base Salary" type="number" placeholder="Enter Base Salary" name="base_salary"
+                    value="{{ old('base_salary') }}" :required="false" helpertxt="Base Salary must be valid number" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="experience_years" label="Experience Years" type="text" placeholder="Enter Experience Years" name="experience_years"
+                    value="{{ old('experience_years') }}" :required="false" helpertxt="Experience Years Must Be Number Eg: 2.3" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="emergency_contact_name" label="Emergency Contact Person " type="text" placeholder="Enter Emergency Contact Person" name="emergency_contact_name"
+                    value="{{ old('emergency_contact_name') }}" :required="false" helpertxt="Maximum 70 Character" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="emergency_relation" label="Emergency Contact Relation " type="text" placeholder="Enter Emergency Contact Relation" name="emergency_relation"
+                    value="{{ old('emergency_relation') }}" :required="false" helpertxt="Maximum 70 Character" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="emergency_contact_phone" label="Emergency Contact Number " type="text" placeholder="Enter Emergency Contact Number" name="emergency_contact_phone"
+                    value="{{ old('emergency_contact_phone') }}" :required="false" helpertxt="Maximum 20 Character" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="location" label="Location " type="text" placeholder="Enter Location" name="location"
+                    value="{{ old('location') }}" :required="false" helpertxt="Maximum 100 Character" />
+            </div>
+            <div class="col-md-6">
+                <label for="skills">Skills</label>
+                <select id="skills" name="skills[]" class="form-control" multiple></select>
+            </div>
+            <div class="col-md-6">
+                <label for="manager">Manager</label>
+                <select id="manager_id" name="manager_id" class="form-control select2"></select>
+            </div>
+
             <div class="col-md-6">
                 <x-inputbox id="blood_group" label="Blood Group" type="text" placeholder="Enter Blood Group" name="blood_group"
                     value="{{ old('blood_group') }}" :required="false" helpertxt="Maximum 5 Character" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="current_class" label="Current Class" type="text" placeholder="Enter Current Class" name="current_class"
-                    value="{{ old('current_class') }}" :required="false" helpertxt="Maximum 40 Character" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="section" label="Section" type="text" placeholder="Enter section " name="section"
-                    value="{{ old('section') }}" :required="false" helpertxt="Maximum 10 Character" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="rollno" label="Rollno" type="text" placeholder="Enter Rollno" name="rollno"
-                    value="{{ old('rollno') }}" :required="false" helpertxt="Maximum 30 Character" />
             </div>
         </div>
 
@@ -86,7 +100,7 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
+    let baseUrl = "{{ url('/employees') }}";
     let student_id = "{{ $id }}";
 
     // --- Progress Helpers ---
@@ -126,12 +140,11 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'Updated!',
-                            text: 'Student profile has been updated successfully.',
+                            text: 'Employee Profile has been updated successfully.',
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            // ✅ Step 2 milestone = 20%
-                            setProgress(20);
+                            setProgress(20); // ✅ Step 2 milestone = 20%
                             window.location.href = `${baseUrl}/${student_id}/Address`;
                         });
                     } else {
@@ -154,8 +167,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                // ✅ Still count this step as completed
-                setProgress(20);
+                setProgress(20); 
                 window.location.href = `${baseUrl}/${student_id}/Address`;
             });
         });
@@ -168,6 +180,8 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
+                    console.log(response);
+
                     let imgSrc = `/storage/${response.data.avatar_url}`;
                     $("#student-details").html(`
                         <div class="d-flex align-items-start gap-3">
@@ -175,11 +189,9 @@
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.employee_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Status:</strong> ${response.primary_details.status}</p>
                             </div>
                         </div>
                     `);
@@ -193,5 +205,71 @@
             }
         });
     }
+
+    // --- Select2 Setup ---
+    $(document).ready(function() {
+        $("#skills").select2({
+            tags: true,
+            tokenSeparators: [','], // only comma
+            placeholder: "Add Skills",
+            width: '100%',
+            createTag: function(params) {
+                let term = $.trim(params.term);
+                if (term === '') {
+                    return null;
+                }
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true
+                };
+            }
+        }).on("select2:close", function() {
+            var input = $('.select2-search__field');
+            if (input && input.val() !== '') {
+                var newTag = input.val();
+                $("#skills").append(new Option(newTag, newTag, true, true)).trigger('change');
+                input.val('');
+            }
+        });
+
+        // ✅ Manager dropdown with AJAX search
+        $('#manager_id').select2({
+            placeholder: "Search & select Manager",
+            allowClear: true,
+            width: '100%',
+            ajax: {
+                url: "{{ route('employees.Employeelist.all') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data.map(function(item) {
+                            return {
+                                id: item.id, // stored in DB as manager_id
+                                text: item.full_name // shown in dropdown
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+    });
 </script>
+@endsection
+
+@section('style')
+
+<style>
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        display: none !important;
+    }
+</style>
+
 @endsection
