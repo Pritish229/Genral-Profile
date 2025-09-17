@@ -180,6 +180,7 @@
 
               // Reset form & uploader
               document.getElementById('employeeForm').reset();
+              const $btn = $('#saveBtn').prop('disabled', true);
               const $box = $('.input-images').empty();
               $box.imageUploader({
                 multiple: false,
@@ -190,7 +191,10 @@
               });
 
               // Redirect to Step 2 (Basic Info)
-              window.location.href = `${baseUrl}/${response.data.id}/Basicinfo`;
+              console.log(response);
+              
+              window.location.href = `${baseUrl}/${response.data.employee.id}/Basicinfo`;
+
             });
           } else {
             Swal.fire({

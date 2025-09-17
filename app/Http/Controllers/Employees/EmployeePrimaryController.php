@@ -196,7 +196,7 @@ class EmployeePrimaryController extends Controller
     public function basicDetails($employee_id)
     {
         $details = EmployeeProfile::where('employee_id', $employee_id)->first();
-        $primary_details = Employee::where('id', $employee_id)->first();
+        $primary_details = Employee::find($employee_id);
 
         if (!$details || !$primary_details) {
             return response()->json([
@@ -206,18 +206,22 @@ class EmployeePrimaryController extends Controller
         }
 
         // Convert models to arrays
-        $detailsArray = $details->toArray();
-        $primaryArray = $primary_details->toArray();
+        $detailsArray = $details ? $details->toArray() : [];
+        $primaryArray = $primary_details ? $primary_details->toArray() : [];
 
-        // Fix DOB formatting
-        $detailsArray['dob'] = $details->dob
+        // Fix DOB formatting safely
+        $detailsArray['dob'] = !empty($details->dob)
             ? Carbon::parse($details->dob)->format('d-M-Y')
             : '-';
 
-        // Fix Admission Date formatting
-        $primaryArray['admission_date'] = $primary_details->admission_date
-            ? Carbon::parse($primary_details->admission_date)->format('d-M-Y')
-            : '-';
+
+        if (isset($primary_details->hire_date)) {
+            $primaryArray['hire_date'] = $primary_details->hire_date
+                ? Carbon::parse($primary_details->hire_date)->format('d-M-Y')
+                : '-';
+        }
+
+        
 
         return response()->json([
             'success' => true,

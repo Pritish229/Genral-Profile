@@ -1,17 +1,17 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Bank Details')
+@section('title', 'Home | employees | Bank Details')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
         title="Bank Details"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist' ,'Bank Details'=>'' ]" />
+        :links="['Home' => 'Admin.Dashboard', 'Employees' => 'employees.employeelist' ,'Bank Details'=>'' ]" />
 
-    <!-- Student details -->
+    <!-- employee details -->
     <div class="mt-2">
         <div class="card">
-            <div class="p-3" id="student-details">
+            <div class="p-3" id="employee-details">
                 Loading details...
             </div>
         </div>
@@ -40,21 +40,12 @@
             <div id="upi-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_id"
-                            label="UPI ID"
-                            type="text"
-                            placeholder="example@upi"
-                            name="upi_id"
+                        <x-inputbox id="upi_vpa" label="UPI ID" type="text" placeholder="example@upi" name="upi_vpa"
                             :required="false" />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_name"
-                            label="UPI Holder Name"
-                            type="text"
-                            placeholder="Full Name"
-                            name="upi_name"
+                        <x-inputbox id="upi_holder_name" label="UPI Holder Name" type="text" placeholder="Full Name"
+                            name="upi_holder_name"
                             :required="false" />
                     </div>
                 </div>
@@ -64,51 +55,31 @@
             <div id="bank-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="account_holder"
-                            label="Account Holder"
-                            type="text"
-                            placeholder="John Doe"
+                        <x-inputbox id="account_holder" label="Account Holder" type="text" placeholder="John Doe"
                             name="account_holder"
                             :required="false" />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="bank_name"
-                            label="Bank Name"
-                            type="text"
-                            placeholder="State Bank of India"
+                        <x-inputbox id="bank_name" label="Bank Name" type="text" placeholder="State Bank of India"
                             name="bank_name"
                             :required="false" />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="branch_name"
-                            label="Branch Name"
-                            type="text"
-                            placeholder="MG Road Branch"
+                        <x-inputbox id="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch"
                             name="branch_name"
                             :required="false" />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="ifsc_code"
-                            label="IFSC Code"
-                            type="text"
-                            placeholder="SBIN0001234"
+                        <x-inputbox id="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234"
                             name="ifsc_code"
                             :required="false" />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="swift_code"
-                            label="SWIFT Code"
-                            type="text"
-                            placeholder="SBININBBXXX"
+                        <x-inputbox id="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX"
                             name="swift_code"
                             :required="false" />
                     </div>
@@ -129,37 +100,36 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/employees') }}";
+    let employee_id = "{{ $id }}";
 
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${employee_id}/Basicinfo/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
+
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
+                    $("#employee-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.employee_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Status:</strong> ${response.primary_details.status}</p>
                             </div>
                         </div>
                     `);
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#employee-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#employee-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -210,7 +180,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Document`; // change NextStep to your next route
+                window.location.href = `${baseUrl}/${employee_id}/Document`; // change NextStep to your next route
             });
         });
 
@@ -226,7 +196,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/storeBank`,
+                url: `${baseUrl}/${employee_id}/saveBank`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -239,7 +209,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = `${baseUrl}/${student_id}/Document`; 
+                            window.location.href = `${baseUrl}/${employee_id}/Document`;
                         });
                     }
                 },

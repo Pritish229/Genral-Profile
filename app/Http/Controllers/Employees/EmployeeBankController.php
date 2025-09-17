@@ -1,27 +1,26 @@
 <?php
 
-namespace App\Http\Controllers\Students;
+namespace App\Http\Controllers\Employees;
 
-use App\Models\Student;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\StudentPaymentAccount;
+use App\Models\EmployeePaymentAccount;
 
-class StudentBankController extends Controller
+class EmployeeBankController extends Controller
 {
     public function index($id)
     {
-        return view('Admin.Students.StudentProfile.AddBankinfo', ['id' => $id]);
+        return view('Admin.Employees.EmployeeProfile.AddBankinfo', ['id' => $id]);
     }
     public function manageBankForm($id)
     {
-        return view('Admin.Students.StudentProfile.ManageBank', ['id' => $id]);
+        return view('Admin.Employees.EmployeeProfile.ManageBank', ['id' => $id]);
     }
 
-    // Unified create/update
-    public function saveBank(Request $request, $student_id)
+    public function saveBank(Request $request, $employee_id)
     {
-        $student = Student::findOrFail($student_id);
+        $employee = Employee::findOrFail($employee_id);
 
         $rules = ['method' => 'required|in:bank,upi'];
 
@@ -43,12 +42,12 @@ class StudentBankController extends Controller
         $validated = $request->validate($rules);
 
         // Determine is_primary
-        $existingAccounts = StudentPaymentAccount::where('student_id', $student_id)->count();
+        $existingAccounts = EmployeePaymentAccount::where('employee_id', $employee_id)->count();
         $is_primary = $existingAccounts == 0 ? 1 : 0;
 
         if ($request->account_id) {
             // Update existing account
-            $account = StudentPaymentAccount::findOrFail($request->account_id);
+            $account = EmployeePaymentAccount::findOrFail($request->account_id);
             $account->method         = $validated['method'];
             $account->account_holder = $validated['method'] === 'upi'
                 ? $validated['upi_holder_name']
@@ -64,9 +63,9 @@ class StudentBankController extends Controller
             $message = 'Bank/UPI details updated successfully';
         } else {
             // Create new account
-            $account = StudentPaymentAccount::create([
-                'tenant_id'      => $student->tenant_id,
-                'student_id'     => $student->id,
+            $account = EmployeePaymentAccount::create([
+                'tenant_id'      => $employee->tenant_id,
+                'employee_id'     => $employee->id,
                 'method'         => $validated['method'],
                 'status'         => 'active',
                 'is_primary'     => $is_primary,
@@ -93,8 +92,8 @@ class StudentBankController extends Controller
 
     public function manageBank($id)
     {
-        $accounts = StudentPaymentAccount::where('student_id', $id)->get();
-        return view('Admin.Students.StudentProfile.ManageBankList', [
+        $accounts = employeePaymentAccount::where('employee_id', $id)->get();
+        return view('Admin.employees.employeeProfile.ManageBankList', [
             'id' => $id,
             'accounts' => $accounts
         ]);
@@ -102,16 +101,16 @@ class StudentBankController extends Controller
 
     public function editBank($id, $account_id)
     {
-        $account = StudentPaymentAccount::findOrFail($account_id);
-        return view('Admin.Students.StudentProfile.AddBankinfo', [
+        $account = employeePaymentAccount::findOrFail($account_id);
+        return view('Admin.employees.employeeProfile.AddBankinfo', [
             'id' => $id,
             'account' => $account
         ]);
     }
 
-    public function deleteBank($student_id, $account_id)
+    public function deleteBank($employee_id, $account_id)
     {
-        $account = StudentPaymentAccount::findOrFail($account_id);
+        $account = employeePaymentAccount::findOrFail($account_id);
 
         if ($account->is_primary) {
             return response()->json(['success' => false, 'message' => 'Primary account cannot be deleted']);
@@ -123,9 +122,9 @@ class StudentBankController extends Controller
     }
 
     // List Bank
-    public function studentBankList($student_id)
+    public function employeeBankList($employee_id)
     {
-        $accounts = StudentPaymentAccount::where('student_id', $student_id)->get();
+        $accounts = employeePaymentAccount::where('employee_id', $employee_id)->get();
         return response()->json(['success' => true, 'data' => $accounts]);
     }
 }

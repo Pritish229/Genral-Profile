@@ -46,4 +46,17 @@ class EmployeeProfile extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
+    protected static function booted()
+    {
+        static::saving(function ($profile) {
+            $profile->full_name = trim(preg_replace(
+                '/\s+/',
+                ' ',
+                ($profile->first_name ?? '') . ' ' .
+                    (($profile->middle_name ?? '') ? ($profile->middle_name . ' ') : '') .
+                    ($profile->last_name ?? '')
+            ));
+        });
+    }
 }
