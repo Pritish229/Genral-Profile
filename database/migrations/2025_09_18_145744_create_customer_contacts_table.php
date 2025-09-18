@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_contacts', function (Blueprint $table) {
+        Schema::create('customer_contacts', function (Blueprint $table) {
             $table->id(); // BIGINT UNSIGNED, AI, PK
             $table->unsignedBigInteger('tenant_id');
-            $table->unsignedBigInteger('employee_id');
+            $table->unsignedBigInteger('customer_id');
 
             $table->enum('contact_type', ['email', 'phone', 'whatsapp', 'telegram', 'fax', 'other'])->default('whatsapp');
             $table->string('value', 180)->nullable();
@@ -36,8 +36,8 @@ return new class extends Migration
             $table->timestamp('updated_at', 6)->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at', 6)->nullable();
 
-            $table->foreign('employee_id')
-                ->references('id')->on('employees')
+            $table->foreign('customer_id')
+                ->references('id')->on('customers')
                 ->onDelete('cascade');
         });
     }
@@ -47,6 +47,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_contacts');
+        Schema::dropIfExists('customer_contacts');
     }
 };

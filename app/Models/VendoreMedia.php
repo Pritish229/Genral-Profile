@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
-use App\Models\Employee;
+use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class EmployeeMedia extends Model
+class VendoreMedia extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $table = 'employee_medias';
 
     protected $fillable = [
         'tenant_id',
-        'employee_id',
+        'vendor_id',
         'media_usage',
         'subject_role',
         'subject_name',
@@ -52,8 +51,8 @@ class EmployeeMedia extends Model
         'duration_sec' => 'decimal:2',
     ];
 
-    public function employee()
+    public function vendor()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Vendor::class);
     }
 }
