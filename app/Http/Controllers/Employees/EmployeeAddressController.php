@@ -13,6 +13,10 @@ class EmployeeAddressController extends Controller
     {
         return view('Admin.Employees.EmployeeProfile.AddAddress', ['id' => $id]);
     }
+    public function manageAddress($id)
+    {
+        return view('Admin.Employees.EmployeeProfile.ManageAddress', ['id' => $id]);
+    }
 
     public function getAddresses($employee_id)
     {
@@ -46,6 +50,7 @@ class EmployeeAddressController extends Controller
         $address = EmployeeAddress::create(array_merge($validated, [
             'employee_id' => $employee->id,
             'tenant_id'  => $employee->tenant_id,
+            'is_primary'  => '1',
         ]));
 
         return response()->json([
@@ -112,4 +117,6 @@ class EmployeeAddressController extends Controller
             'message' => 'No primary address found'
         ], 404);
     }
+
+    
 }

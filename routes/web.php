@@ -97,24 +97,27 @@ Route::prefix('students/')->group(function () {
 Route::prefix('employees/')->group(function () {
     Route::get('create', [EmployeeController::class, 'create'])->name('employees.create');
     Route::post('store', [EmployeeController::class, 'store'])->name('employees.store');
-
+    // Employee Basic info
     Route::get('{id}/Basicinfo', [EmployeePrimaryController::class, 'index'])->name('employees.Basicinfo');
     Route::get('List/All', [EmployeePrimaryController::class, 'listAll'])->name('employees.Employeeslist.paginate');
     Route::get('List/Employees', [EmployeePrimaryController::class, 'employeelist'])->name('employees.Employeelist.all');
     Route::post('{emp_id}/Basicinfo/Update', [EmployeePrimaryController::class, 'updateDetails'])->name('employees.UpdateDetails');
     Route::get('{emp_id}/Basicinfo/Details', [EmployeePrimaryController::class, 'basicDetails'])->name('employees.BasicDetails');
+    Route::get('{emp_id}/view/Details', [EmployeePrimaryController::class, 'viewDetails'])->name('employees.viewDetails');
 
-
+    // Employee Address
     Route::get('{id}/Address', [EmployeeAddressController::class, 'index'])->name('employees.Address');
+    Route::get('{id}/Manage/Addresses', [EmployeeAddressController::class, 'manageAddress'])->name('employees.addresses.manage');
     Route::post('{employee_id}/Manage/Addresses', [EmployeeAddressController::class, 'storeAddress'])->name('employees.addresses.store');
     Route::put('{employee}/addresses/{address}', [EmployeeAddressController::class, 'updateAddress'])->name('employees.addresses.update');
     Route::delete('{employee}/addresses/{address}', [EmployeeAddressController::class, 'deleteAddress'])->name('employees.addresses.delete');
     Route::get('{employee_id}/Address/Permanent', [EmployeeAddressController::class, 'permanentAddress'])->name('employees.Address.Permanent');
+    Route::get('{id}/Get/Addresses', [EmployeeAddressController::class, 'getAddresses'])->name('employees.addresses.list');
 
+    // Employee Contact
     Route::get('{id}/Contact', [EmployeeContactController::class, 'index'])->name('employees.Contact');
     Route::post('{employee_id}/Address/storeContact', [EmployeeContactController::class, 'storeContact'])->name('employees.address.StoreContact');
     Route::get('{id}/Contact/Permanent', [EmployeeContactController::class, 'permanentContact'])->name('employees.Contact.Permanent');
-
     Route::get('{id}/Manage/Contacts', [EmployeeContactController::class, 'manageContact'])->name('employees.contacts.manageContact');
     Route::get('{id}/Get/Contacts', [EmployeeContactController::class, 'getContacts'])->name('employees.contacts.list');
     Route::post('{employee_id}/Manage/Contacts', [EmployeeContactController::class, 'storeContact'])
@@ -124,7 +127,7 @@ Route::prefix('employees/')->group(function () {
     Route::delete('{employee}/contacts/{contact}', [EmployeeContactController::class, 'deleteContact'])
         ->name('employees.contacts.delete');
 
-
+    // Employee Bank
     Route::get('{id}/Bank', [EmployeeBankController::class, 'index'])->name('employees.Bank');
     Route::post('{id}/saveBank', [EmployeeBankController::class, 'saveBank'])->name('employees.Bank.saveBank');
     Route::get('{id}/bank-list', [EmployeeBankController::class, 'employeeBankList'])->name('employees.bank.list');
@@ -132,17 +135,16 @@ Route::prefix('employees/')->group(function () {
     Route::get('{id}/manageBank/{account_id}', [EmployeeBankController::class, 'editBank'])->name('employees.bank.manage.edit');
     Route::delete('{id}/deleteBank/{account_id}', [EmployeeBankController::class, 'deleteBank'])->name('employees.bank.delete');
 
-
+    // Employee Document
     Route::get('{id}/Document', [EmployeeDocumentsController::class, 'index'])->name('employees.Document');
     Route::post('{id}/storeDocument', [EmployeeDocumentsController::class, 'storeDocument'])->name('employees.Bank.StoreDocument');
     Route::get('{id}/manageDocument', [EmployeeDocumentsController::class, 'managedocument'])->name('employees.document.manage');
-
     Route::get('{id}/documents', [EmployeeDocumentsController::class, 'getDocuments']);
     Route::get('{employee_id}/documents/{doc_id}', [EmployeeDocumentsController::class, 'getDocument']);
     Route::delete('{employee_id}/documents/{doc_id}', [EmployeeDocumentsController::class, 'deleteDocument']);
     Route::put('{employee_id}/documents/{doc_id}', [EmployeeDocumentsController::class, 'updateDocument']);
 
-
+    // Employee Media
     Route::get('{id}/Media', [EmployeeMediaController::class, 'index'])->name('employees.Media');
     Route::get('{id}/Media/manage', [EmployeeMediaController::class, 'manageindex'])->name('employees.manageindex');
     Route::post('{id}/storeMedia', [EmployeeMediaController::class, 'storeMedia'])->name('employees.Bank.storeMedia');
@@ -150,7 +152,4 @@ Route::prefix('employees/')->group(function () {
     Route::put('{employee}/{media}/update', [EmployeeMediaController::class, 'updateMedia'])->name('employees.medias.update');
     Route::delete('{employee_id}/{media}/delete', [EmployeeMediaController::class, 'destroy'])->name('employees.medias.destroy');
     Route::get('{id}/medias/list', [EmployeeMediaController::class, 'getMedias'])->name('employees.medias.list');
-
-
-
 });

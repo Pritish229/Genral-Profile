@@ -42,13 +42,17 @@ class StudentBankController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Determine is_primary
+        // If none exists, first account is always primary
         $existingAccounts = StudentPaymentAccount::where('student_id', $student_id)->count();
-        $is_primary = $existingAccounts == 0 ? 1 : 0;
+        $is_primary = $request->is_primary ?? 0;
+        if ($existingAccounts == 0) {
+            $is_primary = 1;
+        }
 
         if ($request->account_id) {
-            // Update existing account
+            // Update
             $account = StudentPaymentAccount::findOrFail($request->account_id);
+
             $account->method         = $validated['method'];
             $account->account_holder = $validated['method'] === 'upi'
                 ? $validated['upi_holder_name']
@@ -58,12 +62,12 @@ class StudentBankController extends Controller
             $account->ifsc_code      = $validated['ifsc_code'] ?? null;
             $account->swift_code     = $validated['swift_code'] ?? null;
             $account->upi_vpa        = $validated['upi_vpa'] ?? null;
-            // Do NOT change is_primary on update
+            $account->is_primary     = $is_primary;
             $account->save();
 
             $message = 'Bank/UPI details updated successfully';
         } else {
-            // Create new account
+            // Create
             $account = StudentPaymentAccount::create([
                 'tenant_id'      => $student->tenant_id,
                 'student_id'     => $student->id,
@@ -83,12 +87,20 @@ class StudentBankController extends Controller
             $message = 'Bank/UPI details added successfully';
         }
 
+        // Ensure only one primary per student
+        if ($is_primary == 1) {
+            StudentPaymentAccount::where('student_id', $student_id)
+                ->where('id', '!=', $account->id)
+                ->update(['is_primary' => 0]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => $message,
             'data'    => $account
         ]);
     }
+
 
 
     public function manageBank($id)

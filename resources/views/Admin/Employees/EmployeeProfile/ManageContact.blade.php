@@ -1,6 +1,6 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Manage Contact')
+@section('title', 'Home | Employees | Manage Contact')
 
 @section('content')
 <div class="page-content">
@@ -8,12 +8,12 @@
         title="Manage Contacts"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Students' => 'students.Studentlist',
-        'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+        'Employees' => 'employees.Employeelist.all',
+        'Employee Detail' => ['employees.viewDetails', $id],
         'Manage Contacts' => ''
     ]" />
     <!-- Contact Form -->
-    <form id="studentContactForm">
+    <form id="employeeContactForm">
         @csrf
         <div class="row">
             <div class="col-md-4">
@@ -65,12 +65,12 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('employees') }}";
+    let employee_id = "{{ $id }}";
 
     // Fetch and render contacts
     function loadContacts() {
-        $.get(`${baseUrl}/${student_id}/Get/Contacts`, function(response) {
+        $.get(`${baseUrl}/${employee_id}/Get/Contacts`, function(response) {
             if (response.success) {
                 let rows = "";
                 let index = 1;
@@ -100,13 +100,13 @@
 
 
     // Create contact
-    $("#studentContactForm").on("submit", function(e) {
+    $("#employeeContactForm").on("submit", function(e) {
         e.preventDefault();
         $('#sav-btn').prop('diabled', true).text('Saving...');
         let formData = $(this).serialize();
-        let url = `${baseUrl}/${student_id}/Manage/Contacts`; // ✅ FIXED
+        let url = `${baseUrl}/${employee_id}/Manage/Contacts`; // ✅ FIXED
 
-        $.post(url, formData + `&student_id=${student_id}`, function(response) {
+        $.post(url, formData + `&employee_id=${employee_id}`, function(response) {
             $('#sav-btn').prop('diabled', false).text('Save');
             if (response.success) {
                 Swal.fire({
@@ -115,7 +115,7 @@
                     text: 'New Contact Added .',
                 });
                 loadContacts();
-                $("#studentContactForm")[0].reset();
+                $("#employeeContactForm")[0].reset();
             } else {
                 $('#sav-btn').prop('diabled', false).text('Save');
                 alert("Error saving contact");
@@ -143,7 +143,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `${baseUrl}/${student_id}/contacts/${contact_id}`,
+                    url: `${baseUrl}/${employee_id}/contacts/${contact_id}`,
                     type: "DELETE",
                     data: {
                         _token: "{{ csrf_token() }}"
@@ -174,27 +174,27 @@
         $("#label").val(tr.find("td:eq(3)").text());
 
         // Change form submit to update mode
-        $("#studentContactForm").off("submit").on("submit", function(e) {
+        $("#employeeContactForm").off("submit").on("submit", function(e) {
             e.preventDefault();
             let formData = $(this).serialize();
 
             $.ajax({
-                url: `${baseUrl}/${student_id}/contacts/${contact_id}`,
+                url: `${baseUrl}/${employee_id}/contacts/${contact_id}`,
                 type: "PUT",
                 data: formData + `&_token={{ csrf_token() }}`, // add token for Laravel
                 success: function(response) {
                     if (response.success) {
                         loadContacts();
-                        $("#studentContactForm")[0].reset();
+                        $("#employeeContactForm")[0].reset();
 
                         // Restore original submit (create mode)
-                        $("#studentContactForm").off("submit").on("submit", function(e) {
+                        $("#employeeContactForm").off("submit").on("submit", function(e) {
                             e.preventDefault();
                             let formData = $(this).serialize();
-                            $.post(`${baseUrl}/${student_id}/Manage/Contacts`, formData, function(res) {
+                            $.post(`${baseUrl}/${employee_id}/Manage/Contacts`, formData, function(res) {
                                 if (res.success) {
                                     loadContacts();
-                                    $("#studentContactForm")[0].reset();
+                                    $("#employeeContactForm")[0].reset();
                                 }
                             });
                         });

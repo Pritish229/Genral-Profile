@@ -4,10 +4,19 @@
 
 @section('content')
 <div class="page-content">
+    <x-breadcrumb
+    title="Bank Details"
+    :links="[
+        'Home' => 'Admin.Dashboard',
+        'Students' => 'students.Studentlist',
+        'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+        'Bank Details' => ''
+    ]"
+/>
     <section id="bank_details">
         <div class="card">
             <div class="d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                <h6>Bank / UPI Details</h6>
+                <h6>Bank / UPI List</h6>
                 <div>
                     <a href="javascript:void(0)" class="text-primary me-3" id="addBankBtn" title="Add Bank/UPI">
                         <i class="fas fa-plus-circle"></i>
@@ -26,12 +35,13 @@
                         <th>IFSC Code</th>
                         <th>SWIFT Code</th>
                         <th>UPI VPA</th>
+                        <th>Primary</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="bank-list">
                     <tr>
-                        <td colspan="9" class="text-center">Loading...</td>
+                        <td colspan="10" class="text-center">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -64,17 +74,26 @@
 
             <!-- Bank Fields -->
             <div id="bank-fields" class="d-none">
-                <x-inputbox id="bank_account_holder" name="account_holder" label="Account Holder" type="text" placeholder="John Doe" required="true" />
-                <x-inputbox id="bank_name" name="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" required="true" />
+                <x-inputbox id="bank_account_holder" name="account_holder" label="Account Holder" type="text" placeholder="John Doe" />
+                <x-inputbox id="bank_name" name="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" />
                 <x-inputbox id="branch_name" name="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch" />
-                <x-inputbox id="ifsc_code" name="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" required="true" />
+                <x-inputbox id="ifsc_code" name="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" />
                 <x-inputbox id="swift_code" name="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX" />
             </div>
 
             <!-- UPI Fields -->
             <div id="upi-fields" class="d-none">
-                <x-inputbox id="upi_vpa" name="upi_vpa" label="UPI ID" type="text" placeholder="example@upi" required="true" />
-                <x-inputbox id="upi_holder_name" name="upi_holder_name" label="UPI Holder Name" type="text" placeholder="Full Name" required="true" />
+                <x-inputbox id="upi_vpa" name="upi_vpa" label="UPI ID" type="text" placeholder="example@upi" />
+                <x-inputbox id="upi_holder_name" name="upi_holder_name" label="UPI Holder Name" type="text" placeholder="Full Name" />
+            </div>
+
+            <!-- Primary Dropdown -->
+            <div class="mb-3">
+                <label for="is_primary">Make Primary?</label>
+                <select id="is_primary" name="is_primary" class="form-select">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
             </div>
         </div>
 
@@ -94,21 +113,25 @@
 <script>
 let student_id = "{{ $id }}";
 
-// Toggle fields
+// Toggle fields + required attributes
 function toggleFields(method) {
     if (method === 'bank') {
         $('#bank-fields').removeClass('d-none');
         $('#upi-fields').addClass('d-none');
-        $('#bank_account_holder, #bank_name, #branch_name, #ifsc_code').attr('required', true);
-        $('#upi_vpa, #upi_holder_name').removeAttr('required');
+
+        $('#bank-fields input').attr('required', true);
+        $('#upi-fields input').removeAttr('required');
+
     } else if (method === 'upi') {
         $('#upi-fields').removeClass('d-none');
         $('#bank-fields').addClass('d-none');
-        $('#upi_vpa, #upi_holder_name').attr('required', true);
-        $('#bank_account_holder, #bank_name, #branch_name, #ifsc_code').removeAttr('required');
+
+        $('#upi-fields input').attr('required', true);
+        $('#bank-fields input').removeAttr('required');
+
     } else {
         $('#bank-fields, #upi-fields').addClass('d-none');
-        $('#bank_account_holder, #bank_name, #branch_name, #ifsc_code, #upi_vpa, #upi_holder_name').removeAttr('required');
+        $('#bank-fields input, #upi-fields input').removeAttr('required');
     }
 }
 
@@ -130,19 +153,18 @@ function editBank(account) {
     $('#account_id').val(account.id);
     $('#method').val(account.method).trigger('change');
 
-    // Bank fields
     $('#bank_account_holder').val(account.account_holder || '');
     $('#bank_name').val(account.bank_name || '');
     $('#branch_name').val(account.branch_name || '');
     $('#ifsc_code').val(account.ifsc_code || '');
     $('#swift_code').val(account.swift_code || '');
 
-    // UPI fields
     $('#upi_vpa').val(account.upi_vpa || '');
-    $('#upi_holder_name').val(account.account_holder || ''); // always stored in account_holder
+    $('#upi_holder_name').val(account.account_holder || '');
+
+    $('#is_primary').val(account.is_primary ? 1 : 0);
 
     toggleFields(account.method);
-
     $('#bankModal').modal('show');
 }
 
@@ -165,6 +187,11 @@ function studentbanklist() {
                             <td>${account.ifsc_code || '-'}</td>
                             <td>${account.swift_code || '-'}</td>
                             <td>${account.upi_vpa || '-'}</td>
+                            <td>
+                                ${account.is_primary == 1 
+                                    ? '<span class="badge bg-success">Yes</span>' 
+                                    : '<span class="badge bg-secondary">No</span>'}
+                            </td>
                             <td>
                                 <button class="btn btn-sm btn-primary editBankBtn" data-account='${JSON.stringify(account)}'>
                                     <i class="fas fa-edit"></i>
@@ -192,7 +219,7 @@ $(document).on('click', '.editBankBtn', function() {
 function deleteBank(account_id) {
     Swal.fire({
         title: 'Are you sure?',
-        text: "You won't be able to revert this!",
+        text: "This will delete the account!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes, delete it!'

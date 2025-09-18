@@ -35,6 +35,7 @@
                 </a>
                 <ul class="sub-menu" aria-expanded="false">
                     <li class="{{ in_array(Route::currentRouteName(), ['employees.create',]) ? 'active' : '' }}"><a href="{{ route('employees.create') }}" data-key="t-alerts" aria-expanded="false"><span>Add Employee</span></a></li>
+                    <li class="{{ in_array(Route::currentRouteName(), ['employees.Employeelist.all']) ? 'active' : '' }}"><a href="{{ route('employees.Employeelist.all') }}" data-key="t-alerts" aria-expanded="false"><span>Employees</span></a></li>
 
                 </ul>
                 </ul>

@@ -41,13 +41,13 @@ class EmployeeBankController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Determine is_primary
-        $existingAccounts = EmployeePaymentAccount::where('employee_id', $employee_id)->count();
-        $is_primary = $existingAccounts == 0 ? 1 : 0;
+        // Default primary logic
+        $is_primary = $request->is_primary ?? 0;
 
         if ($request->account_id) {
             // Update existing account
             $account = EmployeePaymentAccount::findOrFail($request->account_id);
+
             $account->method         = $validated['method'];
             $account->account_holder = $validated['method'] === 'upi'
                 ? $validated['upi_holder_name']
@@ -57,7 +57,8 @@ class EmployeeBankController extends Controller
             $account->ifsc_code      = $validated['ifsc_code'] ?? null;
             $account->swift_code     = $validated['swift_code'] ?? null;
             $account->upi_vpa        = $validated['upi_vpa'] ?? null;
-            // Do NOT change is_primary on update
+            $account->is_primary     = $is_primary;
+
             $account->save();
 
             $message = 'Bank/UPI details updated successfully';
@@ -65,7 +66,7 @@ class EmployeeBankController extends Controller
             // Create new account
             $account = EmployeePaymentAccount::create([
                 'tenant_id'      => $employee->tenant_id,
-                'employee_id'     => $employee->id,
+                'employee_id'    => $employee->id,
                 'method'         => $validated['method'],
                 'status'         => 'active',
                 'is_primary'     => $is_primary,
@@ -82,12 +83,20 @@ class EmployeeBankController extends Controller
             $message = 'Bank/UPI details added successfully';
         }
 
+        // Ensure only one primary per employee
+        if ($is_primary == 1) {
+            EmployeePaymentAccount::where('employee_id', $employee_id)
+                ->where('id', '!=', $account->id)
+                ->update(['is_primary' => 0]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => $message,
             'data'    => $account
         ]);
     }
+
 
 
     public function manageBank($id)

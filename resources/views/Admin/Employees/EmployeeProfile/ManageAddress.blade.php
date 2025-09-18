@@ -8,13 +8,13 @@
     title="Manage Addresses"
     :links="[
         'Home' => 'Admin.Dashboard',
-        'Students' => 'students.Studentlist',
-        'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+        'Employees' => 'employees.Employeelist.all',
+        'Employee Detail' => ['employees.viewDetails', $id],
         'Manage Addresses' => ''
     ]"
 />
     <!-- Address Form -->
-    <form id="studentAddressForm">
+    <form id="employeeAddressForm">
         @csrf
         <div class="row">
             <div class="col-md-3">
@@ -88,13 +88,13 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('employees') }}";
+    let employee_id = "{{ $id }}";
     let edit_id = null; // track address being edited
 
     // Fetch & render addresses
     function loadAddresses() {
-        $.get(`${baseUrl}/${student_id}/Get/Addresses`, function(res) {
+        $.get(`${baseUrl}/${employee_id}/Get/Addresses`, function(res) {
             if (res.success) {
                 let rows = "";
                 let index = 1;
@@ -120,12 +120,12 @@
     }
 
     // Create or Update address
-    $("#studentAddressForm").on("submit", function(e) {
+    $("#employeeAddressForm").on("submit", function(e) {
         e.preventDefault();
         let formData = $(this).serialize();
         let url = edit_id 
-            ? `${baseUrl}/${student_id}/addresses/${edit_id}`
-            : `${baseUrl}/${student_id}/Manage/Addresses`;
+            ? `${baseUrl}/${employee_id}/addresses/${edit_id}`
+            : `${baseUrl}/${employee_id}/Manage/Addresses`;
         let method = edit_id ? "PUT" : "POST";
 
         $.ajax({
@@ -135,7 +135,7 @@
             success: function(res) {
                 if (res.success) {
                     loadAddresses();
-                    $("#studentAddressForm")[0].reset();
+                    $("#employeeAddressForm")[0].reset();
                     edit_id = null;
                     $("#save-btn").text("Save");
                 } else {
@@ -177,7 +177,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `${baseUrl}/${student_id}/addresses/${address_id}`,
+                    url: `${baseUrl}/${employee_id}/addresses/${address_id}`,
                     type: "DELETE",
                     data: {_token: "{{ csrf_token() }}"},
                     success: function(res) {

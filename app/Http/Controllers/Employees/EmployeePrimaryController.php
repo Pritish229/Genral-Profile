@@ -113,6 +113,11 @@ class EmployeePrimaryController extends Controller
         ]);
     }
 
+    public function viewDetails($employee_id)
+    {
+        return view('Admin.Employees.EmployeeProfile.EmployeeDetails', ['id' => $employee_id]);
+    }
+
 
     public function listAll()
     {
@@ -155,7 +160,7 @@ class EmployeePrimaryController extends Controller
                 return $employee->hire_date ? date('d-M-Y', strtotime($employee->hire_date)) : '-';
             })
             ->addColumn('actions', function ($employee) {
-                $url = route("employees.employeelist.employeeDetailsPage", $employee->id);
+                $url = route("employees.viewDetails", $employee->id);
                 return '<a href="' . $url . '" class="btn btn-sm btn-success">Details</a>';
             })
             ->filter(function ($query) {
@@ -178,19 +183,7 @@ class EmployeePrimaryController extends Controller
 
     public function employeelist(Request $request)
     {
-        $query = EmployeeProfile::query();
-
-        if ($request->has('q')) {
-            $search = $request->q;
-            $query->where('first_name', 'like', "%{$search}%")
-                ->orWhere('last_name', 'like', "%{$search}%")
-                ->orWhere('full_name', 'like', "%{$search}%");
-        }
-
-        $employees = $query->select('id', 'full_name')->limit(20)->get();
-
-        // ✅ Return flat JSON array (so Select2 .map() works)
-        return response()->json($employees);
+        return view('Admin.Employees.EmployeeProfile.EmployeeList');
     }
 
     public function basicDetails($employee_id)
