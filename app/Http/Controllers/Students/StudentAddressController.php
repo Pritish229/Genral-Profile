@@ -54,6 +54,7 @@ class StudentAddressController extends Controller
         $address = StudentAddress::create(array_merge($validated, [
             'student_id' => $student->id,
             'tenant_id'  => $student->tenant_id,
+            'is_primary'  => '1',
         ]));
 
         return response()->json([

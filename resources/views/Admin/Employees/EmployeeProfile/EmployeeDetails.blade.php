@@ -1,16 +1,16 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Details')
+@section('title', 'Home | Employees | Details')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Student Detail"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist','Student Detail' => '']" />
+        title="Employee Details"
+        :links="['Home' => 'Admin.Dashboard', 'Employees' => 'employees.Employeelist.all','Employee Details' => '']" />
 
     <div class="mt-2">
         <div class="card">
-            <div class="p-3" id="student-details">
+            <div class="p-3" id="employee-details">
                 Loading details...
             </div>
         </div>
@@ -20,7 +20,7 @@
         <div class="card">
             <h5 class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
                 Basic information
-                <a href="{{ url('students/' . $id . '/Basicinfo/Manage') }}" class="text-primary" data-toggle="tooltip" title="Edit">
+                <a href="{{ url('employees/' . $id . '/Basicinfo/Manage') }}" class="text-primary" data-toggle="tooltip" title="Edit">
                     <i class="fas fa-edit"></i>
                 </a>
             </h5>
@@ -29,51 +29,47 @@
                 <div class="col-md-6 mb-3 info-row"><strong>Full Name</strong>
                     <div id="f_name">...</div>
                 </div>
+                <div class="col-md-6 mb-3 info-row"><strong>Designation</strong>
+                    <div id="designation">...</div>
+                </div>
                 <div class="col-md-6 mb-3 info-row"><strong>Date of Birth</strong>
                     <div id="dob">...</div>
+                </div>
+                <div class="col-md-6 mb-3 info-row"><strong>Department</strong>
+                    <div id="department">...</div>
                 </div>
                 <div class="col-md-6 mb-3 info-row"><strong>Gender</strong>
                     <div id="gender">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Caste</strong>
-                    <div id="caste">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Employee Type</strong>
+                    <div id="employment_type">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Current Class</strong>
-                    <div id="current_class">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Location</strong>
+                    <div id="location">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Religion</strong>
-                    <div id="religion">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Base Salary</strong>
+                    <div id="base_salary">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Section</strong>
-                    <div id="section">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Blood Group</strong>
+                    <div id="blood_group">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Mother Tongue</strong>
-                    <div id="mother_tongue">...</div>
+
+                <div class="col-md-6 mb-3 info-row"><strong>Experience Years</strong>
+                    <div id="experience_years">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Guardian Name</strong>
-                    <div id="guardian_name">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Emergency Contact Name</strong>
+                    <div id="emergency_contact_name">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Roll no </strong>
-                    <div id="roll_no">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Emergency Contact</strong>
+                    <div id="emergency_contact_phone">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Guardian Relation </strong>
-                    <div id="guardian_relation">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Emergency Relation</strong>
+                    <div id="emergency_relation">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Enrollment Status</strong>
-                    <div id="enrollment_status">...</div>
+                <div class="col-md-6 mb-3 info-row"><strong>Skills</strong>
+                    <div id="skills">...</div>
                 </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Guardian Occupation </strong>
-                    <div id="guardian_occupation">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Parent Income</strong>
-                    <div id="parent_income">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Nationality</strong>
-                    <div id="nationality">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Extracurriculars</strong>
-                    <div id="extracurriculars">...</div>
-                </div>
+
             </div>
 
         </div>
@@ -91,20 +87,14 @@
                 </h6>
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
-                    <div class="mb-3 d-flex"><strong class="me-2">Student Name:</strong>
-                        <div id="student_f_name">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Employee Name:</strong>
+                        <div id="employee_f_name">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Student UID:</strong>
-                        <div id="student_uid">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Employee UID:</strong>
+                        <div id="employee_uid">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Admission Number:</strong>
-                        <div id="admission_no">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Admission Date:</strong>
-                        <div id="admission_date">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">University Admission No:</strong>
-                        <div id="univ_admission_no">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Hire Date:</strong>
+                        <div id="hire_date">...</div>
                     </div>
                     <div class="mb-3 d-flex"><strong class="me-2">Status:</strong>
                         <div id="admin_status">...</div>
@@ -117,18 +107,18 @@
 
             <!-- Card 2 -->
             <div class="card p-2">
-                
-                    <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                        Address information
-                        <a href="{{ url('/students/' . $id . '/Manage/Addresses') }}"
-                            class="text-primary"
-                            data-toggle="tooltip"
-                            title="Manage Addresses">
-                            <i class="fas fa-plus-circle"></i>
-                        </a>
-                    </h6>
-                    
-                
+
+                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
+                    Address information
+                    <a href="{{ url('/employees/' . $id . '/Manage/Addresses') }}"
+                        class="text-primary"
+                        data-toggle="tooltip"
+                        title="Manage Addresses">
+                        <i class="fas fa-plus-circle"></i>
+                    </a>
+                </h6>
+
+
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
                     <div class="mb-3 d-flex"><strong class="me-2">Country:</strong>
@@ -160,16 +150,16 @@
 
             <!-- Card 3 -->
             <div class="card p-2">
-                
-                    <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                        Address information
-                        <a href="{{ url('/students/' . $id . '/Manage/Contacts') }}"
-                            class="text-primary"
-                            data-toggle="tooltip"
-                            title="Manage Contact">
-                            <i class="fas fa-plus-circle"></i>
-                        </a>
-                    </h6>
+
+                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
+                    Contact information
+                    <a href="{{ url('/employees/' . $id . '/Manage/Contacts') }}"
+                        class="text-primary"
+                        data-toggle="tooltip"
+                        title="Manage Contact">
+                        <i class="fas fa-plus-circle"></i>
+                    </a>
+                </h6>
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
                     <div class="mb-3 d-flex"><strong class="me-2">Contact Type:</strong>
@@ -199,54 +189,52 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/employees') }}";
+    let employee_id = "{{ $id }}";
 
     function primaryinfo(data, info) {
-        // Fallback helper
+        console.log(data);
         const safe = (val) => val ? val : 'Not Provided';
 
         $('#f_name').text(': ' + safe(info.full_name));
         $('#dob').text(': ' + safe(info.dob));
         $('#gender').text(': ' + safe(info.gender));
-        $('#caste').text(': ' + safe(info.caste));
-        $('#current_class').text(': ' + safe(info.current_class));
-        $('#religion').text(': ' + safe(info.religion));
-        $('#section').text(': ' + safe(info.section));
-        $('#guardian_name').text(': ' + safe(info.guardian_name));
-        $('#roll_no').text(': ' + safe(info.roll_no));
-        $('#guardian_relation').text(': ' + safe(info.guardian_relation));
-        $('#enrollment_status').text(': ' + safe(info.enrollment_status));
-        $('#guardian_occupation').text(': ' + safe(info.guardian_occupation));
-        $('#parent_income').text(': ' + safe(info.parent_income));
-        $('#nationality').text(': ' + safe(info.nationality));
-        $('#extracurriculars').text(': ' + safe(info.extracurriculars));
-        $('#student_uid').text(': ' + safe(data.student_uid));
-        $('#admission_date').text(': ' + safe(data.admission_date));
-        $('#admission_no').text(': ' + safe(data.admission_no));
-        $('#univ_admission_no').text(': ' + safe(data.univ_admission_no));
+        $('#blood_group').text(': ' + safe(info.blood_group));
+        $('#designation').text(': ' + safe(info.designation));
+        $('#department').text(': ' + safe(info.department));
+        $('#employment_type').text(': ' + safe(info.employment_type));
+        $('#experience_years').text(': ' + safe(info.experience_years));
+        $('#emergency_contact_name').text(': ' + safe(info.emergency_contact_name));
+        $('#emergency_contact_phone').text(': ' + safe(info.emergency_contact_phone));
+        $('#emergency_relation').text(': ' + safe(info.emergency_relation));
+        $('#base_salary').text(': ' + safe(info.base_salary + '' + info.salary_currency));
+
+        $('#employee_uid').text(': ' + safe(data.employee_uid));
+        $('#hire_date').text(': ' + safe(data.hire_date));
         $('#admin_status').text(': ' + safe(data.status));
+        $('#employee_f_name').text(': ' + safe(info.full_name));
         $('#note').text(': ' + safe(data.note));
-        $('#student_f_name').text(': ' + safe(info.full_name));
-        $('#mother_tongue').text(': ' + safe(info.mother_tongue));
+        let skills = Array.isArray(info.skills) ? info.skills : JSON.parse(info.skills || '[]');
+$('#skills').text(': ' + skills.join(', '));
+
 
     }
-    // Fetch student basic info
+    // Fetch employee basic info
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${employee_id}/Basicinfo/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
                     primaryinfo(response.primary_details, response.data);
 
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    let manageBankUrl = `/students/${response.data.id}/manageBank`;
-                    let manageDocUrl = `/students/${response.data.id}/manageDocument`;
-                    let managemediaUrl = `/students/${response.data.id}/Media/manage`;
+                    let manageBankUrl = `/employees/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/employees/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/employees/${response.data.id}/Media/manage`;
 
-                    $("#student-details").html(`
+                    $("#employee-details").html(`
                 <div class="d-flex align-items-start justify-content-between">
                     <!-- Profile + Info -->
                     <div class="d-flex align-items-start gap-3">
@@ -254,12 +242,11 @@
                             <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                         </div>
                         <div class="flex-grow-1">
-                            <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                            <p><strong>UID:</strong> ${response.primary_details.employee_uid}</p>
                             <p><strong>Name:</strong> ${response.data.full_name}</p>
                             <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             <p><strong>Phone:</strong> ${response.primary_details.primary_phone}</p>
-                            <p><strong>Admission No:</strong> ${response.primary_details.admission_no}</p>
-                            <p><strong>Admission Date:</strong> ${response.primary_details.admission_date}</p>
+                            <p><strong>Hire Date:</strong> ${response.primary_details.hire_date}</p>
                         </div>
                     </div>
 
@@ -286,11 +273,11 @@
             `);
 
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#employee-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#employee-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -300,7 +287,7 @@
     function permanentAddress() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Address/Permanent`,
+            url: `${baseUrl}/${employee_id}/Address/Permanent`,
             dataType: "json",
             success: function(response) {
                 console.log(response);
@@ -319,7 +306,7 @@
     function permanentContact() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Contact/Permanent`,
+            url: `${baseUrl}/${employee_id}/Contact/Permanent`,
             dataType: "json",
             success: function(response) {
                 console.log(response);
@@ -335,69 +322,6 @@
         });
     }
 
-    function studentbanklist() {
-        $.ajax({
-            url: `${baseUrl}/${student_id}/bank-list`,
-            type: 'GET',
-            success: function(res) {
-                if (res.success) {
-                    let rows = '';
-                    $.each(res.data, function(index, account) {
-                        rows += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${account.method}</td>
-                            <td>${account.account_holder || '-'}</td>
-                            <td>${account.bank_name || '-'}</td>
-                            <td>${account.branch_name || '-'}</td>
-                            <td>${account.ifsc_code || '-'}</td>
-                            <td>${account.swift_code || '-'}</td>
-                            <td>${account.upi_id || '-'}</td>
-                            <td>
-                                <a href="${baseUrl}/${student_id}/manageBank/${account.id}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger" onclick="deleteBank(${student_id}, ${account.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    });
-                    $('#bank-list').html(rows);
-                }
-            }
-        });
-    }
-
-    // Delete account
-    function deleteBank(student_id, account_id) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `${baseUrl}/${student_id}/deleteBank/${account_id}`,
-                    type: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire('Deleted!', res.message, 'success');
-                            studentbanklist(); // Refresh table
-                        } else {
-                            Swal.fire('Error!', res.message, 'error');
-                        }
-                    }
-                });
-            }
-        });
-    }
 
     // Initial loa
 
@@ -405,7 +329,6 @@
         fetchDetails()
         permanentAddress()
         permanentContact()
-        studentbanklist();
     });
 </script>
 @endsection

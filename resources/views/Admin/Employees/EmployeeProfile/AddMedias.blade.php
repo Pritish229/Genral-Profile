@@ -1,17 +1,17 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Documents & Media')
+@section('title', 'Home | employees | Documents & Media')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
         title="Documents & Media"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist' ,'Documents & Media'=>'' ]" />
+        :links="['Home' => 'Admin.Dashboard', 'employees' => 'employees.employeelist' ,'Documents & Media'=>'' ]" />
 
-    <!-- Student Details -->
+    <!-- employee Details -->
     <div class="mt-2">
         <div class="card">
-            <div class="p-3" id="student-details">
+            <div class="p-3" id="employee-details">
                 Loading details...
             </div>
         </div>
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Media Form -->
-    <h5 class="mt-4">Upload Student Media</h5>
+    <h5 class="mt-4">Upload employee Media</h5>
     <hr style="color:#5156be">
     <form id="mediaForm" enctype="multipart/form-data">
         <div class="row mb-3">
@@ -80,175 +80,182 @@
 @endsection
 @section('script')
 <script>
-function updateProgress(percent) {
-    $("#progressContainer").show();
-    $("#progressBar").css("width", percent + "%").text(percent + "%");
-}
+    function updateProgress(percent) {
+        $("#progressContainer").show();
+        $("#progressBar").css("width", percent + "%").text(percent + "%");
+    }
 
-$(document).ready(function() {
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    $(document).ready(function() {
+        let baseUrl = "{{ url('/employees') }}";
+        let employee_id = "{{ $id }}";
 
-    $("#tags").select2({
-        tags: true,
-        tokenSeparators: [',', ' '],
-        placeholder: "Add tags",
-        width: '100%'
-    });
+        $("#tags").select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: "Add tags",
+            width: '100%'
+        });
 
-    $(".flatpickr").flatpickr({
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j F Y",
-        allowInput: true
-    });
+        $(".flatpickr").flatpickr({
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",
+            allowInput: true
+        });
 
-    // Fetch student details
-    function fetchDetails() {
-        $.ajax({
-            type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
-            dataType: "json",
-            success: function(response) {
-                if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
+        // Fetch employee details
+        
+
+        function fetchDetails() {
+            $.ajax({
+                type: "GET",
+                url: `${baseUrl}/${employee_id}/Basicinfo/Details`,
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+
+                        let imgSrc = `/storage/${response.data.avatar_url}`;
+                        $("#employee-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.employee_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Status:</strong> ${response.primary_details.status}</p>
                             </div>
                         </div>
                     `);
-                }
-            }
-        });
-    }
-
-    fetchDetails();
-    updateProgress(80);
-
-    // Document Upload
-    $("#documentForm").on("submit", function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
-        updateProgress(0);
-
-        $.ajax({
-            xhr: function() {
-                let xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function(evt) {
-                    if (evt.lengthComputable) {
-                        let percentComplete = Math.round((evt.loaded / evt.total) * 50); // 0-50%
-                        updateProgress(percentComplete);
+                    } else {
+                        $("#employee-details").html(`<p class="text-danger">${response.errors}</p>`);
                     }
-                }, false);
-                return xhr;
-            },
-            type: "POST",
-            url: `${baseUrl}/${student_id}/storeDocument`,
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    updateProgress(50);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Document Saved!',
-                        text: 'Document uploaded successfully.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+                },
+                error: function(xhr) {
+                    $("#employee-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                    console.error(xhr.responseText);
                 }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let html = '<div class="alert alert-danger"><ul>';
-                    $.each(errors, function(key, value) {
-                        html += '<li>' + value[0] + '</li>';
-                    });
-                    html += '</ul></div>';
-                    $("#alert-box").html(html);
-                } else {
-                    Swal.fire("Error", "Something went wrong.", "error");
-                }
-            }
-        });
-    });
+            });
+        }
 
-    // Media Upload
-    $("#mediaForm").on("submit", function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
+        fetchDetails();
+        updateProgress(80);
 
-        $.ajax({
-            xhr: function() {
-                let xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function(evt) {
-                    if (evt.lengthComputable) {
-                        let percentComplete = 50 + Math.round((evt.loaded / evt.total) * 50); // 50-100%
-                        updateProgress(percentComplete);
+        // Document Upload
+        $("#documentForm").on("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            updateProgress(0);
+
+            $.ajax({
+                xhr: function() {
+                    let xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            let percentComplete = Math.round((evt.loaded / evt.total) * 50); // 0-50%
+                            updateProgress(percentComplete);
+                        }
+                    }, false);
+                    return xhr;
+                },
+                type: "POST",
+                url: `${baseUrl}/${employee_id}/storeDocument`,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        updateProgress(50);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Document Saved!',
+                            text: 'Document uploaded successfully.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
                     }
-                }, false);
-                return xhr;
-            },
-            type: "POST",
-            url: "{{ route('students.Bank.storeMedia', ['id' => $id]) }}",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    updateProgress(100);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'All Steps Completed!',
-                        text: 'Student document & media uploaded successfully.',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.href = "{{ route('students.create') }}";
-                    });
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let html = '<div class="alert alert-danger"><ul>';
+                        $.each(errors, function(key, value) {
+                            html += '<li>' + value[0] + '</li>';
+                        });
+                        html += '</ul></div>';
+                        $("#alert-box").html(html);
+                    } else {
+                        Swal.fire("Error", "Something went wrong.", "error");
+                    }
                 }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let html = '<div class="alert alert-danger"><ul>';
-                    $.each(errors, function(key, value) {
-                        html += '<li>' + value[0] + '</li>';
-                    });
-                    html += '</ul></div>';
-                    $("#alert-box").html(html);
-                } else {
-                    Swal.fire("Error", "Something went wrong.", "error");
-                }
-            }
+            });
         });
-    });
 
-    // Skip Button
-    $("#skipBtn").on("click", function() {
-        Swal.fire({
-            icon: 'info',
-            title: 'Skipped!',
-            text: 'You have skipped this step.',
-            timer: 1200,
-            showConfirmButton: false,
-            allowOutsideClick: false
-        }).then(() => {
-            window.location.href = "{{ route('students.create') }}";
+        // Media Upload
+        $("#mediaForm").on("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            $.ajax({
+                xhr: function() {
+                    let xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            let percentComplete = 50 + Math.round((evt.loaded / evt.total) * 50); // 50-100%
+                            updateProgress(percentComplete);
+                        }
+                    }, false);
+                    return xhr;
+                },
+                type: "POST",
+                url: "{{ route('employees.Bank.storeMedia', ['id' => $id]) }}",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        updateProgress(100);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'All Steps Completed!',
+                            text: 'employee document & media uploaded successfully.',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = "{{ route('employees.create') }}";
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let html = '<div class="alert alert-danger"><ul>';
+                        $.each(errors, function(key, value) {
+                            html += '<li>' + value[0] + '</li>';
+                        });
+                        html += '</ul></div>';
+                        $("#alert-box").html(html);
+                    } else {
+                        Swal.fire("Error", "Something went wrong.", "error");
+                    }
+                }
+            });
+        });
+
+        // Skip Button
+        $("#skipBtn").on("click", function() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Skipped!',
+                text: 'You have skipped this step.',
+                timer: 1200,
+                showConfirmButton: false,
+                allowOutsideClick: false
+            }).then(() => {
+                window.location.href = "{{ route('employees.create') }}";
+            });
         });
     });
-});
 </script>
 @endsection

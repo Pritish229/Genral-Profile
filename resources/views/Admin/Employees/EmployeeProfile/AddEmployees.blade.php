@@ -1,19 +1,19 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Add Student')
+@section('title', 'Home | employees | Add employee')
 
 @section('content')
 <div class="page-content">
   <x-breadcrumb
-    title="Add Student"
-    :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist', 'Add Student' => 'students.create']" />
+    title="Add Employee"
+    :links="['Home' => 'Admin.Dashboard', 'Employees' => 'employees.employeelist', 'Add Employee' => 'employees.create']" />
 
   <div id="alert-box" class="mt-2"></div>
 
-  <form id="studentForm" autocomplete="on" enctype="multipart/form-data">
+  <form id="employeeForm" autocomplete="on" enctype="multipart/form-data">
     @csrf
     <div class="row g-3">
-      <h5>Student info </h5>
+      <h5>Employee info </h5>
       <hr style="color:#5156be">
 
       <div class="col-md-4">
@@ -53,22 +53,15 @@
           </div>
 
           <div class="col-md-6">
-            <x-inputbox id="primary_email" label="Primary Email" type="email" placeholder="Enter student email" name="primary_email"
-              value="{{ old('primary_email') }}" :required="false" helpertxt="Parent or Student Email" />
+            <x-inputbox id="primary_email" label="Primary Email" type="email" placeholder="Enter employee email" name="primary_email"
+              value="{{ old('primary_email') }}" :required="false" helpertxt="Parent or employee Email" />
           </div>
 
           <div class="col-md-6">
             <x-inputbox id="primary_phone" label="Primary Phone" type="text" placeholder="Enter phone number" name="primary_phone"
-              value="{{ old('primary_phone') }}" :required="false" helpertxt="Parent or Student number" />
+              value="{{ old('primary_phone') }}" :required="false" helpertxt="Parent or employee number" />
           </div>
-          <div class="col-md-6">
-            <x-inputbox id="caste" label="Caste" type="text" placeholder="Enter Cast" name="caste"
-              value="{{ old('caste') }}" :required="false" helpertxt="Enter Cast details" />
-          </div>
-          <div class="col-md-6">
-            <x-inputbox id="religion" label="Religion" type="text" placeholder="Enter Religion" name="religion"
-              value="{{ old('religion') }}" :required="false" helpertxt="Enter Religion Details" />
-          </div>
+
         </div>
 
       </div>
@@ -82,28 +75,20 @@
 
 
 
-      <h5>Adminstration info </h5>
+      <h5>Management info </h5>
       <hr style="color:#5156be">
       <div class="col-md-6">
-        <x-inputbox id="student_uid" label="Student UID" type="text" placeholder="Enter unique student code" name="student_uid"
-          value="{{ old('student_uid') }}" :required="false" helpertxt="Unique code per tenant" />
+        <x-inputbox id="employee_uid" label="Employee UID" type="text" placeholder="Enter unique employee code" name="employee_uid"
+          value="{{ old('employee_uid') }}" :required="false" helpertxt="Unique code per tenant" />
       </div>
 
-      <div class="col-md-6">
-        <x-inputbox id="admission_no" label="Admission Number" type="text" placeholder="Enter roll/admission number" name="admission_no"
-          value="{{ old('admission_no') }}" :required="false" helpertxt="Institution-issued admission number" />
-      </div>
-
-      <div class="col-md-6">
-        <x-inputbox id="univ_admission_no" label="University Admission No" type="text" placeholder="Enter university admission number" name="univ_admission_no"
-          value="{{ old('univ_admission_no') }}" :required="false" helpertxt="University provided code" />
-      </div>
+     
 
       <div class="col-md-6">
         <div class="mb-2">
-          <label for="admission_date" class="mb-2 labeltxt">Admission Date</label>
-          <input type="text" id="admission_date" name="admission_date" class="form-control flatpickr"
-            placeholder="Select admission date" value="{{ old('admission_date') }}">
+          <label for="hire_date" class="mb-2 labeltxt">Hire Date</label>
+          <input type="text" id="hire_date" name="hire_date" class="form-control flatpickr"
+            placeholder="Select admission date" value="{{ old('hire_date') }}">
           <small class="mb-3 pt-1 helpertxt">Joining date</small>
         </div>
       </div>
@@ -124,7 +109,7 @@
 
 <script>
   jQuery(function($) {
-    let baseUrl = "{{ url('/students') }}";
+    let baseUrl = "{{ url('/employees') }}";
 
     // Avatar uploader
     $('.input-images').imageUploader({
@@ -145,26 +130,26 @@
 
     // --- Progress Helpers ---
     function setProgress(value) {
-      localStorage.setItem("studentProgress", value);
+      localStorage.setItem("employeeProgress", value);
       $('#progress-bar').css('width', value + '%').text(value + '%');
     }
 
     function getProgress() {
-      return parseInt(localStorage.getItem("studentProgress") || 0, 10);
+      return parseInt(localStorage.getItem("employeeProgress") || 0, 10);
     }
 
     // Restore saved progress (if reload happens)
     setProgress(getProgress());
 
     // --- Form Submit ---
-    $('#studentForm').on('submit', function(e) {
+    $('#employeeForm').on('submit', function(e) {
       e.preventDefault();
       const $btn = $('#saveBtn').prop('disabled', true);
       const formData = new FormData(this);
 
       // 1️⃣ Show initial loader
       Swal.fire({
-        title: 'Saving Student...',
+        title: 'Saving employee...',
         html: 'Please wait',
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -173,7 +158,7 @@
       });
 
       $.ajax({
-          url: "{{ route('students.store') }}",
+          url: "{{ route('employees.store') }}",
           type: "POST",
           data: formData,
           contentType: false,
@@ -194,7 +179,8 @@
               setProgress(10);
 
               // Reset form & uploader
-              document.getElementById('studentForm').reset();
+              document.getElementById('employeeForm').reset();
+              const $btn = $('#saveBtn').prop('disabled', true);
               const $box = $('.input-images').empty();
               $box.imageUploader({
                 multiple: false,
@@ -205,7 +191,10 @@
               });
 
               // Redirect to Step 2 (Basic Info)
-              window.location.href = `${baseUrl}/${response.data.id}/Basicinfo`;
+              console.log(response);
+              
+              window.location.href = `${baseUrl}/${response.data.employee.id}/Basicinfo`;
+
             });
           } else {
             Swal.fire({

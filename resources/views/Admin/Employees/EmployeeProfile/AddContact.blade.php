@@ -1,16 +1,16 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Contact')
+@section('title', 'Home | employees | Contact')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
         title="Contact"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist', 'Contact' => '']" />
+        :links="['Home' => 'Admin.Dashboard', 'employees' => 'employees.employeelist', 'Contact' => '']" />
 
     <div class="mt-2">
         <div class="card">
-            <div class="p-1" id="student-details">
+            <div class="p-1" id="employee-details">
                 Loading details...
             </div>
         </div>
@@ -26,7 +26,7 @@
         <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="progressBar">0%</div>
     </div>
 
-    <form id="studentContactForm">
+    <form id="employeeContactForm">
         <div class="row">
             <div class="col-md-4">
                 <label for="contact_type" class="form-label">Contact Type</label>
@@ -56,37 +56,36 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/employees') }}";
+    let employee_id = "{{ $id }}";
 
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${employee_id}/Basicinfo/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
+
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
+                    $("#employee-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.employee_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Status:</strong> ${response.primary_details.status}</p>
                             </div>
                         </div>
                     `);
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#employee-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#employee-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -103,7 +102,7 @@
         // Show progress at 40% for Contact step
         updateProgress(40);
 
-        $("#studentContactForm").on("submit", function(e) {
+        $("#employeeContactForm").on("submit", function(e) {
             e.preventDefault();
 
             Swal.fire({
@@ -115,7 +114,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/Address/storeContact`,
+                url: `${baseUrl}/${employee_id}/Address/storeContact`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -128,7 +127,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = `${baseUrl}/${student_id}/Bank`;
+                            window.location.href = `${baseUrl}/${employee_id}/Bank`;
                         });
                     }
                 },
@@ -159,7 +158,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Bank`;
+                window.location.href = `${baseUrl}/${employee_id}/Bank`;
             });
         });
     });
