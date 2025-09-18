@@ -214,6 +214,8 @@
         $('#admin_status').text(': ' + safe(data.status));
         $('#employee_f_name').text(': ' + safe(info.full_name));
         $('#note').text(': ' + safe(data.note));
+        let skills = Array.isArray(info.skills) ? info.skills : JSON.parse(info.skills || '[]');
+$('#skills').text(': ' + skills.join(', '));
 
 
     }

@@ -32,7 +32,6 @@ Route::prefix('students/')->group(function () {
     Route::get('Basicinfo/List', [StudentBasicController::class, 'studentlist'])->name('students.Studentlist');
     Route::get('List/All', [StudentBasicController::class, 'listAll'])->name('students.Studentlist.all');
     Route::get('Details/{student_id}/page', [StudentBasicController::class, 'studentDetails'])->name('students.Studentlist.studentDetailsPage');
-
     Route::get('{student_id}/Basicinfo/Manage', [StudentBasicController::class, 'manageDetail'])->name('students.manageDetail');
     Route::get('{student_id}/Basicinfo/Details', [StudentBasicController::class, 'basicDetails'])->name('students.BasicDetails');
     Route::post('{student_id}/Basicinfo/Update', [StudentBasicController::class, 'updateDetails'])->name('students.UpdateDetails');
@@ -41,11 +40,9 @@ Route::prefix('students/')->group(function () {
     Route::get('{id}/Address', [StudentAddressController::class, 'index'])->name('students.Address');
     Route::get('{id}/Manage/Addresses', [StudentAddressController::class, 'manageAddress'])->name('students.addresses.manage');
     Route::get('{id}/Get/Addresses', [StudentAddressController::class, 'getAddresses'])->name('students.addresses.list');
-
     Route::post('{student_id}/Manage/Addresses', [StudentAddressController::class, 'storeAddress'])->name('students.addresses.store');
     Route::put('{student}/addresses/{address}', [StudentAddressController::class, 'updateAddress'])->name('students.addresses.update');
     Route::delete('{student}/addresses/{address}', [StudentAddressController::class, 'deleteAddress'])->name('students.addresses.delete');
-
     Route::get('{student_id}/Address/Permanent', [StudentAddressController::class, 'permanentAddress'])->name('students.Address.Permanent');
 
 
@@ -101,8 +98,10 @@ Route::prefix('employees/')->group(function () {
     Route::get('{id}/Basicinfo', [EmployeePrimaryController::class, 'index'])->name('employees.Basicinfo');
     Route::get('List/All', [EmployeePrimaryController::class, 'listAll'])->name('employees.Employeeslist.paginate');
     Route::get('List/Employees', [EmployeePrimaryController::class, 'employeelist'])->name('employees.Employeelist.all');
+    Route::get('List/ManagerList', [EmployeePrimaryController::class, 'managerList'])->name('employees.managerList');
     Route::post('{emp_id}/Basicinfo/Update', [EmployeePrimaryController::class, 'updateDetails'])->name('employees.UpdateDetails');
     Route::get('{emp_id}/Basicinfo/Details', [EmployeePrimaryController::class, 'basicDetails'])->name('employees.BasicDetails');
+     Route::get('{emp_id}/Basicinfo/Manage', [EmployeePrimaryController::class, 'manageDetail'])->name('employees.manageDetail');
     Route::get('{emp_id}/view/Details', [EmployeePrimaryController::class, 'viewDetails'])->name('employees.viewDetails');
 
     // Employee Address

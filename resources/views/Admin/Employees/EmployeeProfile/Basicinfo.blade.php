@@ -167,7 +167,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                setProgress(20); 
+                setProgress(20);
                 window.location.href = `${baseUrl}/${student_id}/Address`;
             });
         });
@@ -238,26 +238,26 @@
             placeholder: "Search & select Manager",
             allowClear: true,
             width: '100%',
+            minimumInputLength: 0,
             ajax: {
-                url: "{{ route('employees.Employeelist.all') }}",
+                url: "{{ route('employees.managerList') }}",
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {
                     return {
-                        q: params.term
+                        q: params.term || '',
+                        exclude_id: "{{ $id }}" // ✅ pass current employee id
                     };
                 },
-                processResults: function(data) {
+                processResults: function(response) {
+                    let items = response.data || [];
                     return {
-                        results: data.map(function(item) {
-                            return {
-                                id: item.id, // stored in DB as manager_id
-                                text: item.full_name // shown in dropdown
-                            };
-                        })
+                        results: items.map(item => ({
+                            id: item.id,
+                            text: item.full_name
+                        }))
                     };
-                },
-                cache: true
+                }
             }
         });
     });

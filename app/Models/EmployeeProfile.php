@@ -23,6 +23,7 @@ class EmployeeProfile extends Model
         'gender',
         'blood_group',
         'avatar_url',
+        'manager_id',
         'designation',
         'department',
         'employment_type',
@@ -38,8 +39,7 @@ class EmployeeProfile extends Model
 
     protected $casts = [
         'dob' => 'date',
-        'parent_income' => 'decimal:2',
-        'extracurriculars' => 'array',
+        'skills' => 'array',
     ];
 
     public function employee()

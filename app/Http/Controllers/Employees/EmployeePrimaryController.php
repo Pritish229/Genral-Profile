@@ -17,7 +17,36 @@ class EmployeePrimaryController extends Controller
     {
         return view('Admin.Employees.EmployeeProfile.Basicinfo', ['id' => $id]);
     }
+    public function manageDetail($id)
+    {
+        return view('Admin.Employees.EmployeeProfile.ManageBasicinfo', ['id' => $id]);
+    }
+    public function employeelist(Request $request)
+    {
+        return view('Admin.Employees.EmployeeProfile.EmployeeList');
+    }
 
+    public function managerList(Request $request)
+    {
+        $query = $request->get('q', '');
+        $excludeId = $request->get('exclude_id'); // ✅ we’ll pass current employee id from Blade
+
+        $managers = EmployeeProfile::query()
+            ->when($query, function ($q) use ($query) {
+                $q->where('full_name', 'like', "%$query%");
+            })
+            ->when($excludeId, function ($q) use ($excludeId) {
+                $q->where('employee_id', '!=', $excludeId); // ✅ exclude current employee
+            })
+            ->select('id', 'employee_id', 'full_name')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $managers
+        ]);
+    }
 
     public function updateDetails(Request $request, $employee_id)
     {
@@ -25,26 +54,32 @@ class EmployeePrimaryController extends Controller
             'first_name'   => 'sometimes|string|max:70',
             'middle_name'  => 'nullable|string|max:70',
             'last_name'    => 'sometimes|string|max:70',
-            'designation'             => 'nullable|string|max:255',
-            'department'              => 'nullable|string|max:255',
-            'employment_type'         => 'nullable|string|max:50',
-            'salary_currency'         => 'nullable|string|max:3',
-            'base_salary'             => 'nullable|numeric',
-            'experience_years'        => 'nullable|string|max:10',
+
+            'designation'       => 'nullable|string|max:255',
+            'department'        => 'nullable|string|max:255',
+            'employment_type'   => 'nullable|string|max:50',
+            'salary_currency'   => 'nullable|string|max:3',
+            'base_salary'       => 'nullable|numeric',
+            'experience_years'  => 'nullable|string|max:10',
+
             'emergency_contact_name'  => 'nullable|string|max:70',
             'emergency_relation'      => 'nullable|string|max:70',
-            'location'                => 'nullable|string|max:70',
             'emergency_contact_phone' => 'nullable|string|max:20',
+            'location'                => 'nullable|string|max:70',
+
             'dob'          => 'sometimes|date',
             'gender'       => 'sometimes|in:male,female,other,unspecified',
             'blood_group'  => 'nullable|string|max:10',
-            'skills'                  => 'nullable|array',
-            'skills.*'                => 'string|max:100',
+
+            'skills'       => 'nullable|array',
+            'skills.*'     => 'string|max:100',
+
             'avatar_url'   => 'nullable|file|image|max:5120',
-            'manager_id'              => 'nullable|exists:employee_profiles,id',
+            'manager_id'   => 'nullable|exists:employee_profiles,id',
         ];
 
         $validator = Validator::make($request->all(), $rules);
+
 
         if ($validator->fails()) {
             return response()->json([
@@ -64,15 +99,35 @@ class EmployeePrimaryController extends Controller
 
         $profile = $employee->profile;
 
-        // Pick fields except avatar (file handled separately)
+        // Collect all updatable fields except avatar (handled separately)
         $data = $request->only([
             'first_name',
             'middle_name',
             'last_name',
             'dob',
             'gender',
-            'blood_group'
+            'blood_group',
+            'designation',
+            'department',
+            'employment_type',
+            'salary_currency',
+            'base_salary',
+            'experience_years',
+            'emergency_contact_name',
+            'emergency_relation',
+            'emergency_contact_phone',
+            'location',
+            'skills',
+            'manager_id'
         ]);
+        if ($request->has('skills')) {
+            $data['skills'] = $request->skills;
+        }
+
+        // Handle skills as JSON
+        if ($request->has('skills')) {
+            $data['skills'] = json_encode($request->skills);
+        }
 
         // Generate full_name dynamically
         $data['full_name'] = trim(preg_replace(
@@ -112,6 +167,7 @@ class EmployeePrimaryController extends Controller
             'data'    => $profile
         ]);
     }
+
 
     public function viewDetails($employee_id)
     {
@@ -181,10 +237,7 @@ class EmployeePrimaryController extends Controller
             ->make(true);
     }
 
-    public function employeelist(Request $request)
-    {
-        return view('Admin.Employees.EmployeeProfile.EmployeeList');
-    }
+
 
     public function basicDetails($employee_id)
     {
@@ -205,21 +258,31 @@ class EmployeePrimaryController extends Controller
         // Fix DOB formatting safely
         $detailsArray['dob'] = !empty($details->dob)
             ? Carbon::parse($details->dob)->format('d-M-Y')
-            : '-';
-
+            : null;
 
         if (isset($primary_details->hire_date)) {
             $primaryArray['hire_date'] = $primary_details->hire_date
                 ? Carbon::parse($primary_details->hire_date)->format('d-M-Y')
-                : '-';
+                : null;
         }
 
-        
+        // ✅ Add Manager Info
+        $manager = null;
+        if (!empty($details->manager_id)) {
+            $managerProfile = EmployeeProfile::find($details->manager_id);
+            if ($managerProfile) {
+                $manager = [
+                    'id' => $managerProfile->id,
+                    'full_name' => $managerProfile->full_name,
+                ];
+            }
+        }
 
         return response()->json([
             'success' => true,
             'data' => $detailsArray,
             'primary_details' => $primaryArray,
+            'manager' => $manager // ✅ return manager object
         ]);
     }
 }
