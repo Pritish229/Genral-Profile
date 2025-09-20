@@ -28,25 +28,36 @@
                         <li class="{{ in_array(Route::currentRouteName(), ['students.Studentlist','students.Studentlist.studentDetailsPage']) ? 'active' : '' }}"><a href="{{ route('students.Studentlist') }}" data-key="t-alerts" aria-expanded="false"><span>Students</span></a></li>
                     </ul>
                 <li class="{{ in_array(Route::currentRouteName(), ['employees.create']) ? 'mm-active' : '' }}">
-                <a href=" javascript: void(0);" class="has-arrow">
-                  
-                    <i class="fas fa-id-card-alt" style="color: #545a6d;font-size: 0.99rem;"></i>
-                    <span data-key="t-authentication">Employees</span>
-                </a>
-                <ul class="sub-menu" aria-expanded="false">
-                    <li class="{{ in_array(Route::currentRouteName(), ['employees.create',]) ? 'active' : '' }}"><a href="{{ route('employees.create') }}" data-key="t-alerts" aria-expanded="false"><span>Add Employee</span></a></li>
-                    <li class="{{ in_array(Route::currentRouteName(), ['employees.Employeelist.all']) ? 'active' : '' }}"><a href="{{ route('employees.Employeelist.all') }}" data-key="t-alerts" aria-expanded="false"><span>Employees</span></a></li>
+                    <a href=" javascript: void(0);" class="has-arrow">
 
-                </ul>
-                </ul>
-            </li>
-                </ul>
-            </li>
+                        <i class="fas fa-id-card-alt" style="color: #545a6d;font-size: 0.99rem;"></i>
+                        <span data-key="t-authentication">Employees</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li class="{{ in_array(Route::currentRouteName(), ['employees.create',]) ? 'active' : '' }}"><a href="{{ route('employees.create') }}" data-key="t-alerts" aria-expanded="false"><span>Add Employee</span></a></li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['employees.Employeelist.all']) ? 'active' : '' }}"><a href="{{ route('employees.Employeelist.all') }}" data-key="t-alerts" aria-expanded="false"><span>Employees</span></a></li>
+                    </ul>
+                </li>
 
 
+                <li class="{{ in_array(Route::currentRouteName(), ['vendors.create']) ? 'mm-active' : '' }}">
+                    <a href=" javascript: void(0);" class="has-arrow">
 
-
+                        <i class="fas fa-id-card-alt" style="color: #545a6d;font-size: 0.99rem;"></i>
+                        <span data-key="t-authentication">Vendors</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li class="{{ in_array(Route::currentRouteName(), ['vendors.create',]) ? 'active' : '' }}"><a href="{{ route('vendors.create') }}" data-key="t-alerts" aria-expanded="false"><span>Add Vendors</span></a></li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['employees.Employeelist.all']) ? 'active' : '' }}"><a href="{{ route('employees.Employeelist.all') }}" data-key="t-alerts" aria-expanded="false"><span>Employees</span></a></li>
+                    </ul>
+                </li>
             </ul>
+            
+
+
+
+
+            
 
 
         </div>

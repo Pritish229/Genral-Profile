@@ -1,19 +1,19 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Add Student')
+@section('title', 'Home | Vendors | Add Vendor')
 
 @section('content')
 <div class="page-content">
   <x-breadcrumb
-    title="Add Student"
-    :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist', 'Add Student' => 'students.create']" />
+    title="Add Vendor"
+    :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.vendorlist', 'Add Vendor' => 'vendors.create']" />
 
   <div id="alert-box" class="mt-2"></div>
 
-  <form id="studentForm" autocomplete="on" enctype="multipart/form-data">
+  <form id="vendorForm" autocomplete="on" enctype="multipart/form-data">
     @csrf
     <div class="row g-3">
-      <h5>Student info </h5>
+      <h5>Vendor info </h5>
       <hr style="color:#5156be">
 
       <div class="col-md-4">
@@ -31,7 +31,7 @@
 
       <div class="col-md-8">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="mb-2">
               <label for="dob" class="mb-2 labeltxt">DOB</label>
               <input type="text" id="dob" name="dob" class="form-control flatpickr"
@@ -39,7 +39,7 @@
               <small class="mb-3 pt-1 helpertxt">Date of Birth</small>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="mb-2">
               <label for="gender" class="mb-2 labeltxt">Gender</label>
               <select name="gender" class="form-select" id="gender">
@@ -51,24 +51,39 @@
               <small class="mb-3 pt-1 helpertxt">Select Gender Type</small>
             </div>
           </div>
+          <div class="col-md-4">
+            <div class="mb-2">
+              <label for="marital_status" class="mb-2 labeltxt">Maritial Status</label>
+              <select name="marital_status" class="form-select" id="marital_status">
+                <option value="male">Single</option>
+                <option value="married">Married</option>
+                <option value="divorsed">Divorsed</option>
+                <option value="widowed">Widowed</option>
+                <option value="other">Other</option>
+              </select>
+              <small class="mb-3 pt-1 helpertxt">Select Gender Type</small>
+            </div>
+          </div>
 
           <div class="col-md-6">
-            <x-inputbox id="primary_email" label="Primary Email" type="email" placeholder="Enter student email" name="primary_email"
-              value="{{ old('primary_email') }}" :required="false" helpertxt="Parent or Student Email" />
+            <x-inputbox id="primary_email" label="Primary Email" type="email" placeholder="Enter vendor email" name="primary_email"
+              value="{{ old('primary_email') }}" :required="false" helpertxt="Vendor Email" />
           </div>
 
           <div class="col-md-6">
             <x-inputbox id="primary_phone" label="Primary Phone" type="text" placeholder="Enter phone number" name="primary_phone"
-              value="{{ old('primary_phone') }}" :required="false" helpertxt="Parent or Student number" />
+              value="{{ old('primary_phone') }}" :required="false" helpertxt="Vendor number" />
           </div>
           <div class="col-md-6">
-            <x-inputbox id="caste" label="Caste" type="text" placeholder="Enter Cast" name="caste"
-              value="{{ old('caste') }}" :required="false" helpertxt="Enter Cast details" />
+            <x-inputbox id="occupation" label="Occupation" type="text" placeholder="Enter occupation" name="occupation"
+              value="{{ old('occupation') }}" :required="false" helpertxt="Enter Occupation" />
           </div>
           <div class="col-md-6">
-            <x-inputbox id="religion" label="Religion" type="text" placeholder="Enter Religion" name="religion"
-              value="{{ old('religion') }}" :required="false" helpertxt="Enter Religion Details" />
+            <x-inputbox id="Nationality" label="Nationality" type="text" placeholder="Enter Nationality" name="nationality"
+              value="{{ old('nationality') }}" :required="false" helpertxt="Enter Nationality" />
           </div>
+          
+
         </div>
 
       </div>
@@ -85,28 +100,32 @@
       <h5>Adminstration info </h5>
       <hr style="color:#5156be">
       <div class="col-md-6">
-        <x-inputbox id="student_uid" label="Student UID" type="text" placeholder="Enter unique student code" name="student_uid"
-          value="{{ old('student_uid') }}" :required="false" helpertxt="Unique code per tenant" />
+        <x-inputbox id="vendor_uid" label="Vendor UID" type="text" placeholder="Enter unique vendor code" name="vendor_uid"
+          value="{{ old('vendor_uid') }}" :required="false" helpertxt="Unique code per tenant" />
       </div>
-
-      <div class="col-md-6">
-        <x-inputbox id="admission_no" label="Admission Number" type="text" placeholder="Enter roll/admission number" name="admission_no"
-          value="{{ old('admission_no') }}" :required="false" helpertxt="Institution-issued admission number" />
-      </div>
-
-      <div class="col-md-6">
-        <x-inputbox id="univ_admission_no" label="University Admission No" type="text" placeholder="Enter university admission number" name="univ_admission_no"
-          value="{{ old('univ_admission_no') }}" :required="false" helpertxt="University provided code" />
-      </div>
-
       <div class="col-md-6">
         <div class="mb-2">
-          <label for="admission_date" class="mb-2 labeltxt">Admission Date</label>
-          <input type="text" id="admission_date" name="admission_date" class="form-control flatpickr"
-            placeholder="Select admission date" value="{{ old('admission_date') }}">
-          <small class="mb-3 pt-1 helpertxt">Joining date</small>
+          <label for="onboarding_channel" class="mb-2 labeltxt">On Boarding</label>
+          <select name="onboarding_channel" class="form-select" id="onboarding_channel">
+            <option value="web">Web</option>
+            <option value="mobile">Mobile</option>
+            <option value="partner">Partner</option>
+            <option value="import">import</option>
+            <option value="other">Other</option>
+          </select>
+          <small class="mb-3 pt-1 helpertxt">Select On Boarding Type</small>
         </div>
       </div>
+      <div class="col-md-6">
+            <x-inputbox id="preferred_language" label="Preferred Language" type="text" placeholder="Enter Preferred Language" name="preferred_language"
+              value="{{ old('preferred_language') }}" :required="false" helpertxt="Max 10 Character" />
+          </div>
+          <div class="col-md-6">
+            <x-inputbox id="preferred_currency" label="Preferred Currency" type="text" placeholder="Enter Preferred Currency" name="preferred_currency"
+              value="{{ old('preferred_currency') }}" :required="false" helpertxt="Enter Preferred Currency" />
+          </div>
+
+
 
       <div class="col-md-12">
         <x-textareabox id="notes" label="Notes" placeholder="Enter internal notes" name="notes" value="{{ old('notes') }}" helpertxt="For internal remarks" />
@@ -124,7 +143,7 @@
 
 <script>
   jQuery(function($) {
-    let baseUrl = "{{ url('/students') }}";
+    let baseUrl = "{{ url('/vendors') }}";
 
     // Avatar uploader
     $('.input-images').imageUploader({
@@ -145,26 +164,26 @@
 
     // --- Progress Helpers ---
     function setProgress(value) {
-      localStorage.setItem("studentProgress", value);
+      localStorage.setItem("vendorProgress", value);
       $('#progress-bar').css('width', value + '%').text(value + '%');
     }
 
     function getProgress() {
-      return parseInt(localStorage.getItem("studentProgress") || 0, 10);
+      return parseInt(localStorage.getItem("vendorProgress") || 0, 10);
     }
 
     // Restore saved progress (if reload happens)
     setProgress(getProgress());
 
     // --- Form Submit ---
-    $('#studentForm').on('submit', function(e) {
+    $('#vendorForm').on('submit', function(e) {
       e.preventDefault();
       const $btn = $('#saveBtn').prop('disabled', true);
       const formData = new FormData(this);
 
       // 1️⃣ Show initial loader
       Swal.fire({
-        title: 'Saving Student...',
+        title: 'Saving vendor...',
         html: 'Please wait',
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -173,7 +192,7 @@
       });
 
       $.ajax({
-          url: "{{ route('students.store') }}",
+          url: "{{ route('vendors.store') }}",
           type: "POST",
           data: formData,
           contentType: false,
@@ -194,7 +213,7 @@
               setProgress(10);
 
               // Reset form & uploader
-              document.getElementById('studentForm').reset();
+              document.getElementById('vendorForm').reset();
               const $box = $('.input-images').empty();
               $box.imageUploader({
                 multiple: false,

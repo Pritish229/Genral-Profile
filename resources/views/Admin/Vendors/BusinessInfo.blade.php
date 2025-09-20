@@ -26,54 +26,82 @@
 
     <form id="studentForm">
         <div class="row">
-            <div class="col-md-6">
-                <x-inputbox id="guardian_name" label="Guardian Name" type="text" placeholder="Enter Guardian Name" name="guardian_name"
-                    value="{{ old('guardian_name') }}" :required="false" helpertxt="Guardian Name" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_relation" label="Guardian Relation" type="text" placeholder="Enter Guardian Relation" name="guardian_relation"
-                    value="{{ old('guardian_relation') }}" :required="false" helpertxt="Guardian Relation" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_occupation" label="Guardian Occupation" type="text" placeholder="Enter Guardian Occupation" name="guardian_occupation"
-                    value="{{ old('guardian_occupation') }}" :required="false" helpertxt="Guardian Occupation" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_phone" label="Guardian Phone no" type="text" placeholder="Enter Guardian Phone no" name="guardian_phone"
-                    value="{{ old('guardian_phone') }}" :required="false" helpertxt="Phone number must be 10 Digits" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_email" label="Guardian Email" type="email" placeholder="Enter Guardian Email" name="guardian_email"
-                    value="{{ old('guardian_email') }}" :required="false" helpertxt="Guardian email must be valid email" />
-            </div>
-            <div class="col-md-6">
-                <x-inputbox id="parent_income" label="Annual income" type="text" placeholder="Enter Annual income" name="parent_income"
-                    value="{{ old('parent_income') }}" :required="false" helpertxt="Annual income Must Be Number" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="nationality" label="Nationality " type="text" placeholder="Enter Nationality" name="nationality"
-                    value="{{ old('nationality') }}" :required="false" helpertxt="Maximum 70 Character" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="mother_tongue" label="Mother Tongue" type="text" placeholder="Enter Mother Tongue" name="mother_tongue"
-                    value="{{ old('mother_tongue') }}" :required="false" helpertxt="Maximum 70 Character" />
-            </div>
-            <div class="col-md-6">
-                <x-inputbox id="blood_group" label="Blood Group" type="text" placeholder="Enter Blood Group" name="blood_group"
-                    value="{{ old('blood_group') }}" :required="false" helpertxt="Maximum 5 Character" />
+            <div class="col-md-4">
+                <x-inputbox id="legal_name" label="Legal Name" type="text" placeholder="Enter Legal Name" name="legal_name"
+                    value="{{ old('legal_name') }}" :required="false" helpertxt="Legal Name max 180 Character" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="current_class" label="Current Class" type="text" placeholder="Enter Current Class" name="current_class"
-                    value="{{ old('current_class') }}" :required="false" helpertxt="Maximum 40 Character" />
+                <x-inputbox id="trade_name" label="Trade Name" type="text" placeholder="Enter Trade Name" name="trade_name"
+                    value="{{ old('trade_name') }}" :required="false" helpertxt="Trade Name max 180 Character" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="section" label="Section" type="text" placeholder="Enter section " name="section"
-                    value="{{ old('section') }}" :required="false" helpertxt="Maximum 10 Character" />
+                <x-inputbox id="industry" label="Industry" type="text" placeholder="Enter industry" name="industry"
+                    value="{{ old('industry') }}" :required="false" helpertxt="Industry max 120 Character" />
+            </div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="onboarding_channel" class="mb-2 labeltxt">Business Size</label>
+                    <select name="onboarding_channel" class="form-select" id="onboarding_channel">
+                        <option value="micro">Micro</option>
+                        <option value="sme">Sme</option>
+                        <option value="enrterprice">Enrterprice</option>
+                    </select>
+                    <small class="mb-3 pt-1 helpertxt">Select Business Size</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <x-inputbox id="website" label="Website URL" type="text" placeholder="Enter Website URL" name="website"
+                    value="{{ old('website') }}" :required="false" helpertxt="Max 200 Characters" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="rollno" label="Rollno" type="text" placeholder="Enter Rollno" name="rollno"
-                    value="{{ old('rollno') }}" :required="false" helpertxt="Maximum 30 Character" />
+                <x-inputbox id="primary_contact_name" label="Primary Contact name" type="text" placeholder="Enter Contact name" name="primary_contact_name"
+                    value="{{ old('primary_contact_name') }}" :required="false" helpertxt="Primary Contact max 100 Character" />
             </div>
+            <div class="col-md-4">
+                <x-inputbox id="primary_contact_email" label="Primary Contact Email" type="email" placeholder="Enter Primary Contact Email" name="primary_contact_email"
+                    value="{{ old('primary_contact_email') }}" :required="false" helpertxt="Primary Contact Email Max 120 Character" />
+            </div>
+            <div class="col-md-4">
+                <x-inputbox id="primary_contact_phone" label="Primary Contact Email" type="text" placeholder="Enter Primary Contact Email" name="primary_contact_phone"
+                    value="{{ old('primary_contact_phone') }}" :required="false" helpertxt="Primary Contact Number Max 30 Digits" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="billing_email" label="Billing Email" type="email" placeholder="Enter Billing Email" name="billing_email"
+                    value="{{ old('billing_email') }}" :required="false" helpertxt="Billing Email Max 120 Character" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="billing_phone" label="Billing Phone" type="email" placeholder="Enter Billing Phone" name="billing_phone"
+                    value="{{ old('billing_phone') }}" :required="false" helpertxt="Billing Phone Max 30 Digits" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="gst_number" label="GST No" type="text" placeholder="Enter GST No" name="gst_number"
+                    value="{{ old('gst_number') }}" :required="false" helpertxt="GST No Max 20 Characters" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="pan_number" label="PAN No" type="text" placeholder="Enter PAN No" name="pan_number"
+                    value="{{ old('pan_number') }}" :required="false" helpertxt="PAN No Max 15 Characters" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="cin_number" label="CIN No" type="text" placeholder="Enter CIN No" name="cin_number"
+                    value="{{ old('cin_number') }}" :required="false" helpertxt="CIN No Max 25 Characters" />
+            </div>
+            <div class="col-md-3">
+                <x-inputbox id="credit_limit" label="Credit Limit" type="number" placeholder="Enter Credit Limit" name="credit_limit"
+                    value="{{ old('credit_limit') }}" :required="false" helpertxt="Must Be Number" />
+            </div>
+            <div class="col-md-3">
+            <div class="mb-2">
+              <label for="dob" class="mb-2 labeltxt">Payment Terms Date</label>
+              <input type="text" id="payment_terms_days" name="payment_terms_days" class="form-control flatpickr"
+                placeholder="Select Payment Terms Date" value="{{ old('payment_terms_days') }}">
+              <small class="mb-3 pt-1 helpertxt">Must be a Date</small>
+            </div>
+          </div>
+            <div class="col-md-3">
+                <x-inputbox id="account_manager" label="Account Manager" type="text" placeholder="Enter Account Manager " name="account_manager"
+                    value="{{ old('account_manager') }}" :required="false" helpertxt="Max 120 Charcter" />
+            </div>
+
         </div>
 
         <div class="mt-3">
@@ -101,6 +129,13 @@
 
     // Restore progress bar on page load
     $(document).ready(function() {
+        $(".flatpickr").flatpickr({
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",
+            allowInput: true
+        });
+
         $('#progressContainer').show();
         setProgress(getProgress());
 

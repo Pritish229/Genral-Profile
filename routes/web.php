@@ -2,6 +2,7 @@
 
 use App\Models\Employee;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Vendors\VendorController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Employees\EmployeeController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Employees\EmployeeContactController;
 use App\Http\Controllers\Employees\EmployeePrimaryController;
 use App\Http\Controllers\Students\StudentDocumentsController;
 use App\Http\Controllers\Employees\EmployeeDocumentsController;
+use App\Http\Controllers\Vendors\VendorBusinessProfileController;
 
 Route::get('/', [DashboardController::class, 'dashBoardPage'])->name('Admin.Dashboard');
 
@@ -155,8 +157,9 @@ Route::prefix('employees/')->group(function () {
 
 Route::prefix('vendors/')->group(function () {
     
-    Route::get('create', [EmployeeController::class, 'create'])->name('vendors.create');
-    Route::post('store', [EmployeeController::class, 'store'])->name('vendors.store');
+    Route::get('create', [VendorController::class, 'create'])->name('vendors.create');
+    Route::post('store', [VendorController::class, 'store'])->name('vendors.store');
 
 
+    Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendor.BusinessInfo');
 });
