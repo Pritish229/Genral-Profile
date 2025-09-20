@@ -48,7 +48,6 @@ return new class extends Migration
             $table->timestamp('deleted_at', 6)->nullable(); // soft delete
 
             // Constraints
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('vendor_id')->references('id')->on('vendors')->cascadeOnDelete();
             $table->unique(['tenant_id', 'vendor_id']); 
         });

@@ -39,9 +39,6 @@ return new class extends Migration
             $table->timestamp('created_at', 6)->useCurrent();
             $table->timestamp('updated_at', 6)->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at', 6)->nullable(); // soft delete
-
-            // Constraints
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnDelete();
             $table->foreign('customer_id')->references('id')->on('customers')->cascadeOnDelete();
             $table->unique(['tenant_id', 'customer_id']); 
         });
