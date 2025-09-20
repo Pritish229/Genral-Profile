@@ -9,6 +9,8 @@ class VendorBusinessProfileController extends Controller
 {
     public function index($id)
     {
-        return view('Admin.Vendors.BusinessInfo',['id' => $id]);
+        return view('Admin.Vendors.VendorProfile.BusinessInfo',['id' => $id]);
     }
+
+    
 }

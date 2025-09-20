@@ -1,24 +1,23 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students')
+@section('title', 'Home | Vendors')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Students"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => '']" />
+        title="Vendors"
+        :links="['Home' => 'Admin.Dashboard', 'Vendors' => '']" />
 
     <div class="mt-4">
         <table id="students-table" class="table table-bordered">
             <thead>
                 <tr>
                     <th>Avatar</th>
-                    <th>Student UID</th>
+                    <th>Vendor UID</th>
                     <th>Full Name</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
-                    <th>Admission Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -41,7 +40,6 @@
         { data: 'primary_email', name: 'primary_email' },
         { data: 'primary_phone', name: 'primary_phone' },
         { data: 'status', name: 'status', orderable: false },
-        { data: 'admission_date', name: 'admission_date' },
         { data: 'actions', name: 'actions', orderable: false, searchable: false }
     ]
 });

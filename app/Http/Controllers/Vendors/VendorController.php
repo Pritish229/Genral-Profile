@@ -9,6 +9,10 @@ class VendorController extends Controller
 {
     public function create()
     {
-        return view('Admin.Vendors.AddVendor');
+        return view('Admin.Vendors.VendorProfile.AddVendor');
+    }
+    public function vendorlist()
+    {
+        return view('Admin.Vendors.VendorProfile.VendorsList',);
     }
 }

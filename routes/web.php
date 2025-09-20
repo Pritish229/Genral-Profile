@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Vendors\VendorController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Students\StudentController;
+use App\Http\Controllers\Customers\CustomerController;
 use App\Http\Controllers\Employees\EmployeeController;
 use App\Http\Controllers\Students\StudentBankController;
 use App\Http\Controllers\Students\StudentBasicController;
@@ -158,8 +159,20 @@ Route::prefix('employees/')->group(function () {
 Route::prefix('vendors/')->group(function () {
     
     Route::get('create', [VendorController::class, 'create'])->name('vendors.create');
+    Route::get('list', [VendorController::class, 'vendorlist'])->name('vendors.List');
     Route::post('store', [VendorController::class, 'store'])->name('vendors.store');
-
-
+    
+    // Vendor Business Info
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendor.BusinessInfo');
+});
+
+Route::prefix('customers/')->group(function () {
+    
+    Route::get('create', [CustomerController::class, 'create'])->name('customers.create');
+    Route::post('store', [CustomerController::class, 'store'])->name('customers.store');
+    Route::get('list', [CustomerController::class, 'customerlist'])->name('customers.List');
+    
+    // Vendor Business Info
+    Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('customers.BusinessInfo');
+    Route::get('List', [VendorBusinessProfileController::class, 'customerList'])->name('customers.customerList');
 });

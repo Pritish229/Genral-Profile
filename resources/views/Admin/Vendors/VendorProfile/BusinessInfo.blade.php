@@ -1,12 +1,12 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Basic info')
+@section('title', 'Home | Vendors | Business info')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
         title="Basic info"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist', 'Basic info' => '']" />
+        :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.Vendorslist', 'Business info' => '']" />
 
     <div class="mt-2">
         <div class="card">
