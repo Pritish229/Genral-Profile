@@ -152,3 +152,11 @@ Route::prefix('employees/')->group(function () {
     Route::delete('{employee_id}/{media}/delete', [EmployeeMediaController::class, 'destroy'])->name('employees.medias.destroy');
     Route::get('{id}/medias/list', [EmployeeMediaController::class, 'getMedias'])->name('employees.medias.list');
 });
+
+Route::prefix('vendors/')->group(function () {
+    
+    Route::get('create', [EmployeeController::class, 'create'])->name('vendors.create');
+    Route::post('store', [EmployeeController::class, 'store'])->name('vendors.store');
+
+
+});
