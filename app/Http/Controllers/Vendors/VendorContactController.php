@@ -7,5 +7,8 @@ use Illuminate\Http\Request;
 
 class VendorContactController extends Controller
 {
-    //
+    public function index($id)
+    {
+        return view('Admin.Vendors.VendorProfile.AddContact', ['id' => $id]);
+    }
 }

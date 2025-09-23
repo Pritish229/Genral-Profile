@@ -7,5 +7,7 @@ use Illuminate\Http\Request;
 
 class CustomerMediaController extends Controller
 {
-    //
+    public function index($id){
+        return view ('Admin.Customers.CustomerProfile.AddMedias',['id' => $id]);
+    }
 }

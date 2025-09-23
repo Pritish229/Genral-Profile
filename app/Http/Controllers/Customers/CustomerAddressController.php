@@ -7,5 +7,8 @@ use Illuminate\Http\Request;
 
 class CustomerAddressController extends Controller
 {
-    //
+    public function index($id)
+    {
+        return view('Admin.Customers.CustomerProfile.AddAddress', ['id' => $id]);
+    }
 }

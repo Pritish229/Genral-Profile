@@ -7,19 +7,30 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Customers\CustomerController;
 use App\Http\Controllers\Employees\EmployeeController;
+use App\Http\Controllers\Vendors\VendorBankController;
+use App\Http\Controllers\Vendors\VendorMediaController;
 use App\Http\Controllers\Students\StudentBankController;
 use App\Http\Controllers\Students\StudentBasicController;
 use App\Http\Controllers\Students\StudentMediaController;
+use App\Http\Controllers\Vendors\VendorAddressController;
+use App\Http\Controllers\Vendors\VendorContactController;
+use App\Http\Controllers\Customers\CustomerBankController;
 use App\Http\Controllers\Employees\EmployeeBankController;
+use App\Http\Controllers\Vendors\VendorDocumentController;
+use App\Http\Controllers\Customers\CustomerMediaController;
 use App\Http\Controllers\Employees\EmployeeMediaController;
 use App\Http\Controllers\Students\StudentAddressController;
 use App\Http\Controllers\Students\StudentContactController;
+use App\Http\Controllers\Customers\CustomerAddressController;
+use App\Http\Controllers\Customers\CustomerContactController;
 use App\Http\Controllers\Employees\EmployeeAddressController;
 use App\Http\Controllers\Employees\EmployeeContactController;
 use App\Http\Controllers\Employees\EmployeePrimaryController;
 use App\Http\Controllers\Students\StudentDocumentsController;
+use App\Http\Controllers\Customers\CustomerDocumentController;
 use App\Http\Controllers\Employees\EmployeeDocumentsController;
 use App\Http\Controllers\Vendors\VendorBusinessProfileController;
+use App\Http\Controllers\Customers\CustomerBusinessProfileController;
 
 Route::get('/', [DashboardController::class, 'dashBoardPage'])->name('Admin.Dashboard');
 
@@ -163,7 +174,27 @@ Route::prefix('vendors/')->group(function () {
     Route::post('store', [VendorController::class, 'store'])->name('vendors.store');
     
     // Vendor Business Info
-    Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendor.BusinessInfo');
+    Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
+
+
+    // Vendor Address 
+    Route::get('{id}/Address', [VendorAddressController::class, 'index'])->name('vendors.Address');
+
+
+    // Vendor Contact 
+    Route::get('{id}/Contact', [VendorContactController::class, 'index'])->name('vendors.Contact');
+
+    // Vendor Bank
+    Route::get('{id}/Bank', [VendorBankController::class, 'index'])->name('vendors.Bank');
+
+    // Vendor Document
+    Route::get('{id}/Document', [VendorDocumentController::class, 'index'])->name('vendors.Document');
+
+
+    // Vendor Media
+    Route::get('{id}/Media', [VendorMediaController::class, 'index'])->name('vendors.Document');
+
+
 });
 
 Route::prefix('customers/')->group(function () {
@@ -173,6 +204,24 @@ Route::prefix('customers/')->group(function () {
     Route::get('list', [CustomerController::class, 'customerlist'])->name('customers.List');
     
     // Vendor Business Info
-    Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('customers.BusinessInfo');
-    Route::get('List', [VendorBusinessProfileController::class, 'customerList'])->name('customers.customerList');
+    Route::get('{id}/BusinessInfo', [CustomerBusinessProfileController::class, 'index'])->name('customers.BusinessInfo');
+    
+    // Customer Address 
+    Route::get('{id}/Address', [CustomerAddressController::class, 'index'])->name('customers.Address');
+
+
+    // Customer Contact 
+    Route::get('{id}/Contact', [CustomerContactController::class, 'index'])->name('customers.Contact');
+
+    // Customer Bank
+    Route::get('{id}/Bank', [CustomerBankController::class, 'index'])->name('customers.Bank');
+
+    // Customer Document
+    Route::get('{id}/Document', [CustomerDocumentController::class, 'index'])->name('customers.Document');
+
+
+    // Customer Media
+    Route::get('{id}/Media', [CustomerMediaController::class, 'index'])->name('customers.Document');
+
+
 });

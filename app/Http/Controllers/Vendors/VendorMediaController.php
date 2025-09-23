@@ -7,5 +7,7 @@ use Illuminate\Http\Request;
 
 class VendorMediaController extends Controller
 {
-    //
+    public function index($id){
+        return view ('Admin.Vendors.VendorProfile.AddMedias',['id' => $id]);
+    }
 }
