@@ -57,7 +57,7 @@ class VendorController extends Controller
                 [
                     'vendor_id'   => $vendor->id,
                     'tenant_id'   => '1',
-                    'contact_type' => 'primary',
+                    'contact_type' => 'phone',
                     'value'       => $validated['primary_phone'] ?? null,
                     'is_primary'  => true,
                 ]
@@ -72,6 +72,11 @@ class VendorController extends Controller
                 ]
             );
         }
+
+        VendorAddress::create([
+            'student_id' => $vendor->id,
+            'tenant_id'  => $vendor->tenant_id,
+        ]);
         if ($vendor->type === 'individual') {
             $profile = VendorIndividualProfile::create([
                 'vendor_id'      => $vendor->id,
