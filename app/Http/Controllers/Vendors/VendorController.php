@@ -28,7 +28,7 @@ class VendorController extends Controller
         $validated = $request->validate([
             'type'            => 'required|in:individual,business',
             'primary_email'   => 'required|email|unique:vendors,primary_email',
-            'phone_number'    => 'nullable|string|max:20',
+            'primary_phone'    => 'nullable|string|max:20',
             'first_name'      => 'required_if:type,individual|string|max:100',
             'middle_name'     => 'nullable|string|max:100',
             'last_name'       => 'required_if:type,individual|string|max:100',
@@ -49,7 +49,7 @@ class VendorController extends Controller
             'tenant_id'     => '1',
             'type'          => $validated['type'],
             'primary_email' => $validated['primary_email'],
-            'phone_number'  => $validated['phone_number'] ?? null,
+            'primary_phone'  => $validated['primary_phone'] ?? null,
         ]);
 
         if ($vendor->type === 'individual') {

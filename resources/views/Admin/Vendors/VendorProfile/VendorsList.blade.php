@@ -9,7 +9,7 @@
         :links="['Home' => 'Admin.Dashboard', 'Vendors' => '']" />
 
     <div class="mt-4">
-        <table id="students-table" class="table table-bordered">
+        <table id="vendors-table" class="table table-bordered">
             <thead>
                 <tr>
                     <th>Avatar</th>
@@ -29,13 +29,13 @@
 
 @section('script')
 <script>
-    $('#students-table').DataTable({
+    $('#vendors-table').DataTable({
     processing: true,
     serverSide: true,
-    ajax: '{{ route("students.Studentlist.all") }}',
+    ajax: '{{ route("vendors.paginate") }}',
     columns: [
         { data: 'avatar', name: 'avatar', orderable: false, searchable: false },
-        { data: 'student_uid', name: 'student_uid' },
+        { data: 'vendor_uid', name: 'vendor_uid' },
         { data: 'full_name', name: 'full_name' },
         { data: 'primary_email', name: 'primary_email' },
         { data: 'primary_phone', name: 'primary_phone' },

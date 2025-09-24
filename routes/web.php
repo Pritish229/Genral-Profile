@@ -176,6 +176,8 @@ Route::prefix('vendors/')->group(function () {
 
     // Route Profile Details
     Route::get('{id}/Details', [VendorProfileController::class, 'Details'])->name('vendors.Details');
+    Route::get('{id}/view/Details', [VendorProfileController::class, 'viewDetails'])->name('vendors.viewDetails');
+    Route::get('List/All', [VendorProfileController::class, 'listAll'])->name('vendors.paginate');
 
     // Vendor Business Info
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
