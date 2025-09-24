@@ -38,4 +38,21 @@ class VendorContactController extends Controller
             'data'    => $contact
         ], 201);
     }
+
+    public function permanentContact($vendor_id)
+    {
+        $contact = VendorContact::where('vendor_id', $vendor_id)->where('is_primary', '1')->first();
+        if ($contact) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Contact Fatch successfully.',
+                'data'    => $contact
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'employee contact not found',
+            ], 404);
+        }
+    }
 }

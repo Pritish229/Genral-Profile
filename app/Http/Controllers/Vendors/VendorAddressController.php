@@ -44,4 +44,24 @@ class VendorAddressController extends Controller
             'data'    => $address
         ], 201);
     }
+
+    public function permanentAddress($vendor_id)
+    {
+        $address = VendorAddress::where('vendor_id', $vendor_id)
+            ->where('is_primary', 1)
+            ->first();
+
+        if ($address) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Address fetched successfully',
+                'data'    => $address
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No primary address found'
+        ], 404);
+    }
 }

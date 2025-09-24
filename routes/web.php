@@ -187,15 +187,17 @@ Route::prefix('vendors/')->group(function () {
     // Vendor Address 
     Route::get('{id}/Address', [VendorAddressController::class, 'index'])->name('vendors.Address');
     Route::post('{vendor_id}/Manage/Addresses', [VendorAddressController::class, 'storeAddress'])->name('vendors.addresses.store');
+    Route::get('{vendor_id}/Address/Permanent', [VendorAddressController::class, 'permanentAddress'])->name('vendors.Address.Permanent');
 
     // Vendor Contact 
     Route::get('{id}/Contact', [VendorContactController::class, 'index'])->name('vendors.Contact');
-    Route::post('{id}/storeContact', [VendorContactController::class, 'storeContact'])->name('students.address.StoreContact');
-
+    Route::post('{id}/storeContact', [VendorContactController::class, 'storeContact'])->name('vendors.address.StoreContact');
+    Route::get('{id}/Contact/Permanent', [VendorContactController::class, 'permanentContact'])->name('vendors.Contact.Permanent');
+    
     // Vendor Bank
     Route::get('{id}/Bank', [VendorBankController::class, 'index'])->name('vendors.Bank');
     Route::post('{id}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank');
-
+    
     // Vendor Document
     Route::get('{id}/Document', [VendorDocumentController::class, 'index'])->name('vendors.Document');
     Route::post('{id}/storeDocument', [VendorDocumentController::class, 'storeDocument'])->name('vendors.Bank.StoreDocument');

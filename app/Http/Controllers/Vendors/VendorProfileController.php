@@ -24,7 +24,7 @@ class VendorProfileController extends Controller
 
     public function viewDetails($vendor_id)
     {
-        return view('Admin.Vendors.VendorProfile.VendorDetails', ['id' => $vendor_id]);
+        return view('Admin.Vendors.VendorProfile.VendorsDetails', ['id' => $vendor_id]);
     }
 
     public function listAll()

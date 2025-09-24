@@ -52,6 +52,26 @@ class VendorController extends Controller
             'primary_phone'  => $validated['primary_phone'] ?? null,
         ]);
 
+        if ($vendor) {
+            VendorContact::create(
+                [
+                    'vendor_id'   => $vendor->id,
+                    'tenant_id'   => '1',
+                    'contact_type' => 'primary',
+                    'value'       => $validated['primary_phone'] ?? null,
+                    'is_primary'  => true,
+                ]
+            );
+            VendorContact::create(
+                [
+                    'vendor_id'   => $vendor->id,
+                    'tenant_id'   => '1',
+                    'contact_type' => 'email',
+                    'value'       => $validated['primary_email'],
+                    'is_primary'  => true,
+                ]
+            );
+        }
         if ($vendor->type === 'individual') {
             $profile = VendorIndividualProfile::create([
                 'vendor_id'      => $vendor->id,
