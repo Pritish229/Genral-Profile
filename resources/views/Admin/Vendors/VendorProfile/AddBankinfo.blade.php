@@ -11,7 +11,7 @@
     <!-- Student details -->
     <div class="mt-2">
         <div class="card">
-            <div class="p-3" id="student-details">
+            <div class="p-3" id="vendor-details">
                 Loading details...
             </div>
         </div>
@@ -37,6 +37,7 @@
             </div>
 
             <!-- UPI fields -->
+
             <div id="upi-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -129,37 +130,37 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/vendors') }}";
+    let vendor_id = "{{ $id }}";
 
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${vendor_id}/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
+                    $("#vendor-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
                     `);
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -175,7 +176,7 @@
             $("#upi-fields").removeClass("d-none");
             $("#bank-fields").addClass("d-none");
 
-            $("#upi_id, #upi_name").attr("required", true);
+            $("#upi_vpa, #upi_holder_name").attr("required", true);
             $("#account_holder, #bank_name, #branch_name, #ifsc_code, #swift_code").removeAttr("required");
 
         } else if (method === "bank") {
@@ -183,11 +184,12 @@
             $("#upi-fields").addClass("d-none");
 
             $("#account_holder, #bank_name, #branch_name, #ifsc_code").attr("required", true);
-            $("#upi_id, #upi_name, #swift_code").removeAttr("required");
+            $("#upi_vpa, #upi_holder_name, #swift_code").removeAttr("required");
 
         } else {
             $("#upi-fields, #bank-fields").addClass("d-none");
-            $("#upi_id, #upi_name, #account_holder, #bank_name, #branch_name, #ifsc_code, #swift_code").removeAttr("required");
+            $("#upi_vpa, #upi_holder_name, #account_holder, #bank_name, #branch_name, #ifsc_code, #swift_code")
+                .removeAttr("required");
         }
     }
 
@@ -210,7 +212,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Document`; // change NextStep to your next route
+                window.location.href = `${baseUrl}/${vendor_id}/Document`; // change NextStep to your next route
             });
         });
 
@@ -226,7 +228,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/storeBank`,
+                url: `${baseUrl}/${vendor_id}/saveBank`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -239,7 +241,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = `${baseUrl}/${student_id}/Document`; 
+                            window.location.href = `${baseUrl}/${vendor_id}/Document`;
                         });
                     }
                 },

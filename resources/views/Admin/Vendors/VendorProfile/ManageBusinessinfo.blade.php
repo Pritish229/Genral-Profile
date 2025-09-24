@@ -8,13 +8,13 @@
         title="Update Basic info"
         :links="[
             'Home' => 'Admin.Dashboard',
-            'Students' => 'students.Studentlist',
-            'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+            'vendors' => 'vendors.vendorlist',
+            'vendor Detail' => ['vendors.vendorlist.vendorDetailsPage', $id],
             'Update Basic info' => ''
         ]" 
     />
 
-    <form id="studentForm" enctype="multipart/form-data">
+    <form id="vendorForm" enctype="multipart/form-data">
         <div class="row align-items-center">
             <!-- Profile Picture on the left-middle -->
             <div class="col-md-3 mb-3 text-center">
@@ -134,7 +134,7 @@
 <script>
 $(function(){
 
-    const studentId = "{{ $id }}";
+    const vendorId = "{{ $id }}";
 
     // Initialize image uploader
     let avatarUploader = $('.input-images').imageUploader({
@@ -154,7 +154,7 @@ $(function(){
     });
 
     // Fetch existing details
-     $.get("{{ url('students') }}/" + studentId + "/Basicinfo/Details", function(response){
+     $.get("{{ url('vendors') }}/" + vendorId + "/Details", function(response){
         if(response.success){
             let data = response.data;
             let primary = response.primary_details;
@@ -197,12 +197,12 @@ $(function(){
     });
 
     // Submit form via AJAX
-    $('#studentForm').submit(function(e){
+    $('#vendorForm').submit(function(e){
         e.preventDefault();
         let formData = new FormData(this);
 
         $.ajax({
-            url: "{{ url('students') }}/" + studentId + "/Basicinfo/Update",
+            url: "{{ url('vendors') }}/" + vendorId + "/Basicinfo/Update",
             type: 'POST',
             data: formData,
             contentType: false,

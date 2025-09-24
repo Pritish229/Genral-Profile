@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vendore_media', function (Blueprint $table) {
+        Schema::create('vendor_media', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('tenant_id')->nullable();
             $table->unsignedBigInteger('vendor_id'); // FK → students.id

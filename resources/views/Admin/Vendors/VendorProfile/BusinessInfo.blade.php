@@ -10,7 +10,7 @@
 
     <div class="mt-2">
         <div class="card">
-            <div class="p-1" id="student-details">
+            <div class="p-1" id="vendor-details">
                 Loading details...
             </div>
         </div>
@@ -24,7 +24,7 @@
         <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="progress-bar">0%</div>
     </div>
 
-    <form id="studentForm">
+    <form id="vendorForm">
         <div class="row">
             <div class="col-md-4">
                 <x-inputbox id="legal_name" label="Legal Name" type="text" placeholder="Enter Legal Name" name="legal_name"
@@ -40,8 +40,8 @@
             </div>
             <div class="col-md-6">
                 <div class="mb-2">
-                    <label for="onboarding_channel" class="mb-2 labeltxt">Business Size</label>
-                    <select name="onboarding_channel" class="form-select" id="onboarding_channel">
+                    <label for="business_size" class="mb-2 labeltxt">Business Size</label>
+                    <select name="business_size" class="form-select" id="business_size">
                         <option value="micro">Micro</option>
                         <option value="sme">Sme</option>
                         <option value="enrterprice">Enrterprice</option>
@@ -62,16 +62,18 @@
                     value="{{ old('primary_contact_email') }}" :required="false" helpertxt="Primary Contact Email Max 120 Character" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="primary_contact_phone" label="Primary Contact Email" type="text" placeholder="Enter Primary Contact Email" name="primary_contact_phone"
+                <x-inputbox id="primary_contact_phone" label="Primary Contact Phone" type="text" placeholder="Enter Primary Contact Phone" name="primary_contact_phone"
                     value="{{ old('primary_contact_phone') }}" :required="false" helpertxt="Primary Contact Number Max 30 Digits" />
+
             </div>
             <div class="col-md-3">
                 <x-inputbox id="billing_email" label="Billing Email" type="email" placeholder="Enter Billing Email" name="billing_email"
                     value="{{ old('billing_email') }}" :required="false" helpertxt="Billing Email Max 120 Character" />
             </div>
             <div class="col-md-3">
-                <x-inputbox id="billing_phone" label="Billing Phone" type="email" placeholder="Enter Billing Phone" name="billing_phone"
+                <x-inputbox id="billing_phone" label="Billing Phone" type="text" placeholder="Enter Billing Phone" name="billing_phone"
                     value="{{ old('billing_phone') }}" :required="false" helpertxt="Billing Phone Max 30 Digits" />
+
             </div>
             <div class="col-md-3">
                 <x-inputbox id="gst_number" label="GST No" type="text" placeholder="Enter GST No" name="gst_number"
@@ -90,13 +92,13 @@
                     value="{{ old('credit_limit') }}" :required="false" helpertxt="Must Be Number" />
             </div>
             <div class="col-md-3">
-            <div class="mb-2">
-              <label for="dob" class="mb-2 labeltxt">Payment Terms Date</label>
-              <input type="text" id="payment_terms_days" name="payment_terms_days" class="form-control flatpickr"
-                placeholder="Select Payment Terms Date" value="{{ old('payment_terms_days') }}">
-              <small class="mb-3 pt-1 helpertxt">Must be a Date</small>
+                <div class="mb-2">
+                    <label for="dob" class="mb-2 labeltxt">Payment Terms Date</label>
+                    <input type="text" id="payment_terms_days" name="payment_terms_days" class="form-control flatpickr"
+                        placeholder="Select Payment Terms Date" value="{{ old('payment_terms_days') }}">
+                    <small class="mb-3 pt-1 helpertxt">Must be a Date</small>
+                </div>
             </div>
-          </div>
             <div class="col-md-3">
                 <x-inputbox id="account_manager" label="Account Manager" type="text" placeholder="Enter Account Manager " name="account_manager"
                     value="{{ old('account_manager') }}" :required="false" helpertxt="Max 120 Charcter" />
@@ -114,17 +116,17 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/vendors') }}";
+    let vendor_id = "{{ $id }}";
 
     // --- Progress Helpers ---
     function setProgress(value) {
-        localStorage.setItem("studentProgress", value);
+        localStorage.setItem("vendorProgress", value);
         $('#progress-bar').css('width', value + '%').text(value + '%');
     }
 
     function getProgress() {
-        return parseInt(localStorage.getItem("studentProgress") || 0, 10);
+        return parseInt(localStorage.getItem("vendorProgress") || 0, 10);
     }
 
     // Restore progress bar on page load
@@ -141,19 +143,19 @@
 
         fetchDetails();
 
-        $("#studentForm").on("submit", function(e) {
+        $("#vendorForm").on("submit", function(e) {
             e.preventDefault();
 
             Swal.fire({
                 title: 'Saving...',
-                text: 'Please wait while we update the student profile.',
+                text: 'Please wait while we update the vendor profile.',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/Basicinfo/Update`,
+                url: `${baseUrl}/${vendor_id}/Update/BusinessInfo`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -161,13 +163,13 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'Updated!',
-                            text: 'Student profile has been updated successfully.',
+                            text: 'Vendor profile has been updated successfully.',
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
                             // ✅ Step 2 milestone = 20%
                             setProgress(20);
-                            window.location.href = `${baseUrl}/${student_id}/Address`;
+                            window.location.href = `${baseUrl}/${vendor_id}/Address`;
                         });
                     } else {
                         Swal.fire("Failed", JSON.stringify(response.errors), "error");
@@ -179,6 +181,7 @@
                     console.error(xhr.responseText);
                 }
             });
+
         });
 
         $("#skipBtn").on("click", function() {
@@ -189,9 +192,8 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                // ✅ Still count this step as completed
                 setProgress(20);
-                window.location.href = `${baseUrl}/${student_id}/Address`;
+                window.location.href = `${baseUrl}/${vendor_id}/Address`;
             });
         });
     });
@@ -199,31 +201,31 @@
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${vendor_id}/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
+                    $("#vendor-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
                     `);
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });

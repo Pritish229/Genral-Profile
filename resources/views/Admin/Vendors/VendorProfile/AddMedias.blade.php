@@ -8,10 +8,10 @@
         title="Documents & Media"
         :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List' ,'Documents & Media'=>'' ]" />
 
-    <!-- Student Details -->
+    <!-- vendor Details -->
     <div class="mt-2">
         <div class="card">
-            <div class="p-3" id="student-details">
+            <div class="p-3" id="vendor-details">
                 Loading details...
             </div>
         </div>
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Media Form -->
-    <h5 class="mt-4">Upload Student Media</h5>
+    <h5 class="mt-4">Upload Vendor Media</h5>
     <hr style="color:#5156be">
     <form id="mediaForm" enctype="multipart/form-data">
         <div class="row mb-3">
@@ -86,8 +86,41 @@ function updateProgress(percent) {
 }
 
 $(document).ready(function() {
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/vendors') }}";
+    let vendor_id = "{{ $id }}";
+
+    function fetchDetails() {
+        $.ajax({
+            type: "GET",
+            url: `${baseUrl}/${vendor_id}/Details`,
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    $("#vendor-details").html(`
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="flex: 0 0 150px;">
+                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
+                            </div>
+                            <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
+                                <p><strong>Name:</strong> ${response.data.full_name}</p>
+                                <p><strong>Gender:</strong> ${response.data.gender}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
+                }
+            },
+            error: function(xhr) {
+                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                console.error(xhr.responseText);
+            }
+        });
+    }
 
     $("#tags").select2({
         tags: true,
@@ -103,33 +136,7 @@ $(document).ready(function() {
         allowInput: true
     });
 
-    // Fetch student details
-    function fetchDetails() {
-        $.ajax({
-            type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
-            dataType: "json",
-            success: function(response) {
-                if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 150px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
-                                <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
-                            </div>
-                        </div>
-                    `);
-                }
-            }
-        });
-    }
+    
 
     fetchDetails();
     updateProgress(80);
@@ -152,7 +159,7 @@ $(document).ready(function() {
                 return xhr;
             },
             type: "POST",
-            url: `${baseUrl}/${student_id}/storeDocument`,
+            url: `${baseUrl}/${vendor_id}/storeDocument`,
             data: formData,
             processData: false,
             contentType: false,
@@ -201,7 +208,7 @@ $(document).ready(function() {
                 return xhr;
             },
             type: "POST",
-            url: "{{ route('students.Bank.storeMedia', ['id' => $id]) }}",
+            url: "{{ route('vendors.Bank.storeMedia', ['id' => $id]) }}",
             data: formData,
             processData: false,
             contentType: false,
@@ -211,12 +218,12 @@ $(document).ready(function() {
                     Swal.fire({
                         icon: 'success',
                         title: 'All Steps Completed!',
-                        text: 'Student document & media uploaded successfully.',
+                        text: 'vendor document & media uploaded successfully.',
                         timer: 1500,
                         showConfirmButton: false,
                         allowOutsideClick: false
                     }).then(() => {
-                        window.location.href = "{{ route('students.create') }}";
+                        window.location.href = "{{ route('vendors.create') }}";
                     });
                 }
             },
@@ -246,7 +253,7 @@ $(document).ready(function() {
             showConfirmButton: false,
             allowOutsideClick: false
         }).then(() => {
-            window.location.href = "{{ route('students.create') }}";
+            window.location.href = "{{ route('vendors.create') }}";
         });
     });
 });

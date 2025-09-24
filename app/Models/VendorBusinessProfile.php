@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class VendorBusinessProfile extends Model
 {
     use SoftDeletes;
+    protected $table = 'vendor_business_profiles';
 
     protected $fillable = [
         'tenant_id',

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_individuals_profiles', function (Blueprint $table) {
+        Schema::create('customer_individual_profiles', function (Blueprint $table) {
             $table->bigIncrements('id'); // PK
 
             $table->unsignedBigInteger('tenant_id'); // FK -> tenants.id

@@ -8,16 +8,16 @@
         title="Documents"
         :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List' ,'Documents'=>'' ]" />
 
-    <!-- Student Details -->
+    <!-- vendor Details -->
     <div class="mt-2">
         <div class="card">
-            <div class="p-3" id="student-details">
+            <div class="p-3" id="vendor-details">
                 Loading details...
             </div>
         </div>
     </div>
 
-    <h5>Upload Student Documents</h5>
+    <h5>Upload Vendor Documents</h5>
     <hr style="color:#5156be">
 
     <!-- Alert Box -->
@@ -104,38 +104,37 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/vendors') }}";
+    let vendor_id = "{{ $id }}";
 
-    // Fetch student basic info
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${vendor_id}/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
-                    <div class="d-flex align-items-start gap-3">
-                        <div style="flex: 0 0 150px;">
-                            <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
+                    $("#vendor-details").html(`
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="flex: 0 0 150px;">
+                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
+                            </div>
+                            <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
+                                <p><strong>Name:</strong> ${response.data.full_name}</p>
+                                <p><strong>Gender:</strong> ${response.data.gender}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
+                            </div>
                         </div>
-                        <div class="flex-grow-1">
-                            <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
-                            <p><strong>Name:</strong> ${response.data.full_name}</p>
-                            <p><strong>Gender:</strong> ${response.data.gender}</p>
-                            <p><strong>Caste:</strong> ${response.data.caste}</p>
-                            <p><strong>Religion:</strong> ${response.data.religion}</p>
-                        </div>
-                    </div>
-                `);
+                    `);
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -174,7 +173,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/storeDocument`,
+                url: `${baseUrl}/${vendor_id}/storeDocument`,
                 data: formData,
                 processData: false,
                 contentType: false,
@@ -189,8 +188,8 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            updateProgress(90); 
-                            window.location.href = `${baseUrl}/${student_id}/Media`;
+                            updateProgress(80); 
+                            window.location.href = `${baseUrl}/${vendor_id}/Media`;
                         });
                     }
                 },
@@ -221,7 +220,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Media`;
+                window.location.href = `${baseUrl}/${vendor_id}/Media`;
             });
         });
     });

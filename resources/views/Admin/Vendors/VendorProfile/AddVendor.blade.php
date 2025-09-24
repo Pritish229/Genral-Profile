@@ -53,15 +53,15 @@
           </div>
           <div class="col-md-4">
             <div class="mb-2">
-              <label for="marital_status" class="mb-2 labeltxt">Maritial Status</label>
+              <label for="marital_status" class="form-label">Marital Status</label>
               <select name="marital_status" class="form-select" id="marital_status">
-                <option value="male">Single</option>
+                <option value="" selected disabled>-- Select --</option>
+                <option value="single">Single</option>
                 <option value="married">Married</option>
-                <option value="divorsed">Divorsed</option>
+                <option value="divorced">Divorced</option>
                 <option value="widowed">Widowed</option>
                 <option value="other">Other</option>
               </select>
-              <small class="mb-3 pt-1 helpertxt">Select Gender Type</small>
             </div>
           </div>
 
@@ -75,14 +75,14 @@
               value="{{ old('primary_phone') }}" :required="false" helpertxt="Vendor number" />
           </div>
           <div class="col-md-6">
-            <x-inputbox id="occupation" label="Occupation" type="text" placeholder="Enter occupation" name="occupation"
+            <x-inputbox id="occupation" label="Occupation" type="text" placeholder="Enter Occupation" name="occupation"
               value="{{ old('occupation') }}" :required="false" helpertxt="Enter Occupation" />
           </div>
           <div class="col-md-6">
             <x-inputbox id="Nationality" label="Nationality" type="text" placeholder="Enter Nationality" name="nationality"
               value="{{ old('nationality') }}" :required="false" helpertxt="Enter Nationality" />
           </div>
-          
+
 
         </div>
 
@@ -99,11 +99,12 @@
 
       <h5>Adminstration info </h5>
       <hr style="color:#5156be">
-      <div class="col-md-6">
+      <div class="col-md-4">
         <x-inputbox id="vendor_uid" label="Vendor UID" type="text" placeholder="Enter unique vendor code" name="vendor_uid"
-          value="{{ old('vendor_uid') }}" :required="false" helpertxt="Unique code per tenant" />
+          value="{{ old('vendor_uid') }}" :required="false" helpertxt="Unique code don't use spaces" />
       </div>
-      <div class="col-md-6">
+
+      <div class="col-md-4">
         <div class="mb-2">
           <label for="onboarding_channel" class="mb-2 labeltxt">On Boarding</label>
           <select name="onboarding_channel" class="form-select" id="onboarding_channel">
@@ -116,19 +117,32 @@
           <small class="mb-3 pt-1 helpertxt">Select On Boarding Type</small>
         </div>
       </div>
+
+      <div class="col-md-4">
+        <div class="mb-2">
+          <label for="type" class="mb-2 labeltxt">Vendor Type</label>
+          <select name="type" class="form-select" id="type">
+            <option value="individual">individual</option>
+            <option value="Business">Business</option>
+          </select>
+          <small class="mb-3 pt-1 helpertxt">Select On Vendor Type</small>
+        </div>
+      </div>
+
       <div class="col-md-6">
-            <x-inputbox id="preferred_language" label="Preferred Language" type="text" placeholder="Enter Preferred Language" name="preferred_language"
-              value="{{ old('preferred_language') }}" :required="false" helpertxt="Max 10 Character" />
-          </div>
-          <div class="col-md-6">
-            <x-inputbox id="preferred_currency" label="Preferred Currency" type="text" placeholder="Enter Preferred Currency" name="preferred_currency"
-              value="{{ old('preferred_currency') }}" :required="false" helpertxt="Enter Preferred Currency" />
-          </div>
+        <x-inputbox id="preferred_language" label="Preferred Language" type="text" placeholder="Enter Preferred Language" name="preferred_language"
+          value="{{ old('preferred_language') }}" :required="false" helpertxt="Max 10 Character" />
+      </div>
+
+      <div class="col-md-6">
+        <x-inputbox id="preferred_currency" label="Preferred Currency" type="text" placeholder="Enter Preferred Currency" name="preferred_currency"
+          value="{{ old('preferred_currency') }}" :required="false" helpertxt="Enter Preferred Currency" />
+      </div>
 
 
 
       <div class="col-md-12">
-        <x-textareabox id="notes" label="Notes" placeholder="Enter internal notes" name="notes" value="{{ old('notes') }}" helpertxt="For internal remarks" />
+        <x-textareabox id="notes" label="Notes" placeholder="Enter internal notes" name="notes" value="{{ old('notes') }}" helpertxt="For Remarks" />
       </div>
     </div>
 
@@ -224,7 +238,7 @@
               });
 
               // Redirect to Step 2 (Basic Info)
-              window.location.href = `${baseUrl}/${response.data.id}/Basicinfo`;
+              window.location.href = `${baseUrl}/${response.data.id}/BusinessInfo`;
             });
           } else {
             Swal.fire({

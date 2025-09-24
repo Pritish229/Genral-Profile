@@ -166,7 +166,7 @@ class StudentMediaController extends Controller
 
         if (is_string($tags)) {
             $decoded = json_decode($tags, true);
-            return is_array($decoded) ? $decoded : [$tags]; // fallback: wrap string in array
+            return is_array($decoded) ? $decoded : [$tags]; 
         }
 
         return [];

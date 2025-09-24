@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use App\Models\VendorBusinessProfile;
 use App\Models\VendorIndividualProfile;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Vendor extends Model
 {
     use SoftDeletes;
-
+    protected $table = 'vendors';
     protected $fillable = [
         'tenant_id',
         'vendor_uid',
@@ -30,9 +31,6 @@ class Vendor extends Model
         'total_payout' => 'decimal:2',
     ];
 
-
-  
-
     public function businessProfile()
     {
         return $this->hasOne(VendorBusinessProfile::class);
@@ -42,8 +40,15 @@ class Vendor extends Model
     {
         return $this->hasOne(VendorIndividualProfile::class);
     }
+    protected static function booted()
+    {
+        static::creating(function ($vendor) {
+            if (empty($vendor->vendor_uid)) {
+                $vendor->vendor_uid = 'VEND-' . strtoupper(Str::random(8));
+            }
+        });
+    }
 
-  
 
     public function isActive(): bool
     {

@@ -115,7 +115,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/Address/storeContact`,
+                url: `${baseUrl}/${student_id}/storeContact`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();

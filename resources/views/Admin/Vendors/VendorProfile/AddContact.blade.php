@@ -10,7 +10,7 @@
 
     <div class="mt-2">
         <div class="card">
-            <div class="p-1" id="student-details">
+            <div class="p-1" id="vendor-details">
                 Loading details...
             </div>
         </div>
@@ -26,7 +26,7 @@
         <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="progressBar">0%</div>
     </div>
 
-    <form id="studentContactForm">
+    <form id="vendorContactForm">
         <div class="row">
             <div class="col-md-4">
                 <label for="contact_type" class="form-label">Contact Type</label>
@@ -56,37 +56,37 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/vendors') }}";
+    let vendor_id = "{{ $id }}";
 
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${vendor_id}/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
                     let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
+                    $("#vendor-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
                             </div>
                             <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
                     `);
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -103,7 +103,7 @@
         // Show progress at 40% for Contact step
         updateProgress(40);
 
-        $("#studentContactForm").on("submit", function(e) {
+        $("#vendorContactForm").on("submit", function(e) {
             e.preventDefault();
 
             Swal.fire({
@@ -115,7 +115,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/Address/storeContact`,
+                url: `${baseUrl}/${vendor_id}/storeContact`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -128,7 +128,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = `${baseUrl}/${student_id}/Bank`;
+                            window.location.href = `${baseUrl}/${vendor_id}/Bank`;
                         });
                     }
                 },
@@ -159,7 +159,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Bank`;
+                window.location.href = `${baseUrl}/${vendor_id}/Bank`;
             });
         });
     });

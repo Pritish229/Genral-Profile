@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class VendorIndividualProfile extends Model
 {
     use SoftDeletes;
-
+    protected $table = 'vendor_individual_profiles';
     protected $fillable = [
         'tenant_id',
         'vendor_id',
         'first_name',
         'middle_name',
         'last_name',
+        'marital_status',
         'dob',
         'gender',
         'avatar_url',

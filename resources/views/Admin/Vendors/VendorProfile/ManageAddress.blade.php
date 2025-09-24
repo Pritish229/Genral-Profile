@@ -5,14 +5,13 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-    title="Manage Addresses"
-    :links="[
+        title="Manage Addresses"
+        :links="[
         'Home' => 'Admin.Dashboard',
         'Students' => 'students.Studentlist',
         'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
         'Manage Addresses' => ''
-    ]"
-/>
+    ]" />
     <!-- Address Form -->
     <form id="studentAddressForm">
         @csrf
@@ -123,9 +122,9 @@
     $("#studentAddressForm").on("submit", function(e) {
         e.preventDefault();
         let formData = $(this).serialize();
-        let url = edit_id 
-            ? `${baseUrl}/${student_id}/addresses/${edit_id}`
-            : `${baseUrl}/${student_id}/Manage/Addresses`;
+        let url = edit_id ?
+            `${baseUrl}/${student_id}/addresses/${edit_id}` :
+            `${baseUrl}/${student_id}/Manage/Addresses`;
         let method = edit_id ? "PUT" : "POST";
 
         $.ajax({
@@ -179,7 +178,9 @@
                 $.ajax({
                     url: `${baseUrl}/${student_id}/addresses/${address_id}`,
                     type: "DELETE",
-                    data: {_token: "{{ csrf_token() }}"},
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
                     success: function(res) {
                         if (res.success) {
                             Swal.fire("Deleted!", res.message, "success");

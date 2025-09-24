@@ -14,6 +14,7 @@ use App\Http\Controllers\Students\StudentBasicController;
 use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Vendors\VendorAddressController;
 use App\Http\Controllers\Vendors\VendorContactController;
+use App\Http\Controllers\Vendors\VendorProfileController;
 use App\Http\Controllers\Customers\CustomerBankController;
 use App\Http\Controllers\Employees\EmployeeBankController;
 use App\Http\Controllers\Vendors\VendorDocumentController;
@@ -59,9 +60,9 @@ Route::prefix('students/')->group(function () {
     Route::delete('{student}/addresses/{address}', [StudentAddressController::class, 'deleteAddress'])->name('students.addresses.delete');
     Route::get('{student_id}/Address/Permanent', [StudentAddressController::class, 'permanentAddress'])->name('students.Address.Permanent');
 
-
+    // Student Contact
     Route::get('{id}/Contact', [StudentContactController::class, 'index'])->name('students.Contact');
-    Route::post('{student_id}/Address/storeContact', [StudentContactController::class, 'storeContact'])->name('students.address.StoreContact');
+    Route::post('{student_id}/storeContact', [StudentContactController::class, 'storeContact'])->name('students.StoreContact');
     Route::get('{id}/Contact/Permanent', [StudentContactController::class, 'permanentContact'])->name('students.Contact.Permanent');
 
     Route::get('{id}/Manage/Contacts', [StudentContactController::class, 'manageContact'])->name('students.contacts.manageContact');
@@ -115,7 +116,7 @@ Route::prefix('employees/')->group(function () {
     Route::get('List/ManagerList', [EmployeePrimaryController::class, 'managerList'])->name('employees.managerList');
     Route::post('{emp_id}/Basicinfo/Update', [EmployeePrimaryController::class, 'updateDetails'])->name('employees.UpdateDetails');
     Route::get('{emp_id}/Basicinfo/Details', [EmployeePrimaryController::class, 'basicDetails'])->name('employees.BasicDetails');
-     Route::get('{emp_id}/Basicinfo/Manage', [EmployeePrimaryController::class, 'manageDetail'])->name('employees.manageDetail');
+    Route::get('{emp_id}/Basicinfo/Manage', [EmployeePrimaryController::class, 'manageDetail'])->name('employees.manageDetail');
     Route::get('{emp_id}/view/Details', [EmployeePrimaryController::class, 'viewDetails'])->name('employees.viewDetails');
 
     // Employee Address
@@ -129,7 +130,7 @@ Route::prefix('employees/')->group(function () {
 
     // Employee Contact
     Route::get('{id}/Contact', [EmployeeContactController::class, 'index'])->name('employees.Contact');
-    Route::post('{employee_id}/Address/storeContact', [EmployeeContactController::class, 'storeContact'])->name('employees.address.StoreContact');
+    Route::post('{employee_id}/storeContact', [EmployeeContactController::class, 'storeContact'])->name('employees.StoreContact');
     Route::get('{id}/Contact/Permanent', [EmployeeContactController::class, 'permanentContact'])->name('employees.Contact.Permanent');
     Route::get('{id}/Manage/Contacts', [EmployeeContactController::class, 'manageContact'])->name('employees.contacts.manageContact');
     Route::get('{id}/Get/Contacts', [EmployeeContactController::class, 'getContacts'])->name('employees.contacts.list');
@@ -168,44 +169,50 @@ Route::prefix('employees/')->group(function () {
 });
 
 Route::prefix('vendors/')->group(function () {
-    
+
     Route::get('create', [VendorController::class, 'create'])->name('vendors.create');
     Route::get('list', [VendorController::class, 'vendorlist'])->name('vendors.List');
     Route::post('store', [VendorController::class, 'store'])->name('vendors.store');
-    
+
+    // Route Profile Details
+    Route::get('{id}/Details', [VendorProfileController::class, 'Details'])->name('vendors.Details');
+
     // Vendor Business Info
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
+    Route::post('{id}/Update/BusinessInfo', [VendorBusinessProfileController::class, 'updateBusinessInfo'])->name('vendors.UpdateBusinessInfo');
 
 
     // Vendor Address 
     Route::get('{id}/Address', [VendorAddressController::class, 'index'])->name('vendors.Address');
-
+    Route::post('{vendor_id}/Manage/Addresses', [VendorAddressController::class, 'storeAddress'])->name('vendors.addresses.store');
 
     // Vendor Contact 
     Route::get('{id}/Contact', [VendorContactController::class, 'index'])->name('vendors.Contact');
+    Route::post('{id}/storeContact', [VendorContactController::class, 'storeContact'])->name('students.address.StoreContact');
 
     // Vendor Bank
     Route::get('{id}/Bank', [VendorBankController::class, 'index'])->name('vendors.Bank');
+    Route::post('{id}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank');
 
     // Vendor Document
     Route::get('{id}/Document', [VendorDocumentController::class, 'index'])->name('vendors.Document');
+    Route::post('{id}/storeDocument', [VendorDocumentController::class, 'storeDocument'])->name('vendors.Bank.StoreDocument');
 
 
     // Vendor Media
     Route::get('{id}/Media', [VendorMediaController::class, 'index'])->name('vendors.Document');
-
-
+    Route::post('{id}/storeMedia', [VendorMediaController::class, 'storeMedia'])->name('vendors.Bank.storeMedia');
 });
 
 Route::prefix('customers/')->group(function () {
-    
+
     Route::get('create', [CustomerController::class, 'create'])->name('customers.create');
     Route::post('store', [CustomerController::class, 'store'])->name('customers.store');
     Route::get('list', [CustomerController::class, 'customerlist'])->name('customers.List');
-    
+
     // Vendor Business Info
     Route::get('{id}/BusinessInfo', [CustomerBusinessProfileController::class, 'index'])->name('customers.BusinessInfo');
-    
+
     // Customer Address 
     Route::get('{id}/Address', [CustomerAddressController::class, 'index'])->name('customers.Address');
 
@@ -222,6 +229,4 @@ Route::prefix('customers/')->group(function () {
 
     // Customer Media
     Route::get('{id}/Media', [CustomerMediaController::class, 'index'])->name('customers.Document');
-
-
 });
