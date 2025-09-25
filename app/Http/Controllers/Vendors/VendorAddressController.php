@@ -21,8 +21,8 @@ class VendorAddressController extends Controller
             'district'   => 'required|string|max:120',
             'city'       => 'required|string|max:120',
             'pincode'    => 'required|digits:6',
-            'line_1'     => 'nullable|string|max:120',
-            'line_2'     => 'nullable|string|max:120',
+            'line1'      => 'nullable|string|max:120',
+            'line2'      => 'nullable|string|max:120',
             'landmark'   => 'nullable|string|max:150',
             'label'      => 'nullable|string|max:100',
             'longitude'  => 'nullable|string|max:50',
@@ -32,18 +32,19 @@ class VendorAddressController extends Controller
 
         $vendor = Vendor::findOrFail($vendor_id);
 
-        $address = VendorAddress::create(array_merge($validated, [
-            'vendor_id' => $vendor->id,
-            'tenant_id'  => $vendor->tenant_id,
-            'is_primary'  => '1',
+        $address = VendorAddress::where('vendor_id', $vendor->id)->firstOrFail();
+        $address->update(array_merge($validated, [
+            'tenant_id' => $vendor->tenant_id,
+            'is_primary' => 1,
         ]));
 
         return response()->json([
             'success' => true,
-            'message' => 'Address created successfully',
+            'message' => 'Address updated successfully',
             'data'    => $address
-        ], 201);
+        ], 200);
     }
+
 
     public function permanentAddress($vendor_id)
     {

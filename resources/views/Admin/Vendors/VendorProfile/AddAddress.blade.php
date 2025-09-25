@@ -45,11 +45,11 @@
                     value="{{ old('pincode') }}" :required="false" helpertxt="Pincode must be 6 digits" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="line_1" label="Line 1" type="text" placeholder="Enter Line 1" name="line_1"
-                    value="{{ old('line_1') }}" :required="false" helpertxt="Line 1 Name Max 120 character" />
+                <x-inputbox id="line1" label="Line 1" type="text" placeholder="Enter Line 1" name="line1"
+                    value="{{ old('line1') }}" :required="false" helpertxt="Line 1 Name Max 120 character" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="line_2" label="Line 2" type="text" placeholder="Enter Line 2" name="line_2"
+                <x-inputbox id="line_2" label="Line 2" type="text" placeholder="Enter Line 2" name="line2"
                     value="{{ old('line_2') }}" :required="false" helpertxt="Line 2 Name Max 120 character" />
             </div>
             <div class="col-md-4">

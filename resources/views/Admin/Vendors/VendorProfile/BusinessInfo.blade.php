@@ -50,6 +50,14 @@
                 </div>
             </div>
             <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="dob" class="mb-2 labeltxt">Incorporation Date</label>
+                    <input type="text" id="incorporation_date" name="incorporation_date" class="form-control flatpickr"
+                        placeholder="Select Incorporation Date Date" value="{{ old('incorporation_date') }}">
+                    <small class="mb-3 pt-1 helpertxt">Must be a Date</small>
+                </div>
+            </div>
+            <div class="col-md-12">
                 <x-inputbox id="website" label="Website URL" type="text" placeholder="Enter Website URL" name="website"
                     value="{{ old('website') }}" :required="false" helpertxt="Max 200 Characters" />
             </div>
@@ -93,10 +101,10 @@
             </div>
             <div class="col-md-3">
                 <div class="mb-2">
-                    <label for="dob" class="mb-2 labeltxt">Payment Terms Date</label>
-                    <input type="text" id="payment_terms_days" name="payment_terms_days" class="form-control flatpickr"
+                    <label for="dob" class="mb-2 labeltxt">Payment Terms Days</label>
+                    <input type="number" id="payment_terms_days" name="payment_terms_days" class="form-control"
                         placeholder="Select Payment Terms Date" value="{{ old('payment_terms_days') }}">
-                    <small class="mb-3 pt-1 helpertxt">Must be a Date</small>
+                    <small class="mb-3 pt-1 helpertxt">Must be a Number</small>
                 </div>
             </div>
             <div class="col-md-3">

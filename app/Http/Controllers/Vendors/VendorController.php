@@ -74,7 +74,7 @@ class VendorController extends Controller
         }
 
         VendorAddress::create([
-            'student_id' => $vendor->id,
+            'vendor_id' => $vendor->id,
             'tenant_id'  => $vendor->tenant_id,
         ]);
         if ($vendor->type === 'individual') {

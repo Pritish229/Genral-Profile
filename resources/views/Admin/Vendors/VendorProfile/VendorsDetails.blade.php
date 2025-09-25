@@ -70,33 +70,42 @@
             <!-- Card 1 -->
             <div class="card p-2">
                 <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    Administration information
+                    Business information
                     <!-- <a href="#" class="text-primary" data-toggle="tooltip" title="Edit">
                         <i class="fas fa-edit"></i>
                     </a> -->
                 </h6>
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
-                    <div class="mb-3 d-flex"><strong class="me-2">vendor Name:</strong>
+                    <div class="mb-3 d-flex"><strong class="me-2">Vendor Name:</strong>
                         <div id="vendor_f_name">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">vendor UID:</strong>
-                        <div id="vendor_uid">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Leagel Name:</strong>
+                        <div id="leagel_name">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Admission Number:</strong>
-                        <div id="admission_no">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Tread Name:</strong>
+                        <div id="tread_name">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Admission Date:</strong>
-                        <div id="admission_date">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">industry:</strong>
+                        <div id="industry">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">University Admission No:</strong>
-                        <div id="univ_admission_no">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Incorporation Date:</strong>
+                        <div id="incorporation_date">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Status:</strong>
-                        <div id="admin_status">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Business Size:</strong>
+                        <div id="business_size">...</div>
                     </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Note:</strong>
-                        <div id="note">...</div>
+                    <div class="mb-3 d-flex"><strong class="me-2">Website:</strong>
+                        <div id="website">...</div>
+                    </div>
+                    <div class="mb-3 d-flex"><strong class="me-2">GST No:</strong>
+                        <div id="gst_number">...</div>
+                    </div>
+                    <div class="mb-3 d-flex"><strong class="me-2">CIN No:</strong>
+                        <div id="cin_number">...</div>
+                    </div>
+                    <div class="mb-3 d-flex"><strong class="me-2">PAM No:</strong>
+                        <div id="pan_number">...</div>
                     </div>
                 </div>
             </div>
@@ -148,7 +157,7 @@
             <div class="card p-2">
 
                 <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    Address information
+                    Contact information
                     <a href="{{ url('/vendors/' . $id . '/Manage/Contacts') }}"
                         class="text-primary"
                         data-toggle="tooltip"
