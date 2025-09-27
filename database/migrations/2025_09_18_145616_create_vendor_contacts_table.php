@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id(); // BIGINT UNSIGNED, AI, PK
             $table->unsignedBigInteger('tenant_id');
             $table->unsignedBigInteger('vendor_id');
+            $table->unsignedBigInteger('business_id')->nullable();
+            $table->string('business_name')->nullable();
+            $table->enum('profile_type', ['business', 'individual',])->default('individual');
 
             $table->enum('contact_type', ['email', 'phone', 'whatsapp', 'telegram', 'fax', 'other'])->default('whatsapp');
             $table->string('value', 180)->nullable();
@@ -39,6 +42,7 @@ return new class extends Migration
             $table->foreign('vendor_id')
                 ->references('id')->on('vendors')
                 ->onDelete('cascade');
+            $table->foreign('business_id')->references('id')->on('vendor_business_profiles')->nullOnDelete();
         });
     }
 

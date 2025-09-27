@@ -73,10 +73,6 @@ class VendorController extends Controller
             );
         }
 
-        VendorAddress::create([
-            'vendor_id' => $vendor->id,
-            'tenant_id'  => $vendor->tenant_id,
-        ]);
         if ($vendor->type === 'individual') {
             $profile = VendorIndividualProfile::create([
                 'vendor_id'      => $vendor->id,

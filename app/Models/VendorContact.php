@@ -12,6 +12,9 @@ class VendorContact extends Model
     protected $fillable = [
         'tenant_id',
         'vendor_id',
+        'profile_type',
+        'business_id',
+        'business_name',
         'contact_type',
         'value',
         'normalized_value',

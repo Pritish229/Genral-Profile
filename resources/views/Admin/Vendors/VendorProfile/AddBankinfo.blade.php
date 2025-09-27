@@ -26,13 +26,22 @@
     <div class="mt-4">
         <form id="bankDetailsForm">
             <div class="row mb-3">
-                <div class="col-md-12">
+                <div class="col-md-6">
+                    <label for="is_default_payout">Payment Method</label>
                     <select class="form-select" id="method" name="method">
                         <option value="">-- Select Method --</option>
                         <option value="bank" selected>Bank</option>
                         <option value="upi">UPI</option>
                     </select>
                     <small class="form-text text-muted">Choose whether you want to add Bank details or UPI details.</small>
+                </div>
+                <div class="col-md-6">
+                    <label for="is_default_payout">Default Payout</label>
+                    <select class="form-select" id="is_default_payout" name="is_default_payout">
+                        <option value="1" selected>Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                    <small class="form-text text-muted">Choose the Default Payout.</small>
                 </div>
             </div>
 
@@ -41,21 +50,11 @@
             <div id="upi-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_id"
-                            label="UPI ID"
-                            type="text"
-                            placeholder="example@upi"
-                            name="upi_id"
+                        <x-inputbox id="upi_id" label="UPI ID" type="text" placeholder="example@upi" name="upi_id"
                             :required="false" />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_name"
-                            label="UPI Holder Name"
-                            type="text"
-                            placeholder="Full Name"
-                            name="upi_name"
+                        <x-inputbox id="upi_name" label="UPI Holder Name" type="text" placeholder="Full Name" name="upi_name"
                             :required="false" />
                     </div>
                 </div>
@@ -65,52 +64,32 @@
             <div id="bank-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="account_holder"
-                            label="Account Holder"
-                            type="text"
-                            placeholder="John Doe"
-                            name="account_holder"
+                        <x-inputbox id="account_holder" label="Account Holder" type="text" placeholder="John Doe" name="account_holder"
                             :required="false" />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="bank_name"
-                            label="Bank Name"
-                            type="text"
-                            placeholder="State Bank of India"
-                            name="bank_name"
+                        <x-inputbox id="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" name="bank_name"
                             :required="false" />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="branch_name"
-                            label="Branch Name"
-                            type="text"
-                            placeholder="MG Road Branch"
-                            name="branch_name"
+                        <x-inputbox id="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch" name="branch_name"
                             :required="false" />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="ifsc_code"
-                            label="IFSC Code"
-                            type="text"
-                            placeholder="SBIN0001234"
-                            name="ifsc_code"
-                            :required="false" />
+                        <x-inputbox id="account_number" label="Account Number" type="text" placeholder="Enter Account Number" name="account_number"
+                            :required="true" />
                     </div>
+                    
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="swift_code"
-                            label="SWIFT Code"
-                            type="text"
-                            placeholder="SBININBBXXX"
-                            name="swift_code"
+                        <x-inputbox id="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" name="ifsc_code"
+                            :required="false" />
+                    </div>
+                    <div class="col-md-6">
+                        <x-inputbox id="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX" name="swift_code"
                             :required="false" />
                     </div>
                 </div>

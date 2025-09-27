@@ -27,8 +27,8 @@ return new class extends Migration
             $table->string('branch_name', 120)->nullable();
             $table->string('ifsc_code', 15)->nullable();
             $table->string('swift_code', 15)->nullable();
-            $table->string('account_number_mask', 8)->nullable(); // last 4–8 only
-            $table->binary('account_number_hash')->nullable(); // secure hash (SHA-256)
+            $table->string('account_number_mask', 50)->change()->nullable(); // last 4–8 only
+            $table->string('account_number_hash',64)->change()->nullable();  // secure hash (SHA-256)
 
             // --- UPI fields ---
             $table->string('upi_vpa', 120)->nullable();

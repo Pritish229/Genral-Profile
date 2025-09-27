@@ -14,26 +14,15 @@ return new class extends Migration
         Schema::create('vendor_media', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('tenant_id')->nullable();
-            $table->unsignedBigInteger('vendor_id'); // FK → students.id
+            $table->unsignedBigInteger('vendor_id');
+            $table->unsignedBigInteger('business_id')->nullable();
+            $table->string('business_name')->nullable(); 
+            $table->enum('profile_type', ['business', 'individual',])->default('individual');
 
-            $table->enum('media_usage', [
-                'profile',
-                'logo',
-                'banner',
-                'gallery',
-                'kyc',
-                'doc_scan',
-                'avatar',
-                'other'
+            $table->enum('media_usage', [ 'profile', 'logo', 'banner', 'gallery', 'kyc', 'doc_scan', 'avatar', 'other'
             ])->default('profile');  // Purpose of file
 
-            $table->enum('subject_role', [
-                'self',
-                'parent',
-                'guardian',
-                'spouse',
-                'child',
-                'other'
+            $table->enum('subject_role', [ 'self', 'parent', 'guardian', 'spouse', 'child', 'other'
             ])->nullable();  // e.g., parent/guardian’s photo
 
             $table->string('subject_name', 150)->nullable();
@@ -67,6 +56,7 @@ return new class extends Migration
             $table->softDeletes('deleted_at', 6);
 
             $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade');
+             $table->foreign('business_id')->references('id')->on('vendor_business_profiles')->nullOnDelete();
         });
     }
 

@@ -15,6 +15,9 @@ return new class extends Migration
              $table->id();
             $table->unsignedBigInteger('tenant_id')->nullable();
             $table->unsignedBigInteger('customer_id'); // FK → students.id
+            $table->unsignedBigInteger('business_id')->nullable();
+            $table->string('business_name')->nullable();
+            $table->enum('profile_type', ['business', 'individual',])->default('individual');
 
             $table->enum('media_usage', [
                 'profile',
@@ -67,6 +70,7 @@ return new class extends Migration
             $table->softDeletes('deleted_at', 6);
 
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+            $table->foreign('business_id')->references('id')->on('customer_business_profiles')->nullOnDelete();
         });
     }
 

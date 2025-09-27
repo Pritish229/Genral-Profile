@@ -12,16 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('vendor_addresses', function (Blueprint $table) {
-           $table->id();
+            $table->id();
             $table->unsignedBigInteger('tenant_id')->nullable();
-            $table->unsignedBigInteger('vendor_id'); // FK → vendors.id
-
-            $table->enum('address_type', [
-                'permanent',
-                'other',
-                'hostel',
-            ])->default('permanent');
-
+            $table->unsignedBigInteger('vendor_id');
+            $table->unsignedBigInteger('business_id')->nullable();
+            $table->string('business_name')->nullable();
+            $table->enum('profile_type', ['business', 'individual',])->default('individual');
+            $table->enum('address_type', ['permanent', 'office', 'other',])->default('permanent');
             $table->string('label', 120)->nullable();
             $table->string('line1', 180)->nullable();
             $table->string('line2', 180)->nullable();
@@ -47,6 +44,7 @@ return new class extends Migration
             $table->timestamp('updated_at', 6)->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at', 6)->nullable();
             $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade');
+            $table->foreign('business_id')->references('id')->on('vendor_business_profiles')->nullOnDelete();
         });
     }
 

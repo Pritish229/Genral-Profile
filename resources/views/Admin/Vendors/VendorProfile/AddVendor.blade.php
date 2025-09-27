@@ -55,7 +55,6 @@
             <div class="mb-2">
               <label for="marital_status" class="form-label">Marital Status</label>
               <select name="marital_status" class="form-select" id="marital_status">
-                <option value="" selected disabled>-- Select --</option>
                 <option value="single">Single</option>
                 <option value="married">Married</option>
                 <option value="divorced">Divorced</option>
@@ -228,6 +227,7 @@
 
               // Reset form & uploader
               document.getElementById('vendorForm').reset();
+              $btn.prop('disabled', true);
               const $box = $('.input-images').empty();
               $box.imageUploader({
                 multiple: false,
@@ -237,8 +237,13 @@
                 preloaded: []
               });
 
-              // Redirect to Step 2 (Basic Info)
-              window.location.href = `${baseUrl}/${response.data.id}/BusinessInfo`;
+              // ✅ Redirect based on Vendor Type
+              let vendorType = response.data.type || $('#type').val(); // fallback to form input
+              if (vendorType.toLowerCase() === "individual") {
+                window.location.href = `${baseUrl}/${response.data.id}/Address`;
+              } else {
+                window.location.href = `${baseUrl}/${response.data.id}/BusinessInfo`;
+              }
             });
           } else {
             Swal.fire({

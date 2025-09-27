@@ -13,6 +13,9 @@ class VendorDocument extends Model
     protected $fillable = [
         'tenant_id',
         'vendor_id',
+        'profile_type',
+        'business_id',
+        'business_name',
         'document_type',
         'document_number',
         'document_number_hash',

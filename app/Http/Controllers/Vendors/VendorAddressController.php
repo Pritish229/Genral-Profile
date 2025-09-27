@@ -30,17 +30,36 @@ class VendorAddressController extends Controller
             'is_primary' => 'nullable|boolean',
         ]);
 
-        $vendor = Vendor::findOrFail($vendor_id);
+       
+        
+        $vendor = Vendor::find($vendor_id);
+        if (!$vendor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor not found'
+            ], 404);
+        }
 
-        $address = VendorAddress::where('vendor_id', $vendor->id)->firstOrFail();
-        $address->update(array_merge($validated, [
-            'tenant_id' => $vendor->tenant_id,
+        $address = VendorAddress::create(array_merge($validated, [
+            'tenant_id' => '1',
             'is_primary' => 1,
+            'profile_type' => $vendor->type,
+            'vendor_id' => $vendor->id,
+            'state' => $request->state,
+            'district' => $request->district,
+            'city' => $request->city,
+            'pincode' => $request->pincode,
+            'line1' => $request->line1,
+            'line2' => $request->line2,
+            'landmark' => $request->landmark,
+            'label' => $request->label,
+            'longitude' => $request->longitude,
+            'latitude' => $request->latitude, 
         ]));
 
         return response()->json([
             'success' => true,
-            'message' => 'Address updated successfully',
+            'message' => 'Address Added successfully',
             'data'    => $address
         ], 200);
     }
@@ -55,7 +74,7 @@ class VendorAddressController extends Controller
         if ($address) {
             return response()->json([
                 'success' => true,
-                'message' => 'Address fetched successfully',
+                'message' => 'Address Fetched Successfully',
                 'data'    => $address
             ]);
         }

@@ -19,7 +19,7 @@ class StudentController extends Controller
 {
     public function create()
     {
-        return view('Admin.students.StudentProfile.AddStudent');
+        return view('Admin.Students.StudentProfile.AddStudent');
     }
 
 
@@ -114,6 +114,7 @@ class StudentController extends Controller
             StudentAddress::create([
                 'student_id' => $student->id,
                 'tenant_id'  => $student->tenant_id,
+                
             ]);
 
             

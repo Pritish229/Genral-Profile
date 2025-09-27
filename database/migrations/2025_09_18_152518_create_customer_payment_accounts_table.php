@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id(); // BIGINT UNSIGNED AI PK
             $table->unsignedBigInteger('tenant_id'); // Multi-tenant scope
             $table->unsignedBigInteger('customer_id'); // FK → students.id
+            $table->unsignedBigInteger('business_id')->nullable();
+            $table->string('business_name')->nullable();
+            $table->enum('profile_type', ['business', 'individual',])->default('individual');
 
             $table->enum('method', ['bank', 'upi'])->nullable();; // Payment method type
             $table->enum('status', ['active', 'inactive', 'blocked'])->default('active');
@@ -27,8 +30,8 @@ return new class extends Migration
             $table->string('branch_name', 120)->nullable();
             $table->string('ifsc_code', 15)->nullable();
             $table->string('swift_code', 15)->nullable();
-            $table->string('account_number_mask', 8)->nullable(); // last 4–8 only
-            $table->binary('account_number_hash')->nullable(); // secure hash (SHA-256)
+            $table->string('account_number_mask', 50)->nullable();
+            $table->string('account_number_hash', 64)->nullable(); // secure hash (SHA-256)
 
             // --- UPI fields ---
             $table->string('upi_vpa', 120)->nullable();
@@ -41,16 +44,17 @@ return new class extends Migration
             $table->enum('source', ['web', 'mobile', 'import', 'api', 'other'])->nullable();
             $table->json('meta')->nullable();
 
-            $table->unsignedInteger('row_version')->default(0); 
+            $table->unsignedInteger('row_version')->default(0);
 
             $table->timestamp('created_at', 6)->useCurrent();
             $table->timestamp('updated_at', 6)->useCurrent()->useCurrentOnUpdate();
-            $table->timestamp('deleted_at', 6)->nullable(); 
+            $table->timestamp('deleted_at', 6)->nullable();
 
             // 🔑 Foreign key
             $table->foreign('customer_id')
                 ->references('id')->on('customers')
                 ->onDelete('cascade');
+            $table->foreign('business_id')->references('id')->on('customer_business_profiles')->nullOnDelete();
         });
     }
 

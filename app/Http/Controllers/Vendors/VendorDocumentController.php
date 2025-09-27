@@ -44,8 +44,13 @@ class VendorDocumentController extends Controller
         }
 
         // Always create a new document
+        $validated['profile_type']  = $vendor->profile_type;
         $validated['tenant_id']  = $vendor->tenant_id;
         $validated['vendor_id'] = $vendor->id;
+
+        
+
+
 
         $document = VendorDocument::create($validated);
 

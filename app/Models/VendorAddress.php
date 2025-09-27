@@ -12,9 +12,13 @@ class VendorAddress extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'vendor_id',
         'tenant_id',
         'employee_id',
         'address_type',
+        'profile_type',
+        'business_id',
+        'business_name',
         'label',
         'line1',
         'line2',
