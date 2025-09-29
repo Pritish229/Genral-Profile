@@ -30,8 +30,10 @@
         <div class="row">
             <div class="col-md-4">
                 <label for="contact_type" class="form-label">Contact Type</label>
-                <select id="contact_type" name="contact_type" class="form-control" >
+                <select id="contact_type" name="contact_type" class="form-select" >
                     <option value="">-- Select Type --</option>
+                    <option value="phone">Phone</option>
+                    <option value="email">Email</option>
                     <option value="whatsapp">WhatsApp</option>
                     <option value="telegram">Telegram</option>
                 </select>

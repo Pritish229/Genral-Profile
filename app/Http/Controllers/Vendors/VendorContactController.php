@@ -6,6 +6,7 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use App\Models\VendorContact;
 use App\Http\Controllers\Controller;
+use App\Models\VendorBusinessProfile;
 
 class VendorContactController extends Controller
 {
@@ -16,28 +17,46 @@ class VendorContactController extends Controller
 
     public function storeContact(Request $request, $vendor_id)
     {
-        // Validate request
-        $validated = $request->validate([
+        $vendor = Vendor::findOrFail($vendor_id);
+
+        $rules = [
             'contact_type' => 'required|string|max:120',
             'value'        => 'required|string|max:120',
             'label'        => 'nullable|string|max:120',
-        ]);
+        ];
 
-        $vendor = Vendor::findOrFail($vendor_id);
+        $validated = $request->validate($rules);
 
-        $contact = VendorContact::create([
+        $data = [
             'contact_type' => $validated['contact_type'],
             'label'        => $validated['label'] ?? null,
             'value'        => $validated['value'],
-            'vendor_id'   => $vendor->id,
+            'vendor_id'    => $vendor->id,
             'tenant_id'    => $vendor->tenant_id,
-        ]);
+        ];
+
+        if ($vendor->type === 'business') {
+            $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->first();
+
+            if (!$business) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Business profile not found for this vendor.'
+                ], 422);
+            }
+
+            $data['business_id']   = $business->id;
+            $data['business_name'] = $business->trade_name;
+        }
+
+        $contact = VendorContact::create($data);
 
         return response()->json([
             'success' => true,
             'data'    => $contact
         ], 201);
     }
+
 
     public function permanentContact($vendor_id)
     {

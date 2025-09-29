@@ -20,7 +20,6 @@ class Vendor extends Model
         'primary_phone',
         'status',
         'onboarding_channel',
-        
         'last_order_id',
         'total_orders',
         'total_payout',

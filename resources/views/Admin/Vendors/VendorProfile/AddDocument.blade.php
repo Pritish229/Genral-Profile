@@ -31,51 +31,31 @@
     <!-- Document Form -->
     <form id="documentForm" enctype="multipart/form-data">
         <div class="row mb-3">
-            <div class="col-md-6">
-                <x-inputbox
-                    id="document_type"
-                    label="Document Type"
-                    type="text"
-                    placeholder="e.g., Passport, Aadhar Card"
-                    name="document_type" />
+            <div class="col-md-4">
+                <x-inputbox id="document_type" label="Document Type" type="text" placeholder="e.g., Passport, Aadhar Card" name="document_type" />
             </div>
-            <div class="col-md-6">
-                <x-inputbox
-                    id="document_number"
-                    label="Document Number"
-                    type="text"
-                    placeholder="Enter Document Number"
-                    name="document_number" />
+            <div class="col-md-4">
+                <x-inputbox id="document_number" label="Document Number" type="text" placeholder="Enter Document Number" name="document_number" />
+            </div>
+            <div class="col-md-4">
+                <x-inputbox id="issuing_authority" label="Issuing Authority" type="text" placeholder="Enter Issuing Authority" name="issuing_authority" />
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="issue_date">Issue Date</label>
-                <input type="text"
-                    id="issue_date"
-                    name="issue_date"
-                    class="form-control flatpickr"
-                    placeholder="Select issue date">
+                <input type="text" id="issue_date" name="issue_date" class="form-control flatpickr" placeholder="Select issue date">
             </div>
             <div class="col-md-6">
                 <label for="expiry_date">Expiry Date</label>
-                <input type="text"
-                    id="expiry_date"
-                    name="expiry_date"
-                    class="form-control flatpickr"
-                    placeholder="Select expiry date">
+                <input type="text" id="expiry_date" name="expiry_date" class="form-control flatpickr" placeholder="Select expiry date">
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <x-inputbox
-                    id="file_name"
-                    label="File Name"
-                    type="text"
-                    placeholder="e.g., Passport Scan"
-                    name="file_name" />
+                <x-inputbox id="file_name" label="File Name" type="text" placeholder="e.g., Passport Scan" name="file_name" />
             </div>
             <div class="col-md-6">
                 <label for="file_url">Upload File</label>
@@ -86,10 +66,7 @@
 
         <div class="row mb-3">
             <div class="col-md-12">
-                <x-textareabox
-                    id="remarks"
-                    label="Remarks"
-                    name="remarks"
+                <x-textareabox id="remarks" label="Remarks" name="remarks"
                     placeholder="Enter additional remarks about this document" />
             </div>
         </div>

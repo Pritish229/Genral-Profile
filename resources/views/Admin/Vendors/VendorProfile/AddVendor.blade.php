@@ -94,8 +94,6 @@
 
 
 
-
-
       <h5>Adminstration info </h5>
       <hr style="color:#5156be">
       <div class="col-md-4">
@@ -122,7 +120,7 @@
           <label for="type" class="mb-2 labeltxt">Vendor Type</label>
           <select name="type" class="form-select" id="type">
             <option value="individual">individual</option>
-            <option value="Business">Business</option>
+            <option value="business">Business</option>
           </select>
           <small class="mb-3 pt-1 helpertxt">Select On Vendor Type</small>
         </div>

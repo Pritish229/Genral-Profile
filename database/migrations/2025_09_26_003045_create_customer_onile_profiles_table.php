@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id');
             $table->unsignedBigInteger('business_id')->nullable();
             $table->string('business_name')->nullable();
-            $table->enum('business_type', ['business', 'individual',])->default('individual');
+            $table->enum('profile_type', ['business', 'individual',])->default('individual');
             $table->string('social_platform', 50)->nullable();
             $table->string('icon', 80)->nullable();
             $table->string('profile_url', 255)->nullable();

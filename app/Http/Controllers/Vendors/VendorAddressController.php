@@ -64,7 +64,6 @@ class VendorAddressController extends Controller
         ], 200);
     }
 
-
     public function permanentAddress($vendor_id)
     {
         $address = VendorAddress::where('vendor_id', $vendor_id)

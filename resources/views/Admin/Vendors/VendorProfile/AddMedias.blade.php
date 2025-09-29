@@ -35,6 +35,7 @@
                 <select class="form-select" id="media_usage" name="media_usage" required>
                     <option value="" disabled selected>-- Select Usage --</option>
                     <option value="profile">Profile</option>
+                    <option value="logo">Logo</option>
                     <option value="banner">Banner</option>
                     <option value="gallery">Gallery</option>
                     <option value="kyc">KYC</option>
@@ -165,7 +166,7 @@ $(document).ready(function() {
             contentType: false,
             success: function(response) {
                 if (response.success) {
-                    updateProgress(50);
+                    updateProgress(90);
                     Swal.fire({
                         icon: 'success',
                         title: 'Document Saved!',
@@ -214,16 +215,16 @@ $(document).ready(function() {
             contentType: false,
             success: function(response) {
                 if (response.success) {
-                    updateProgress(100);
+                    updateProgress(90);
                     Swal.fire({
                         icon: 'success',
-                        title: 'All Steps Completed!',
-                        text: 'vendor document & media uploaded successfully.',
+                        title: 'Save',
+                        text: 'Media uploaded successfully.',
                         timer: 1500,
                         showConfirmButton: false,
                         allowOutsideClick: false
                     }).then(() => {
-                        window.location.href = "{{ route('vendors.create') }}";
+                        window.location.href = `${baseUrl}/${vendor_id}/OnlineProfile`;
                     });
                 }
             },
@@ -253,9 +254,11 @@ $(document).ready(function() {
             showConfirmButton: false,
             allowOutsideClick: false
         }).then(() => {
-            window.location.href = "{{ route('vendors.create') }}";
+            window.location.href = `${baseUrl}/${vendor_id}/OnlineProfile`;
         });
     });
 });
+
+
 </script>
 @endsection

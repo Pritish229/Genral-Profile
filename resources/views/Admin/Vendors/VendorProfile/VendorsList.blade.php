@@ -13,6 +13,7 @@
             <thead>
                 <tr>
                     <th>Avatar</th>
+                    <th>Type</th>
                     <th>Vendor UID</th>
                     <th>Full Name</th>
                     <th>Email</th>
@@ -35,6 +36,7 @@
     ajax: '{{ route("vendors.paginate") }}',
     columns: [
         { data: 'avatar', name: 'avatar', orderable: false, searchable: false },
+        { data: 'type', name: 'type', orderable: true, searchable: false },
         { data: 'vendor_uid', name: 'vendor_uid' },
         { data: 'full_name', name: 'full_name' },
         { data: 'primary_email', name: 'primary_email' },

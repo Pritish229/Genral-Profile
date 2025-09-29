@@ -81,7 +81,7 @@
                         <x-inputbox id="account_number" label="Account Number" type="text" placeholder="Enter Account Number" name="account_number"
                             :required="true" />
                     </div>
-                    
+
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -155,26 +155,28 @@
             $("#upi-fields").removeClass("d-none");
             $("#bank-fields").addClass("d-none");
 
-            $("#upi_vpa, #upi_holder_name").attr("required", true);
-            $("#account_holder, #bank_name, #branch_name, #ifsc_code, #swift_code").removeAttr("required");
+            // enable UPI, disable Bank
+            $("#upi-fields :input").prop("disabled", false);
+            $("#bank-fields :input").prop("disabled", true);
 
         } else if (method === "bank") {
             $("#bank-fields").removeClass("d-none");
             $("#upi-fields").addClass("d-none");
 
-            $("#account_holder, #bank_name, #branch_name, #ifsc_code").attr("required", true);
-            $("#upi_vpa, #upi_holder_name, #swift_code").removeAttr("required");
+            // enable Bank, disable UPI
+            $("#bank-fields :input").prop("disabled", false);
+            $("#upi-fields :input").prop("disabled", true);
 
         } else {
+            // hide & disable both
             $("#upi-fields, #bank-fields").addClass("d-none");
-            $("#upi_vpa, #upi_holder_name, #account_holder, #bank_name, #branch_name, #ifsc_code, #swift_code")
-                .removeAttr("required");
+            $("#upi-fields :input, #bank-fields :input").prop("disabled", true);
         }
     }
 
     $(document).ready(function() {
         fetchDetails();
-        updateProgress(50); // Bank step = 40%
+        updateProgress(50); // Bank step = 50%
 
         // Default show bank
         toggleFields("bank");
@@ -191,7 +193,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${vendor_id}/Document`; // change NextStep to your next route
+                window.location.href = `${baseUrl}/${vendor_id}/Document`;
             });
         });
 

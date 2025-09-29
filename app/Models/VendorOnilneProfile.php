@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class VendorOnileProfile extends Model
+class VendorOnilneProfile extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $table = 'vendor_onile_profiles';
+    protected $table = 'vendor_onilne_profiles';
 
     protected $fillable = [
         'tenant_id',

@@ -30,6 +30,7 @@ use App\Http\Controllers\Employees\EmployeePrimaryController;
 use App\Http\Controllers\Students\StudentDocumentsController;
 use App\Http\Controllers\Customers\CustomerDocumentController;
 use App\Http\Controllers\Employees\EmployeeDocumentsController;
+use App\Http\Controllers\Vendors\VendorOnlineProfileController;
 use App\Http\Controllers\Vendors\VendorBusinessProfileController;
 use App\Http\Controllers\Customers\CustomerBusinessProfileController;
 
@@ -181,7 +182,7 @@ Route::prefix('vendors/')->group(function () {
 
     // Vendor Business Info
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
-    Route::post('{id}/Update/BusinessInfo', [VendorBusinessProfileController::class, 'updateBusinessInfo'])->name('vendors.UpdateBusinessInfo');
+    Route::post('{id}/Add/BusinessInfo', [VendorBusinessProfileController::class, 'addBusinessInfo'])->name('vendors.AddBusinessInfo');
 
 
     // Vendor Address 
@@ -206,6 +207,10 @@ Route::prefix('vendors/')->group(function () {
     // Vendor Media
     Route::get('{id}/Media', [VendorMediaController::class, 'index'])->name('vendors.Document');
     Route::post('{id}/storeMedia', [VendorMediaController::class, 'storeMedia'])->name('vendors.Bank.storeMedia');
+
+    // Vendor Online Profile
+    Route::get('{id}/OnlineProfile', [VendorOnlineProfileController::class, 'index'])->name('vendors.OnlineProfile');
+    Route::post('{id}/storeOnlineProfile', [VendorOnlineProfileController::class, 'store'])->name('vendors.onlineProfiles.store');
 });
 
 Route::prefix('customers/')->group(function () {
@@ -229,7 +234,6 @@ Route::prefix('customers/')->group(function () {
 
     // Customer Document
     Route::get('{id}/Document', [CustomerDocumentController::class, 'index'])->name('customers.Document');
-
 
     // Customer Media
     Route::get('{id}/Media', [CustomerMediaController::class, 'index'])->name('customers.Document');
