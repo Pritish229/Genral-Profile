@@ -34,8 +34,8 @@ class VendorMediaController extends Controller
             $file      = $request->file('file_url');
             $extension = $file->getClientOriginalExtension();
             $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->storeAs('vendor_media', $fileName, 'public');
-            $validated['file_url'] = "vendor_media/{$fileName}";
+            $file->storeAs('VendorMedia', $fileName, 'public');
+            $validated['file_url'] = "VendorMedia/{$fileName}";
         }
 
         $validated['tags'] = $validated['tags'] ?? [];

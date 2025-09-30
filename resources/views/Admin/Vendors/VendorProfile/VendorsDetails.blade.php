@@ -238,7 +238,7 @@
                 if (response.success) {
                     primaryinfo(response.primary_details, response.data);
 
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let imgSrc = `storage/${response.data.avatar_url}`;
                     let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
                     let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
                     let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
@@ -248,7 +248,7 @@
                     <!-- Profile + Info -->
                     <div class="d-flex align-items-start gap-3">
                         <div style="flex: 0 0 160px;">
-                            <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
                         </div>
                         <div class="flex-grow-1">
                                 <div class="flex-grow-1">

@@ -36,8 +36,8 @@ class VendorDocumentController extends Controller
             $file      = $request->file('file_url');
             $extension = $file->getClientOriginalExtension();
             $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->storeAs('vendor_documents', $fileName, 'public');
-            $validated['file_url'] = "vendor_documents/{$fileName}";
+            $file->storeAs('VendorDocuments', $fileName, 'public');
+            $validated['file_url'] = "VendorDocuments/{$fileName}";
         }
 
         $validated['profile_type'] = $vendor->type;

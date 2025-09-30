@@ -35,6 +35,11 @@ use App\Http\Controllers\Vendors\VendorBusinessProfileController;
 use App\Http\Controllers\Customers\CustomerBusinessProfileController;
 
 Route::get('/', [DashboardController::class, 'dashBoardPage'])->name('Admin.Dashboard');
+Route::get('/storage-link',function () {
+     $targetFolder = storage_path('app/public');
+     $linkFolder = $_SERVER['DOCUMENT_ROOT'] .'/storage';
+     symlink($targetFolder,$linkFolder);
+    });
 
 // Students Module 
 

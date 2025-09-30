@@ -93,7 +93,7 @@ class VendorController extends Controller
             $file = $request->file('avatar_url');
             $extension = $file->getClientOriginalExtension();
             $fileName = ($validated['vendor_uid'] ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->storeAs('vendorImages', $fileName, 'public');
+            $file->storeAs('VendorImages', $fileName, 'public');
 
             $profile->update([
                 'avatar_url' => "VendorImages/{$fileName}",
