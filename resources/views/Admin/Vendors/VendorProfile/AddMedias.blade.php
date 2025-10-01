@@ -45,13 +45,13 @@
                 <small class="form-text text-muted">Purpose of the media file.</small>
             </div>
             <div class="col-md-6" id="subject_name_wrapper">
-                <x-inputbox id="subject_name" label="Subject Name" type="text" placeholder="Enter custom purpose" name="subject_name" />
+                <x-inputbox id="subject_name" label="Subject Name" type="text" placeholder="Enter Subject Name" name="subject_name" value="{{old('subject_name')}}" :required="false" helpertxt="" />
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <x-inputbox id="file_name_media" label="File Name" type="text" placeholder="Original file name" name="file_name_media" />
+                <x-inputbox id="file_name_media" label="File Name" type="text" placeholder="Original file name" name="file_name_media" value="{{old('file_name_media')}}" :required="true" helpertxt=""  />
             </div>
             <div class="col-md-6">
                 <label for="file_url_media">Upload File</label>
@@ -62,7 +62,7 @@
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <x-inputbox id="caption" label="Caption" type="text" placeholder="Short description" name="caption" />
+                <x-inputbox id="caption" label="Caption" type="text" placeholder="Short description" name="caption" value="{{old('caption')}}" :required="false" helpertxt=""/>
             </div>
             <div class="col-md-6">
                 <label for="tags">Tags</label>
@@ -97,13 +97,21 @@ $(document).ready(function() {
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    
+                    let imgSrc = `storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
+
                     $("#vendor-details").html(`
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 150px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
+                        </div>
+                        <div class="flex-grow-1">
+                                <div class="flex-grow-1">
                                 <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
@@ -111,7 +119,30 @@ $(document).ready(function() {
                                 <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
-                    `);
+                    </div>
+
+                    <!-- Status badge on top-right -->
+                    <div>
+                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                            ${response.primary_details.status}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Footer with Documents & Media -->
+                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
+                    <a href="${manageBankUrl}" class="text-decoration-none">
+                        <i class="fas fa-university me-1"></i> Bank Details
+                    </a>
+                    <a href="${manageDocUrl}" class="text-decoration-none">
+                        <i class="fas fa-file-alt me-1"></i> Documents
+                    </a>
+                    <a href="${managemediaUrl}" class="text-decoration-none">
+                        <i class="fas fa-photo-video me-1"></i> Medias
+                    </a>
+                </div>
+            `);
+
                 } else {
                     $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }

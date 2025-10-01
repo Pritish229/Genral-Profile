@@ -46,16 +46,19 @@
             </div>
 
             <!-- UPI fields -->
-
             <div id="upi-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox id="upi_id" label="UPI ID" type="text" placeholder="example@upi" name="upi_id"
-                            :required="false" />
+                        <x-inputbox id="upi_id" label="UPI ID" type="text"
+                            placeholder="example@upi" name="upi_id"
+                            :required="false" value="{{ old('upi_id') }}"
+                            helpertxt="Enter your valid UPI ID (e.g., mobile@upi)." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox id="upi_name" label="UPI Holder Name" type="text" placeholder="Full Name" name="upi_name"
-                            :required="false" />
+                        <x-inputbox id="upi_name" label="UPI Holder Name" type="text"
+                            placeholder="Full Name" name="upi_name"
+                            :required="false" value="{{ old('upi_name') }}"
+                            helpertxt="Enter the name as registered with UPI." />
                     </div>
                 </div>
             </div>
@@ -64,33 +67,44 @@
             <div id="bank-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox id="account_holder" label="Account Holder" type="text" placeholder="John Doe" name="account_holder"
-                            :required="false" />
+                        <x-inputbox id="account_holder" label="Account Holder" type="text"
+                            placeholder="John Doe" name="account_holder"
+                            :required="false" value="{{ old('account_holder') }}"
+                            helpertxt="Enter the account holder’s full name as per bank records." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox id="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" name="bank_name"
-                            :required="false" />
+                        <x-inputbox id="bank_name" label="Bank Name" type="text"
+                            placeholder="State Bank of India" name="bank_name"
+                            :required="false" value="{{ old('bank_name') }}"
+                            helpertxt="Mention the official name of the bank." />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox id="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch" name="branch_name"
-                            :required="false" />
+                        <x-inputbox id="branch_name" label="Branch Name" type="text"
+                            placeholder="MG Road Branch" name="branch_name"
+                            :required="false" value="{{ old('branch_name') }}"
+                            helpertxt="Provide the branch name where the account is opened." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox id="account_number" label="Account Number" type="text" placeholder="Enter Account Number" name="account_number"
-                            :required="true" />
+                        <x-inputbox id="account_number" label="Account Number" type="text"
+                            placeholder="Enter Account Number" name="account_number"
+                            :required="true" value="{{ old('account_number') }}"
+                            helpertxt="Double-check your account number before submitting." />
                     </div>
-
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox id="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" name="ifsc_code"
-                            :required="false" />
+                        <x-inputbox id="ifsc_code" label="IFSC Code" type="text"
+                            placeholder="SBIN0001234" name="ifsc_code"
+                            :required="false" value="{{ old('ifsc_code') }}"
+                            helpertxt="Enter the 11-digit IFSC code (for Indian banks)." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox id="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX" name="swift_code"
-                            :required="false" />
+                        <x-inputbox id="swift_code" label="SWIFT Code" type="text"
+                            placeholder="SBININBBXXX" name="swift_code"
+                            :required="false" value="{{ old('swift_code') }}"
+                            helpertxt="Enter SWIFT code (for international transactions)." />
                     </div>
                 </div>
             </div>
@@ -119,13 +133,20 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let imgSrc = `storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
+
                     $("#vendor-details").html(`
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 150px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
+                        </div>
+                        <div class="flex-grow-1">
+                                <div class="flex-grow-1">
                                 <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
@@ -133,7 +154,30 @@
                                 <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
-                    `);
+                    </div>
+
+                    <!-- Status badge on top-right -->
+                    <div>
+                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                            ${response.primary_details.status}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Footer with Documents & Media -->
+                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
+                    <a href="${manageBankUrl}" class="text-decoration-none">
+                        <i class="fas fa-university me-1"></i> Bank Details
+                    </a>
+                    <a href="${manageDocUrl}" class="text-decoration-none">
+                        <i class="fas fa-file-alt me-1"></i> Documents
+                    </a>
+                    <a href="${managemediaUrl}" class="text-decoration-none">
+                        <i class="fas fa-photo-video me-1"></i> Medias
+                    </a>
+                </div>
+            `);
+
                 } else {
                     $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
@@ -154,21 +198,14 @@
         if (method === "upi") {
             $("#upi-fields").removeClass("d-none");
             $("#bank-fields").addClass("d-none");
-
-            // enable UPI, disable Bank
             $("#upi-fields :input").prop("disabled", false);
             $("#bank-fields :input").prop("disabled", true);
-
         } else if (method === "bank") {
             $("#bank-fields").removeClass("d-none");
             $("#upi-fields").addClass("d-none");
-
-            // enable Bank, disable UPI
             $("#bank-fields :input").prop("disabled", false);
             $("#upi-fields :input").prop("disabled", true);
-
         } else {
-            // hide & disable both
             $("#upi-fields, #bank-fields").addClass("d-none");
             $("#upi-fields :input, #bank-fields :input").prop("disabled", true);
         }
@@ -178,7 +215,6 @@
         fetchDetails();
         updateProgress(50); // Bank step = 50%
 
-        // Default show bank
         toggleFields("bank");
 
         $("#method").on("change", function() {

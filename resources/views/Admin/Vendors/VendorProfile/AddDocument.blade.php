@@ -29,45 +29,69 @@
     </div>
 
     <!-- Document Form -->
+    <!-- Document Form -->
     <form id="documentForm" enctype="multipart/form-data">
         <div class="row mb-3">
             <div class="col-md-4">
-                <x-inputbox id="document_type" label="Document Type" type="text" placeholder="e.g., Passport, Aadhar Card" name="document_type" />
+                <x-inputbox id="document_type" label="Document Type" type="text"
+                    placeholder="e.g., Passport, Aadhar Card" name="document_type"
+                    value="{{ old('document_type') }}" :required="true"
+                    helpertxt="Enter the type of document (Passport, Aadhar, etc.)" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="document_number" label="Document Number" type="text" placeholder="Enter Document Number" name="document_number" />
+                <x-inputbox id="document_number" label="Document Number" type="text"
+                    placeholder="Enter Document Number" name="document_number"
+                    value="{{ old('document_number') }}" :required="false"
+                    helpertxt="Provide the unique document number."  />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="issuing_authority" label="Issuing Authority" type="text" placeholder="Enter Issuing Authority" name="issuing_authority" />
+                <x-inputbox id="issuing_authority" label="Issuing Authority" type="text"
+                    placeholder="Enter Issuing Authority" name="issuing_authority"
+                    value="{{ old('issuing_authority') }}" :required="false"
+                    helpertxt="Mention the authority who issued the document." />
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
                 <label for="issue_date">Issue Date</label>
-                <input type="text" id="issue_date" name="issue_date" class="form-control flatpickr" placeholder="Select issue date">
+                <input type="text" id="issue_date" name="issue_date"
+                    class="form-control flatpickr"
+                    value="{{ old('issue_date') }}"
+                    :required="false"
+                    placeholder="Select issue date">
+                <small class="form-text text-muted">Select the date when the document was issued.</small>
             </div>
             <div class="col-md-6">
                 <label for="expiry_date">Expiry Date</label>
-                <input type="text" id="expiry_date" name="expiry_date" class="form-control flatpickr" placeholder="Select expiry date">
+                <input type="text" id="expiry_date" name="expiry_date"
+                    class="form-control flatpickr"
+                    :required="false"
+                    value="{{ old('expiry_date') }}"
+                    placeholder="Select expiry date">
+                <small class="form-text text-muted">Select the document expiry date (if applicable).</small>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <x-inputbox id="file_name" label="File Name" type="text" placeholder="e.g., Passport Scan" name="file_name" />
+                <x-inputbox id="file_name" label="File Name" type="text"
+                    placeholder="e.g., Passport Scan" name="file_name"
+                    value="{{ old('file_name') }}"
+                    :required="true"
+                    helpertxt="Provide a recognizable file name (e.g., Passport Front)." />
             </div>
             <div class="col-md-6">
                 <label for="file_url">Upload File</label>
-                <input type="file" class="form-control" id="file_url" name="file_url">
-                <small class="form-text text-muted">Upload scanned copy or PDF.</small>
+                <input type="file" class="form-control" id="file_url" name="file_url" required="true" accept=".pdf,.jpg,.jpeg,.png">
+                <small class="form-text text-muted">Upload a scanned copy or PDF (max size as per rules).</small>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-12">
-                <x-textareabox id="remarks" label="Remarks" name="remarks"
-                    placeholder="Enter additional remarks about this document" />
+                <x-textareabox id="remarks" label="Remarks" placeholder="Enter Remarks" name="remarks" value="{{ old('remarks') }}" helpertxt="Optional: Add extra remarks or clarification about this document." />
+               
             </div>
         </div>
 
@@ -76,6 +100,7 @@
             <button type="button" class="btn btn-secondary" id="skipBtn">Skip</button>
         </div>
     </form>
+
 </div>
 @endsection
 
@@ -91,13 +116,20 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let imgSrc = `storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
+
                     $("#vendor-details").html(`
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 150px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
+                        </div>
+                        <div class="flex-grow-1">
+                                <div class="flex-grow-1">
                                 <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
@@ -105,7 +137,30 @@
                                 <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
-                    `);
+                    </div>
+
+                    <!-- Status badge on top-right -->
+                    <div>
+                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                            ${response.primary_details.status}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Footer with Documents & Media -->
+                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
+                    <a href="${manageBankUrl}" class="text-decoration-none">
+                        <i class="fas fa-university me-1"></i> Bank Details
+                    </a>
+                    <a href="${manageDocUrl}" class="text-decoration-none">
+                        <i class="fas fa-file-alt me-1"></i> Documents
+                    </a>
+                    <a href="${managemediaUrl}" class="text-decoration-none">
+                        <i class="fas fa-photo-video me-1"></i> Medias
+                    </a>
+                </div>
+            `);
+
                 } else {
                     $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
@@ -157,7 +212,7 @@
                 success: function(response) {
                     Swal.close();
                     if (response.success) {
-                         // Update progress to 90%
+                        // Update progress to 90%
                         Swal.fire({
                             icon: 'success',
                             title: 'Saved!',
@@ -165,7 +220,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            updateProgress(80); 
+                            updateProgress(80);
                             window.location.href = `${baseUrl}/${vendor_id}/Media`;
                         });
                     }

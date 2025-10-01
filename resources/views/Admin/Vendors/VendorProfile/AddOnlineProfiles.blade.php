@@ -76,19 +76,27 @@
         updateProgress(90);
 
         function fetchDetails() {
-            $.ajax({
-                type: "GET",
-                url: `${baseUrl}/${vendor_id}/Details`,
-                dataType: "json",
-                success: function(response) {
-                    if (response.success) {
-                        let imgSrc = `/storage/${response.data.avatar_url}`;
-                        $("#vendor-details").html(`
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 150px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
+        $.ajax({
+            type: "GET",
+            url: `${baseUrl}/${vendor_id}/Details`,
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    
+                    let imgSrc = `storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
+
+                    $("#vendor-details").html(`
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
+                        </div>
+                        <div class="flex-grow-1">
+                                <div class="flex-grow-1">
                                 <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
@@ -96,17 +104,40 @@
                                 <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
-                    `);
-                    } else {
-                        $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
-                    }
-                },
-                error: function(xhr) {
-                    $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
-                    console.error(xhr.responseText);
+                    </div>
+
+                    <!-- Status badge on top-right -->
+                    <div>
+                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                            ${response.primary_details.status}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Footer with Documents & Media -->
+                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
+                    <a href="${manageBankUrl}" class="text-decoration-none">
+                        <i class="fas fa-university me-1"></i> Bank Details
+                    </a>
+                    <a href="${manageDocUrl}" class="text-decoration-none">
+                        <i class="fas fa-file-alt me-1"></i> Documents
+                    </a>
+                    <a href="${managemediaUrl}" class="text-decoration-none">
+                        <i class="fas fa-photo-video me-1"></i> Medias
+                    </a>
+                </div>
+            `);
+
+                } else {
+                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
-            });
-        }
+            },
+            error: function(xhr) {
+                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                console.error(xhr.responseText);
+            }
+        });
+    }
 
         fetchDetails();
 
@@ -166,5 +197,34 @@
             });
         });
     });
+    // Add new row
+$(document).on("click", ".addRow", function() {
+    let newRow = `
+        <tr class="profile-row">
+            <td>
+                <input type="text" name="social_platform[]" class="form-control"
+                       placeholder="Platform (e.g., LinkedIn)" required>
+            </td>
+            <td>
+                <input type="text" name="icon[]" class="form-control"
+                       placeholder="Icon URL or name">
+            </td>
+            <td>
+                <input type="url" name="profile_url[]" class="form-control"
+                       placeholder="https://..." required>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm removeRow">-</button>
+            </td>
+        </tr>
+    `;
+    $("#profilesTable tbody").append(newRow);
+});
+
+// Remove row
+$(document).on("click", ".removeRow", function() {
+    $(this).closest("tr").remove();
+});
+
 </script>
 @endsection

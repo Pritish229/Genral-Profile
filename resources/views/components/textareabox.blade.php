@@ -2,7 +2,7 @@
     <label for="{{ $id }}" class="mb-2 labeltxt">{{ $label }}</label>
     <textarea class="form-control " placeholder="{{ $placeholder }}" id="{{ $id }}" rows="5"
         name="{{ $name }}">{{ $value }}</textarea>
-    <p class="mb-3 pt-1 helpertxt"> {{ $helpertxt }}</p>
+    <small class="mb-3 pt-1 helpertxt"> {{ $helpertxt }}</small>
 </div>
 
 <style>

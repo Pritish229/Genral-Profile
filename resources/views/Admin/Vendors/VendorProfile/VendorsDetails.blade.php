@@ -6,7 +6,7 @@
 <div class="page-content">
     <x-breadcrumb
         title="vendor Detail"
-        :links="['Home' => 'Admin.Dashboard', 'vendors' => 'vendors.vendorlist','vendor Detail' => '']" />
+        :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.vendorlist','Vendor Detail' => '']" />
 
     <div class="mt-2">
         <div class="card">
