@@ -43,7 +43,7 @@ class VendorAddressController extends Controller
         $address = VendorAddress::create(array_merge($validated, [
             'tenant_id' => '1',
             'is_primary' => 1,
-            'profile_type' => $vendor->type,
+            'profile_type' => 'individual',
             'vendor_id' => $vendor->id,
             'state' => $request->state,
             'district' => $request->district,
@@ -64,9 +64,9 @@ class VendorAddressController extends Controller
         ], 200);
     }
 
-    public function permanentAddress($vendor_id)
+    public function permanentAddress($vendor_id , $type)
     {
-        $address = VendorAddress::where('vendor_id', $vendor_id)
+        $address = VendorAddress::where('vendor_id', $vendor_id)->where('profile_type', $type)
             ->where('is_primary', 1)
             ->first();
 

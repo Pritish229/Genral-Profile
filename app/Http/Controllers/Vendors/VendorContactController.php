@@ -58,9 +58,9 @@ class VendorContactController extends Controller
     }
 
 
-    public function permanentContact($vendor_id)
+    public function permanentContact($vendor_id , $type)
     {
-        $contact = VendorContact::where('vendor_id', $vendor_id)->where('is_primary', '1')->first();
+        $contact = VendorContact::where('vendor_id', $vendor_id)->where('is_primary', '1')->where('profile_type',$type)->first();
         if ($contact) {
             return response()->json([
                 'success' => true,

@@ -221,7 +221,7 @@
                         }).then(() => {
                             // ✅ Step 2 milestone = 20%
                             setProgress(20);
-                            window.location.href = `${baseUrl}/${vendor_id}/Contact`;
+                            window.location.href = `${baseUrl}/${vendor_id}/Address`;
                         });
                     } else {
                         Swal.fire("Failed", JSON.stringify(response.errors), "error");

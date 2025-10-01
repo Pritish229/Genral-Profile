@@ -1,435 +1,246 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | vendors | Details')
+@section('title', 'Home | Vendors | Vendor Detail')
+
+@section('style')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+@endsection
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="vendor Detail"
+        title="Vendor Detail"
         :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.vendorlist','Vendor Detail' => '']" />
 
+    <div id="vendor-details" class="p-2 card mb-3">Loading Profile...</div>
+
     <div class="mt-2">
-        <div class="card">
-            <div class="p-3" id="vendor-details">
-                Loading details...
+        <div class="p-3">
+            <!-- Tabs -->
+            <ul class="nav nav-tabs nav-tabs-custom mb-4" id="vendorTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">
+                        Profile
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab">
+                        Business Profile
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab contents -->
+            <div class="tab-content" id="vendorTabContent">
+                <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                    <div class="row align-items-stretch" id="primary-info-cards">
+                        Loading Profile Information...
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="business" role="tabpanel">
+                    <div id="vendor-business-details">Loading Business Profile...</div>
+                </div>
             </div>
         </div>
     </div>
-
-    <section id="primary_info">
-
-        <div class="card">
-            <h5 class="card-title d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                Profile information
-                <a href="{{ url('vendors/' . $id . '/Basicinfo/Manage') }}" class="text-primary" data-toggle="tooltip" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </a>
-            </h5>
-            <hr style="color:#5156be">
-            <div class="row mx-2 mb-0">
-                <div class="col-md-6 mb-3 info-row"><strong>Full Name</strong>
-                    <div id="f_name">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Date of Birth</strong>
-                    <div id="dob">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Gender</strong>
-                    <div id="gender">...</div>
-                </div>
-
-                <div class="col-md-6 mb-3 info-row"><strong>Nationality</strong>
-                    <div id="nationality">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Occupation</strong>
-                    <div id="occupation">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Marital Status</strong>
-                    <div id="marital_status">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Prefrred Language</strong>
-                    <div id="preferred_language">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Prefrred Currency</strong>
-                    <div id="preferred_currency">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Primary Email </strong>
-                    <div id="primary_email">...</div>
-                </div>
-                <div class="col-md-6 mb-3 info-row"><strong>Primary Phone </strong>
-                    <div id="primary_phone">...</div>
-                </div>
-
-
-            </div>
-            <div class="col-lg-6"></div>
-        </div>
-    </section>
-
-    <section id="admin_andother_info">
-        <div class="card-grid">
-            <!-- Card 1 -->
-            <div class="card p-2">
-                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    Business information
-                    <!-- <a href="#" class="text-primary" data-toggle="tooltip" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </a> -->
-                </h6>
-                <hr style="color:#5156be">
-                <div class="mx-2 mb-0">
-                    <div class="mb-3 d-flex"><strong class="me-2">Vendor Name:</strong>
-                        <div id="vendor_f_name">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Leagel Name:</strong>
-                        <div id="leagel_name">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Tread Name:</strong>
-                        <div id="tread_name">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">industry:</strong>
-                        <div id="industry">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Incorporation Date:</strong>
-                        <div id="incorporation_date">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Business Size:</strong>
-                        <div id="business_size">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Website:</strong>
-                        <div id="website">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">GST No:</strong>
-                        <div id="gst_number">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">CIN No:</strong>
-                        <div id="cin_number">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">PAM No:</strong>
-                        <div id="pan_number">...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 2 -->
-            <div class="card p-2">
-
-                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    Address information
-                    <a href="{{ url('/vendors/' . $id . '/Manage/Addresses') }}"
-                        class="text-primary"
-                        data-toggle="tooltip"
-                        title="Manage Addresses">
-                        <i class="fas fa-plus-circle"></i>
-                    </a>
-                </h6>
-
-
-                <hr style="color:#5156be">
-                <div class="mx-2 mb-0">
-                    <div class="mb-3 d-flex"><strong class="me-2">Country:</strong>
-                        <div id="address_country">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">State:</strong>
-                        <div id="state">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">District:</strong>
-                        <div id="district">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">City:</strong>
-                        <div id="city">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Pincode:</strong>
-                        <div id="pincode">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Address 1:</strong>
-                        <div id="addr_1">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Address 2:</strong>
-                        <div id="addr_2">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Land Mark:</strong>
-                        <div id="land_mark">...</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3 -->
-            <div class="card p-2">
-
-                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                    Contact information
-                    <a href="{{ url('/vendors/' . $id . '/Manage/Contacts') }}"
-                        class="text-primary"
-                        data-toggle="tooltip"
-                        title="Manage Contact">
-                        <i class="fas fa-plus-circle"></i>
-                    </a>
-                </h6>
-                <hr style="color:#5156be">
-                <div class="mx-2 mb-0">
-                    <div class="mb-3 d-flex"><strong class="me-2">Contact Type:</strong>
-                        <div id="contact_type">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Value:</strong>
-                        <div id="contact_value">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Country Code:</strong>
-                        <div id="country_code">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Label:</strong>
-                        <div id="label">...</div>
-                    </div>
-                    <div class="mb-3 d-flex"><strong class="me-2">Emergency:</strong>
-                        <div id="is_emergency">...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
 </div>
 @endsection
 
-
 @section('script')
 <script>
-    let baseUrl = "{{ url('/vendors') }}";
-    let vendor_id = "{{ $id }}";
+let baseUrl = "{{ url('/vendors') }}";
+let vendor_id = "{{ $id }}";
+let vendorType = "individual";
 
-    function primaryinfo(data, info) {
-        console.log(info);
+function safe(val) {
+    return val ? val : 'Not Provided';
+}
 
-        // Fallback helper
-        const safe = (val) => val ? val : 'Not Provided';
+function primaryinfo(data, info) {
+    let profileCard = `
+        <div class="col-md-6 mb-3 d-flex">
+            <div class="card p-3 flex-fill">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5><i class="fas fa-user"></i> Personal Details</h5>
+                    <a href="#" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                </div>
+                <p><i class="fas fa-id-card"></i> <strong>Full Name:</strong> ${safe(info.full_name)}</p>
+                <p><i class="fas fa-birthday-cake"></i> <strong>Date of Birth:</strong> ${safe(info.dob)}</p>
+                <p><i class="fas fa-venus-mars"></i> <strong>Gender:</strong> ${safe(info.gender)}</p>
+                <p><i class="fas fa-flag"></i> <strong>Nationality:</strong> ${safe(info.nationality)}</p>
+                <p><i class="fas fa-briefcase"></i> <strong>Occupation:</strong> ${safe(info.occupation)}</p>
+                <p><i class="fas fa-heart"></i> <strong>Marital Status:</strong> ${safe(info.marital_status)}</p>
+                <p><i class="fas fa-language"></i> <strong>Preferred Language:</strong> ${safe(info.preferred_language)}</p>
+                <p><i class="fas fa-coins"></i> <strong>Preferred Currency:</strong> ${safe(info.preferred_currency)}</p>
+            </div>
+        </div>
+    `;
 
-        $('#f_name').text(': ' + safe(info.full_name));
-        $('#dob').text(': ' + safe(info.dob));
-        $('#gender').text(': ' + safe(info.gender));
-        $('#nationality').text(': ' + safe(info.nationality));
-        $('#marital_status').text(': ' + safe(info.marital_status));
-        $('#occupation').text(': ' + safe(info.occupation));
-        $('#primary_email').text(': ' + safe(data.primary_email));
-        $('#primary_phone').text(': ' + safe(data.primary_phone));
-        $('#roll_no').text(': ' + safe(info.roll_no));
-        $('#guardian_relation').text(': ' + safe(info.guardian_relation));
-        $('#preferred_language').text(': ' + safe(info.preferred_language));
-        $('#guardian_occupation').text(': ' + safe(info.guardian_occupation));
-        $('#preferred_currency').text(': ' + safe(info.preferred_currency));
-        $('#nationality').text(': ' + safe(info.nationality));
-        $('#extracurriculars').text(': ' + safe(info.extracurriculars));
-        $('#vendor_uid').text(': ' + safe(data.vendor_uid));
-        $('#admission_date').text(': ' + safe(data.admission_date));
-        $('#admission_no').text(': ' + safe(data.admission_no));
-        $('#univ_admission_no').text(': ' + safe(data.univ_admission_no));
-        $('#admin_status').text(': ' + safe(data.status));
-        $('#note').text(': ' + safe(data.note));
-        $('#vendor_f_name').text(': ' + safe(info.full_name));
-        $('#mother_tongue').text(': ' + safe(info.mother_tongue));
+    let contactCard = `
+        <div class="col-md-6 mb-3 d-flex">
+            <div class="card p-3 flex-fill" id="contact-info">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5><i class="fas fa-address-book"></i> Contact Info</h5>
+                    <a href="#" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                </div>
+                <p>Loading Contact Information...</p>
+            </div>
+        </div>
+    `;
 
-    }
-    // Fetch vendor basic info
-    function fetchDetails() {
-        $.ajax({
-            type: "GET",
-            url: `${baseUrl}/${vendor_id}/Details`,
-            dataType: "json",
-            success: function(response) {
-                if (response.success) {
-                    primaryinfo(response.primary_details, response.data);
+    let addressCard = `
+        <div class="col-md-6 mb-3 d-flex">
+            <div class="card p-3 flex-fill" id="address-info">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5><i class="fas fa-map-marker-alt"></i> Permanent Address</h5>
+                    <a href="#" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                </div>
+                <p>Loading Address Information...</p>
+            </div>
+        </div>
+    `;
 
-                    let imgSrc = `storage/${response.data.avatar_url}`;
-                    let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
-                    let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
-                    let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
+    $("#primary-info-cards").html(profileCard + contactCard + addressCard);
 
-                    $("#vendor-details").html(`
-                <div class="d-flex align-items-start justify-content-between">
-                    <!-- Profile + Info -->
-                    <div class="d-flex align-items-start gap-3">
-                        <div style="flex: 0 0 160px;">
-                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
-                        </div>
-                        <div class="flex-grow-1">
-                                <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
-                                <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
-                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
+    permanentContact(vendorType);
+    permanentAddress(vendorType);
+}
+
+function permanentContact(type) {
+    $.ajax({
+        type: "GET",
+        url: `${baseUrl}/${vendor_id}/${type}/Contact/Permanent`,
+        dataType: "json",
+        success: function(response) {
+            if (response.success && response.data) {
+                let contactHtml = `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5><i class="fas fa-address-book"></i> Contact Info</h5>
+                        <a href="#" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                    </div>
+                    <p><i class="fas fa-phone-square"></i> <strong>Contact Type:</strong> ${safe(response.data.contact_type)}</p>
+                    <p><i class="fas fa-phone"></i> <strong>Value:</strong> ${safe(response.data.contact_value)}</p>
+                    <p><i class="fas fa-globe"></i> <strong>Country Code:</strong> ${safe(response.data.country_code)}</p>
+                    <p><i class="fas fa-tag"></i> <strong>Label:</strong> ${safe(response.data.contact_label)}</p>
+                    <p><i class="fas fa-exclamation-circle"></i> <strong>Emergency:</strong> ${safe(response.data.emergency)}</p>
+                `;
+                $("#contact-info").html(contactHtml);
+            } else {
+                $("#contact-info").html("<p class='text-danger'>No contact information found.</p>");
+            }
+        },
+        error: function(xhr) {
+            $("#contact-info").html("<p class='text-danger'>Error loading contact information.</p>");
+        }
+    });
+}
+
+function permanentAddress(type) {
+    $.ajax({
+        type: "GET",
+        url: `${baseUrl}/${vendor_id}/${type}/Address/Permanent`,
+        dataType: "json",
+        success: function(response) {
+            console.log(response);
+            
+            if (response.success && response.data) {
+                let address = response.data;
+                let addressHtml = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5><i class="fas fa-address-book"></i> Address Info</h5>
+                        <a href="#" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                    </div>
+                    <p><strong>Address Line 1:</strong> ${safe(address.line1)}</p>
+                    <p><strong>Address Line 2:</strong> ${safe(address.line2)}</p>
+                    <p><strong>City:</strong> ${safe(address.city)}</p>
+                    <p><strong>State:</strong> ${safe(address.state)}</p>
+                    <p><strong>Pincode:</strong> ${safe(address.pincode)}</p>
+                    <p><strong>Country:</strong> ${safe(address.country)}</p>
+                `;
+                $("#address-info").html(addressHtml);
+            } else {
+                $("#address-info").html("<p class='text-danger'>No address information found.</p>");
+            }
+        },
+        error: function(xhr) {
+            $("#address-info").html("<p class='text-danger'>Error loading address information.</p>");
+        }
+    });
+}
+
+function fetchDetails() {
+    $.ajax({
+        type: "GET",
+        url: `${baseUrl}/${vendor_id}/Details`,
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                let imgSrc = response.data.avatar_url ? `{{ asset('storage') }}/${response.data.avatar_url}` : "{{ asset('images/default.png') }}";
+                $("#vendor-details").html(`
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="flex: 0 0 160px;">
+                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
+                            </div>
+                            <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${safe(response.primary_details.vendor_uid)}</p>
+                                <p><strong>Name:</strong> ${safe(response.data.full_name)}</p>
+                                <p><strong>Gender:</strong> ${safe(response.data.gender)}</p>
+                                <p><strong>Occupation:</strong> ${safe(response.data.occupation)}</p>
+                                <p><strong>Email:</strong> ${safe(response.primary_details.primary_email)}</p>
                             </div>
                         </div>
+                        <div>
+                            <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
+                                ${safe(response.primary_details.status)}
+                            </span>
+                        </div>
                     </div>
+                `);
 
-                    <!-- Status badge on top-right -->
-                    <div>
-                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
-                            ${response.primary_details.status}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Footer with Documents & Media -->
-                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
-                    <a href="${manageBankUrl}" class="text-decoration-none">
-                        <i class="fas fa-university me-1"></i> Bank Details
-                    </a>
-                    <a href="${manageDocUrl}" class="text-decoration-none">
-                        <i class="fas fa-file-alt me-1"></i> Documents
-                    </a>
-                    <a href="${managemediaUrl}" class="text-decoration-none">
-                        <i class="fas fa-photo-video me-1"></i> Medias
-                    </a>
-                </div>
-            `);
-
-                } else {
-                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
-                }
-            },
-            error: function(xhr) {
-                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
-                console.error(xhr.responseText);
+                primaryinfo(response.primary_details, response.data);
+            } else {
+                $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
             }
-        });
-    }
-
-
-    function permanentAddress() {
-        $.ajax({
-            type: "GET",
-            url: `${baseUrl}/${vendor_id}/Address/Permanent`,
-            dataType: "json",
-            success: function(response) {
-                console.log(response);
-                $('#address_country').text(response.data.country)
-                $('#state').text(response.data.state)
-                $('#district').text(response.data.district)
-                $('#city').text(response.data.city)
-                $('#pincode').text(response.data.pincode)
-                $('#addr_1').text(response.data.line1)
-                $('#addr_2').text(response.data.line2)
-                $('#land_mark').text(response.data.landmark)
-            }
-        });
-    }
-
-    function permanentContact() {
-        $.ajax({
-            type: "GET",
-            url: `${baseUrl}/${vendor_id}/Contact/Permanent`,
-            dataType: "json",
-            success: function(response) {
-                console.log(response);
-                $('#contact_type').text(response.data.contact_type)
-                $('#contact_value').text(response.data.value)
-                $('#country_code').text(response.data.country_code)
-                $('#label').text(response.data.label)
-                $('#is_emergency').text(response.data.is_emergency == '1' ? 'Yes' : 'No')
-                $('#addr_1').text(response.data.line1)
-                $('#addr_2').text(response.data.line2)
-                $('#land_mark').text(response.data.landmark)
-            }
-        });
-    }
-
-    function vendorbanklist() {
-        $.ajax({
-            url: `${baseUrl}/${vendor_id}/bank-list`,
-            type: 'GET',
-            success: function(res) {
-                if (res.success) {
-                    let rows = '';
-                    $.each(res.data, function(index, account) {
-                        rows += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${account.method}</td>
-                            <td>${account.account_holder || '-'}</td>
-                            <td>${account.bank_name || '-'}</td>
-                            <td>${account.branch_name || '-'}</td>
-                            <td>${account.ifsc_code || '-'}</td>
-                            <td>${account.swift_code || '-'}</td>
-                            <td>${account.upi_id || '-'}</td>
-                            <td>
-                                <a href="${baseUrl}/${vendor_id}/manageBank/${account.id}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger" onclick="deleteBank(${vendor_id}, ${account.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    });
-                    $('#bank-list').html(rows);
-                }
-            }
-        });
-    }
-
-    // Delete account
-    function deleteBank(vendor_id, account_id) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `${baseUrl}/${vendor_id}/deleteBank/${account_id}`,
-                    type: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire('Deleted!', res.message, 'success');
-                            vendorbanklist(); // Refresh table
-                        } else {
-                            Swal.fire('Error!', res.message, 'error');
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    // Initial loa
-
-    $(document).ready(function() {
-        fetchDetails()
-        permanentAddress()
-        permanentContact()
-        vendorbanklist();
+        },
+        error: function(xhr) {
+            $("#vendor-details").html("<p class='text-danger'>Something went wrong.</p>");
+        }
     });
+}
+
+function fetchBusinessDetails() {
+    $.ajax({
+        type: "GET",
+        url: `${baseUrl}/${vendor_id}/Business`,
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                $("#vendor-business-details").html(`<pre>${JSON.stringify(response.data, null, 2)}</pre>`);
+            } else {
+                $("#vendor-business-details").html("<p class='text-danger'>No business profile found.</p>");
+            }
+        },
+        error: function(xhr) {
+            $("#vendor-business-details").html("<p class='text-danger'>Error loading business profile.</p>");
+        }
+    });
+}
+
+$(document).ready(function() {
+    fetchDetails();
+
+    $('#vendorTab button').on('shown.bs.tab', function(e) {
+        const target = $(e.target).attr("data-bs-target");
+        if (target === "#profile") {
+            vendorType = "individual";
+        } else if (target === "#business") {
+            vendorType = "business";
+            fetchBusinessDetails();
+        }
+        permanentContact(vendorType);
+    });
+});
 </script>
-@endsection
-
-@section('style')
-
-<style>
-    .card-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 1rem;
-        /* space between cards */
-    }
-
-    .info-row {
-        display: flex;
-        align-items: center;
-        gap: 10rem;
-        /* space between label and value */
-    }
-
-    .info-row strong {
-        min-width: 160px;
-        /* fix width so all values start at same line */
-        font-weight: 600;
-    }
-</style>
-
 @endsection

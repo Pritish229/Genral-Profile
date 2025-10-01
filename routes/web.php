@@ -193,12 +193,12 @@ Route::prefix('vendors/')->group(function () {
     // Vendor Address 
     Route::get('{id}/Address', [VendorAddressController::class, 'index'])->name('vendors.Address');
     Route::post('{vendor_id}/Manage/Addresses', [VendorAddressController::class, 'storeAddress'])->name('vendors.addresses.store');
-    Route::get('{vendor_id}/Address/Permanent', [VendorAddressController::class, 'permanentAddress'])->name('vendors.Address.Permanent');
+    Route::get('{vendor_id}/{type}/Address/Permanent', [VendorAddressController::class, 'permanentAddress'])->name('vendors.Address.Permanent');
 
     // Vendor Contact 
     Route::get('{id}/Contact', [VendorContactController::class, 'index'])->name('vendors.Contact');
     Route::post('{id}/storeContact', [VendorContactController::class, 'storeContact'])->name('vendors.address.StoreContact');
-    Route::get('{id}/Contact/Permanent', [VendorContactController::class, 'permanentContact'])->name('vendors.Contact.Permanent');
+    Route::get('{id}/{type}/Contact/Permanent', [VendorContactController::class, 'permanentContact'])->name('vendors.Contact.Permanent');
     
     // Vendor Bank
     Route::get('{id}/Bank', [VendorBankController::class, 'index'])->name('vendors.Bank');
