@@ -8,10 +8,18 @@
         title="Manage Documents"
         :links="[
             'Home' => 'Admin.Dashboard',
-            'Students' => 'students.Studentlist',
-            'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+            'Vendors' => 'vendors.List',
+            'Vendor Detail' => ['vendors.viewDetails', $id],
             'Manage Documents' => ''
         ]" />
+
+    <!-- Page Header -->
+    <div class="mt-3">
+        <h4 class="mb-3">
+            <i class="fas fa-file-alt"></i>
+            <span id="documentTypeTitle">{{ $type === 'individual' ? 'Personal' : 'Business' }} Documents</span>
+        </h4>
+    </div>
 
     <!-- Cards container -->
     <div class="row p-3 " id="documentList"></div>
@@ -29,6 +37,7 @@
                 <div class="modal-body">
 
                     <input type="hidden" name="id" id="doc_id">
+                    <input type="hidden" name="profile_type" id="profile_type">
 
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -94,11 +103,14 @@
         allowInput: true
     });
 
-    let studentId = "{{ $id }}";
+    let vendorId = "{{ $id }}";
+    let vendorType = "{{ $type }}"; // Get type from backend
 
     // Fetch and render documents
     function loadDocuments() {
-        $.get("{{ url('/students') }}/" + studentId + "/documents", function(res) {
+        let url = "{{ url('/vendors') }}/" + vendorId + "/" + vendorType + "/documents";
+
+        $.get(url, function(res) {
             let html = '';
 
             if (res.data.length === 0) {
@@ -107,7 +119,7 @@
                 <div class="col-12 text-center py-5">
                     <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
                     <h5 class="text-muted">No documents are here</h5>
-                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#documentModal">
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#documentModal" onclick="openAddModal()">
                         <i class="fas fa-plus"></i> Create New
                     </button>
                 </div>`;
@@ -115,7 +127,7 @@
                 // Show "Add Document" button on top
                 html = `
                 <div class="col-12 d-flex justify-content-end mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" id="addDocumentBtn">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" id="addDocumentBtn" onclick="openAddModal()">
                         <i class="fas fa-plus"></i> Add Document
                     </button>
                 </div>`;
@@ -126,7 +138,7 @@
 
                     if (doc.file_url) {
                         let ext = doc.file_url.split('.').pop().toLowerCase();
-                        if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
                             preview = `<img src="${fileUrl}" class="img-fluid rounded mb-2" style="max-height:120px;object-fit:cover;">`;
                         } else if (ext === 'pdf') {
                             preview = `<i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>`;
@@ -168,6 +180,13 @@
         });
     }
 
+    // Open add modal with current profile type
+    function openAddModal() {
+        $("#profile_type").val(vendorType);
+        let docTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+        $("#documentModalLabel").text("Add " + docTypeLabel + " Document");
+        $("#doc_id").val("");
+    }
 
     // Add/Edit document
     $("#documentForm").on("submit", function(e) {
@@ -177,11 +196,11 @@
         let url, method;
 
         if (docId) {
-            url = "{{ url('/students') }}/" + studentId + "/documents/" + docId;
+            url = "{{ url('/vendors') }}/" + vendorId + "/" + vendorType + "/documents/" + docId;
             method = "POST";
             formData.append("_method", "PUT");
         } else {
-            url = "{{ url('/students') }}/" + studentId + "/storeDocument";
+            url = "{{ url('/vendors') }}/" + vendorId + "/storeDocument";
             method = "POST";
         }
 
@@ -196,7 +215,9 @@
                 loadDocuments();
                 $("#documentForm")[0].reset();
                 $("#doc_id").val("");
-                $("#documentModalLabel").text("Add Document");
+                $("#profile_type").val("");
+                let docTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+                $("#documentModalLabel").text("Add " + docTypeLabel + " Document");
 
                 Swal.fire({
                     icon: "success",
@@ -219,7 +240,7 @@
     // Edit document
     $(document).on("click", ".editDoc", function() {
         let id = $(this).data("id");
-        $.get("{{ url('/students') }}/" + studentId + "/documents/" + id, function(res) {
+        $.get("{{ url('/vendors') }}/" + vendorId + "/" + vendorType + "/documents/" + id, function(res) {
             let d = res.data;
 
             $("#doc_id").val(d.id);
@@ -240,8 +261,10 @@
 
             $("#file_name").val(d.file_name);
             $("#remarks").val(d.remarks);
+            $("#profile_type").val(d.profile_type);
 
-            $("#documentModalLabel").text("Edit Document");
+            let docTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+            $("#documentModalLabel").text("Edit " + docTypeLabel + " Document");
             $("#documentModal").modal("show");
         });
     });
@@ -261,7 +284,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: "{{ url('/students') }}/" + studentId + "/documents/" + id,
+                    url: "{{ url('/vendors') }}/" + vendorId + "/" + vendorType + "/documents/" + id,
                     type: "DELETE",
                     success: function() {
                         loadDocuments();

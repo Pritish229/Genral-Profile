@@ -8,10 +8,18 @@
         title="Manage Medias"
         :links="[
             'Home' => 'Admin.Dashboard',
-            'Students' => 'students.StudentList',
-            'Student Detail' => ['students.StudentList.studentDetailsPage', $id],
+            'Vendors' => 'vendors.List',
+            'Vendor Detail' => ['vendors.viewDetails', $id],
             'Manage Media' => ''
         ]" />
+
+    <!-- Page Header -->
+    <div class="mt-3">
+        <h4 class="mb-3">
+            <i class="fas fa-photo-video"></i>
+            <span id="mediaTypeTitle">{{ $type === 'individual' ? 'Personal' : 'Business' }} Media</span>
+        </h4>
+    </div>
 
     <!-- Media List -->
     <div class="row" id="mediaList"></div>
@@ -28,12 +36,14 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="id" id="media_id">
+                    <input type="hidden" name="profile_type" id="profile_type">
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="media_usage">Media Usage</label>
                             <select class="form-select" id="media_usage" name="media_usage" required>
                                 <option value="" disabled selected>-- Select Usage --</option>
+                                <option value="logo">Logo</option>
                                 <option value="profile">Profile</option>
                                 <option value="banner">Banner</option>
                                 <option value="gallery">Gallery</option>
@@ -81,7 +91,8 @@
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let studentId = "{{ $id }}";
+    let vendorId = "{{ $id }}";
+    let vendorType = "{{ $type }}"; // Get type from backend
 
     $(document).ready(function() {
         // Initialize Select2
@@ -98,19 +109,21 @@
         $('#mediaModal').on('hidden.bs.modal', function() {
             $("#mediaForm")[0].reset();
             $("#media_id").val("");
+            $("#profile_type").val("");
             $("#tags").val(null).trigger('change');
-            $("#mediaModalLabel").text("Add Media");
+            let mediaTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+            $("#mediaModalLabel").text("Add " + mediaTypeLabel + " Media");
         });
     });
 
     // Load all media files
     function loadMedias() {
-        $.get("{{ url('/students') }}/" + studentId + "/medias/list", function(res) {
+        $.get("{{ url('/vendors') }}/" + vendorId + "/" + vendorType + "/medias", function(res) {
             let html = '';
 
             // Always show Add Media button
             html += `<div class="col-12 d-flex justify-content-end mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mediaModal" id="addMediaBtn">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mediaModal" id="addMediaBtn" onclick="openAddModal()">
                         <i class="fas fa-plus"></i> Add Media
                     </button>
                  </div>`;
@@ -151,6 +164,14 @@
         });
     }
 
+    // Open add modal with current profile type
+    function openAddModal() {
+        $("#profile_type").val(vendorType);
+        let mediaTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+        $("#mediaModalLabel").text("Add " + mediaTypeLabel + " Media");
+        $("#media_id").val("");
+    }
+
     // Add / Update Media
     $("#mediaForm").on("submit", function(e) {
         e.preventDefault();
@@ -159,11 +180,11 @@
         let url, method;
 
         if (mediaId) {
-            url = `{{ url('/students') }}/${studentId}/${mediaId}/update`;
+            url = `{{ url('/vendors') }}/${vendorId}/${vendorType}/medias/${mediaId}`;
             method = "POST";
             formData.append("_method", "PUT");
         } else {
-            url = `{{ url('/students') }}/${studentId}/storeMedia`;
+            url = `{{ url('/vendors') }}/${vendorId}/storeMedia`;
             method = "POST";
         }
 
@@ -187,7 +208,7 @@
     // Edit media
     $(document).on("click", ".editMedia", function() {
         let mediaId = $(this).data("id");
-        $.get(`/students/${studentId}/${mediaId}/medias/details`, function(res) {
+        $.get(`{{ url('/vendors') }}/${vendorId}/${vendorType}/medias/${mediaId}`, function(res) {
             console.log(res);
 
             let m = res.data;
@@ -197,7 +218,9 @@
             $("#file_name_media").val(m.file_name);
             $("#caption").val(m.caption);
             $("#tags").val(m.tags || []).trigger("change");
-            $("#mediaModalLabel").text("Edit Media");
+            $("#profile_type").val(m.profile_type);
+            let mediaTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+            $("#mediaModalLabel").text("Edit " + mediaTypeLabel + " Media");
             $("#mediaModal").modal("show");
         });
     });
@@ -216,7 +239,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `{{ url('/students') }}/${studentId}/${mediaId}/delete`,
+                    url: `{{ url('/vendors') }}/${vendorId}/${vendorType}/medias/${mediaId}`,
                     type: "DELETE",
                     success: function() {
                         loadMedias();

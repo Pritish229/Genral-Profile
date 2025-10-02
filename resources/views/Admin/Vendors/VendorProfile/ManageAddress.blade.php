@@ -5,15 +5,28 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Addresses"
+        title="Manage Address"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Students' => 'students.Studentlist',
-        'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
-        'Manage Addresses' => ''
+        'Vendors' => 'vendors.List',
+        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Manage Address' => ''
     ]" />
+
+    <!-- Profile Type Selection -->
+    <div class="mb-3">
+        <h5>Profile Type</h5>
+        <div class="btn-group" role="group" aria-label="Profile Type">
+            <input type="radio" class="btn-check" name="profile_type" id="individual" value="individual" checked>
+            <label class="btn btn-outline-primary" for="individual">Individual</label>
+
+            <input type="radio" class="btn-check" name="profile_type" id="business" value="business">
+            <label class="btn btn-outline-primary" for="business">Business</label>
+        </div>
+    </div>
+
     <!-- Address Form -->
-    <form id="studentAddressForm">
+    <form id="vendorAddressForm">
         @csrf
         <div class="row">
             <div class="col-md-3">
@@ -46,7 +59,28 @@
             </div>
             <div class="col-md-4">
                 <x-inputbox id="label" label="Label" type="text" placeholder="Enter Label" name="label"
-                    value="{{ old('label') }}" :required="false" helpertxt="Ex: Parents Address" />
+                    value="{{ old('label') }}" :required="false" helpertxt="Ex: Home Address, Office Address" />
+            </div>
+            <div class="col-md-4">
+                <div class="mb-2">
+                    <label for="address_type" class="mb-2 labeltxt">Address Type</label>
+                    <select name="address_type" class="form-select" id="address_type">
+                        <option value="permanent">Permanent</option>
+                        <option value="temporary">Temporary</option>
+                        <option value="office">Office</option>
+                        <option value="billing">Billing</option>
+                        <option value="shipping">Shipping</option>
+                    </select>
+                    <small class="mb-3 pt-1 helpertxt">Select Address Type</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="is_primary" name="is_primary" value="1">
+                    <label class="form-check-label" for="is_primary">
+                        Set as Primary Address
+                    </label>
+                </div>
             </div>
             <div class="col-md-4">
                 <x-inputbox id="longitude" label="Longitude (Optional)" type="text" placeholder="Enter Longitude" name="longitude"
@@ -73,6 +107,7 @@
                     <th>City</th>
                     <th>Pincode</th>
                     <th>Label</th>
+                    <th>Type</th>
                     <th>Primary</th>
                     <th>Action</th>
                 </tr>
@@ -87,13 +122,14 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('vendors') }}";
+    let vendor_id = "{{ $id }}";
     let edit_id = null; // track address being edited
+    let currentProfileType = 'individual'; // track current profile type
 
     // Fetch & render addresses
     function loadAddresses() {
-        $.get(`${baseUrl}/${student_id}/Get/Addresses`, function(res) {
+        $.get(`${baseUrl}/${vendor_id}/${currentProfileType}/Get/Addresses`, function(res) {
             if (res.success) {
                 let rows = "";
                 let index = 1;
@@ -106,6 +142,7 @@
                             <td>${address.city}</td>
                             <td>${address.pincode}</td>
                             <td>${address.label ?? '-'}</td>
+                            <td>${address.address_type ?? '-'}</td>
                             <td>${address.is_primary ? 'Yes' : 'No'}</td>
                             <td>
                                 <button class="btn btn-sm btn-warning editBtn">Edit</button>
@@ -119,12 +156,12 @@
     }
 
     // Create or Update address
-    $("#studentAddressForm").on("submit", function(e) {
+    $("#vendorAddressForm").on("submit", function(e) {
         e.preventDefault();
-        let formData = $(this).serialize();
+        let formData = $(this).serialize() + `&profile_type=${currentProfileType}`;
         let url = edit_id ?
-            `${baseUrl}/${student_id}/addresses/${edit_id}` :
-            `${baseUrl}/${student_id}/Manage/Addresses`;
+            `${baseUrl}/${vendor_id}/${currentProfileType}/addresses/${edit_id}` :
+            `${baseUrl}/${vendor_id}/${currentProfileType}/Manage/Addresses`;
         let method = edit_id ? "PUT" : "POST";
 
         $.ajax({
@@ -133,12 +170,24 @@
             data: formData + `&_token={{ csrf_token() }}`,
             success: function(res) {
                 if (res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: res.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                     loadAddresses();
-                    $("#studentAddressForm")[0].reset();
+                    $("#vendorAddressForm")[0].reset();
                     edit_id = null;
                     $("#save-btn").text("Save");
+                    $("#is_primary").prop('checked', false);
                 } else {
-                    alert("Error saving address");
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: res.message || 'Error saving address'
+                    });
                 }
             },
             error: function(err) {
@@ -153,11 +202,24 @@
         let tr = $(this).closest("tr");
         edit_id = tr.data("id");
 
-        $("#state").val(tr.find("td:eq(1)").text());
-        $("#district").val(tr.find("td:eq(2)").text());
-        $("#city").val(tr.find("td:eq(3)").text());
-        $("#pincode").val(tr.find("td:eq(4)").text());
-        $("#label").val(tr.find("td:eq(5)").text() === '-' ? '' : tr.find("td:eq(5)").text());
+        // Fetch full address details for editing
+        $.get(`${baseUrl}/${vendor_id}/${currentProfileType}/addresses/${edit_id}`, function(res) {
+            if (res.success) {
+                const address = res.data;
+                $("#state").val(address.state);
+                $("#district").val(address.district);
+                $("#city").val(address.city);
+                $("#pincode").val(address.pincode);
+                $("#line1").val(address.line1);
+                $("#line2").val(address.line2);
+                $("#landmark").val(address.landmark);
+                $("#label").val(address.label);
+                $("#address_type").val(address.address_type);
+                $("#longitude").val(address.longitude);
+                $("#latitude").val(address.latitude);
+                $("#is_primary").prop('checked', address.is_primary);
+            }
+        });
 
         $("#save-btn").text("Update");
     });
@@ -176,7 +238,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `${baseUrl}/${student_id}/addresses/${address_id}`,
+                    url: `${baseUrl}/${vendor_id}/${currentProfileType}/addresses/${address_id}`,
                     type: "DELETE",
                     data: {
                         _token: "{{ csrf_token() }}"
@@ -197,8 +259,25 @@
         });
     });
 
+    // Profile type change handler
+    $('input[name="profile_type"]').on('change', function() {
+        currentProfileType = $(this).val();
+        loadAddresses();
+        // Reset form when switching profile types
+        $("#vendorAddressForm")[0].reset();
+        edit_id = null;
+        $("#save-btn").text("Save");
+        $("#is_primary").prop('checked', false);
+    });
+
     $(document).ready(function() {
         loadAddresses();
+
+        // Initialize Select2 for address type
+        $('#address_type').select2({
+            minimumResultsForSearch: Infinity,
+            width: '100%'
+        });
     });
 </script>
 @endsection

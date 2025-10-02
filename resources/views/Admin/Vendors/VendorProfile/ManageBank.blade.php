@@ -1,13 +1,22 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Bank Details')
+@section('title', 'Home | Vendors | Bank Details')
 
 @section('content')
 <div class="page-content">
+    <x-breadcrumb
+        title="Vendor Detail"
+        :links="[
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Manage Bank' => ''
+    ]" />
+
     <section id="bank_details">
         <div class="card">
             <div class="d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                <h6>Bank / UPI Details</h6>
+                <h6>Bank / UPI List</h6>
                 <div>
                     <a href="javascript:void(0)" class="text-primary me-3" id="addBankBtn" title="Add Bank/UPI">
                         <i class="fas fa-plus-circle"></i>
@@ -18,10 +27,11 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>slNo</th>
+                        <th>Sl No</th>
                         <th>Method</th>
                         <th>Account Holder</th>
                         <th>Bank Name</th>
+                        <th>Account Number</th>
                         <th>Branch</th>
                         <th>IFSC Code</th>
                         <th>SWIFT Code</th>
@@ -31,7 +41,7 @@
                 </thead>
                 <tbody id="bank-list">
                     <tr>
-                        <td colspan="9" class="text-center">Loading...</td>
+                        <td colspan="10" class="text-center">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -39,128 +49,158 @@
     </section>
 </div>
 
-<!-- Modal for Add/Edit Bank/UPI -->
+<!-- Modal -->
 <div class="modal fade" id="bankModal" tabindex="-1" aria-labelledby="bankModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <form id="bankDetailsForm">
-        @csrf
-        <input type="hidden" name="account_id" id="account_id" value="">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="bankDetailsForm">
+                @csrf
+                <input type="hidden" name="account_id" id="account_id" value="">
 
-        <div class="modal-header">
-          <h5 class="modal-title" id="bankModalLabel">Bank / UPI Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bankModalLabel">Bank / UPI Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="method">Method</label>
+                        <select id="method" name="method" class="form-select" required>
+                            <option value="">-- Select Method --</option>
+                            <option value="bank">Bank</option>
+                            <option value="upi">UPI</option>
+                        </select>
+                    </div>
+
+                    <!-- Bank Fields -->
+                    <div id="bank-fields" class="d-none">
+                        <x-inputbox id="bank_account_holder" name="account_holder" label="Account Holder" type="text" placeholder="John Doe" required="true" />
+                        <x-inputbox id="bank_name" name="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" required="true" />
+                        <x-inputbox id="account_number" name="account_number" label="Account Number" type="text" placeholder="XXXXXXXXXXXX1234" />
+                        <x-inputbox id="branch_name" name="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch" />
+                        <x-inputbox id="ifsc_code" name="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" required="true" />
+                        <x-inputbox id="swift_code" name="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX" />
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" value="1" id="is_primary" name="is_primary">
+                            <label class="form-check-label" for="is_primary">Set as Primary</label>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" value="1" id="is_default_payout" name="is_default_payout">
+                            <label class="form-check-label" for="is_default_payout">Set as Default Payout</label>
+                        </div>
+                    </div>
+
+                    <!-- UPI Fields -->
+                    <div id="upi-fields" class="d-none">
+                        <x-inputbox id="upi_id" name="upi_id" label="UPI ID" type="text" placeholder="example@upi" required="true" />
+                        <x-inputbox id="upi_name" name="upi_name" label="UPI Holder Name" type="text" placeholder="Full Name" required="true" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> <span id="modalSaveText">Save</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
         </div>
-
-        <div class="modal-body">
-            <div class="mb-3">
-                <label for="method">Method</label>
-                <select id="method" name="method" class="form-select" required>
-                    <option value="">-- Select Method --</option>
-                    <option value="bank">Bank</option>
-                    <option value="upi">UPI</option>
-                </select>
-            </div>
-
-            <!-- Bank Fields -->
-            <div id="bank-fields" class="d-none">
-                <x-inputbox id="bank_account_holder" name="account_holder" label="Account Holder" type="text" placeholder="John Doe" required="true" />
-                <x-inputbox id="bank_name" name="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" required="true" />
-                <x-inputbox id="branch_name" name="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch" />
-                <x-inputbox id="ifsc_code" name="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" required="true" />
-                <x-inputbox id="swift_code" name="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX" />
-            </div>
-
-            <!-- UPI Fields -->
-            <div id="upi-fields" class="d-none">
-                <x-inputbox id="upi_vpa" name="upi_vpa" label="UPI ID" type="text" placeholder="example@upi" required="true" />
-                <x-inputbox id="upi_holder_name" name="upi_holder_name" label="UPI Holder Name" type="text" placeholder="Full Name" required="true" />
-            </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-save"></i> <span id="modalSaveText">Save</span>
-          </button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 @endsection
 
 @section('script')
 <script>
-let student_id = "{{ $id }}";
+    let vendor_id = "{{ $id }}";
+    let type = "{{ $type }}";
+    let baseUrl = "{{ url('/vendors') }}";
 
-// Toggle fields
-function toggleFields(method) {
-    if (method === 'bank') {
-        $('#bank-fields').removeClass('d-none');
-        $('#upi-fields').addClass('d-none');
-        $('#bank_account_holder, #bank_name, #branch_name, #ifsc_code').attr('required', true);
-        $('#upi_vpa, #upi_holder_name').removeAttr('required');
-    } else if (method === 'upi') {
-        $('#upi-fields').removeClass('d-none');
-        $('#bank-fields').addClass('d-none');
-        $('#upi_vpa, #upi_holder_name').attr('required', true);
-        $('#bank_account_holder, #bank_name, #branch_name, #ifsc_code').removeAttr('required');
-    } else {
-        $('#bank-fields, #upi-fields').addClass('d-none');
-        $('#bank_account_holder, #bank_name, #branch_name, #ifsc_code, #upi_vpa, #upi_holder_name').removeAttr('required');
+    function toggleFields(method) {
+        const isEdit = $('#account_id').val() !== '';
+        if (method === 'bank') {
+            $('#bank-fields').removeClass('d-none');
+            $('#upi-fields').addClass('d-none');
+            $('#bank_account_holder, #bank_name, #ifsc_code').attr('required', true);
+            // account_number required only when adding
+            if (!isEdit) {
+                $('#account_number').attr('required', true);
+            } else {
+                $('#account_number').removeAttr('required');
+            }
+            $('#upi_id, #upi_name').removeAttr('required');
+        } else if (method === 'upi') {
+            $('#upi-fields').removeClass('d-none');
+            $('#bank-fields').addClass('d-none');
+            $('#upi_id, #upi_name').attr('required', true);
+            $('#bank_account_holder, #bank_name, #ifsc_code, #account_number').removeAttr('required');
+        } else {
+            $('#bank-fields, #upi-fields').addClass('d-none');
+            $('#bank_account_holder, #bank_name, #ifsc_code, #account_number, #upi_id, #upi_name').removeAttr('required');
+        }
     }
-}
 
-// Open Modal: Add
-$('#addBankBtn').click(function() {
-    $('#bankModalLabel').text('Add Bank / UPI');
-    $('#modalSaveText').text('Save');
-    $('#bankDetailsForm')[0].reset();
-    $('#account_id').val('');
-    toggleFields('');
-    $('#bankModal').modal('show');
-});
+    $('#addBankBtn').click(function() {
+        $('#bankModalLabel').text('Add Bank / UPI');
+        $('#modalSaveText').text('Save');
+        $('#bankDetailsForm')[0].reset();
+        $('#account_id').val('');
+        $('#account_number').attr('placeholder', 'XXXXXXXXXXXX1234');
+        // ensure account_number can become required when switching to bank
+        $('#account_number').removeAttr('required');
+        toggleFields('');
+        $('#bankModal').modal('show');
+    });
 
-// Open Modal: Edit
-function editBank(account) {
-    $('#bankModalLabel').text('Edit Bank / UPI');
-    $('#modalSaveText').text('Update');
+    function editBank(account) {
+        $('#bankModalLabel').text('Edit Bank / UPI');
+        $('#modalSaveText').text('Update');
+        // Fetch latest account details to ensure fresh data
+        $.ajax({
+            url: `${baseUrl}/${vendor_id}/${type}/bank/${account.id}`,
+            type: 'GET',
+            success: function(res) {
+                const acc = res.data || account;
+                $('#account_id').val(acc.id);
+                $('#method').val(acc.method).trigger('change');
+                $('#bank_account_holder').val(acc.account_holder || '');
+                $('#bank_name').val(acc.bank_name || '');
+                // Do not prefill account number; show masked as placeholder
+                const masked = acc.account_number_mask || '';
+                $('#account_number').val('');
+                $('#account_number').attr('placeholder', masked || 'XXXXXXXXXXXX1234');
+                // set checkboxes
+                $('#is_primary').prop('checked', acc.is_primary == 1);
+                $('#is_default_payout').prop('checked', acc.is_default_payout == 1);
+                $('#branch_name').val(acc.branch_name || '');
+                $('#ifsc_code').val(acc.ifsc_code || '');
+                $('#swift_code').val(acc.swift_code || '');
+                $('#upi_id').val(acc.upi_vpa || '');
+                $('#upi_name').val(acc.account_holder || '');
 
-    $('#account_id').val(account.id);
-    $('#method').val(account.method).trigger('change');
+                toggleFields(acc.method);
+                $('#bankModal').modal('show');
+            }
+        });
+    }
 
-    // Bank fields
-    $('#bank_account_holder').val(account.account_holder || '');
-    $('#bank_name').val(account.bank_name || '');
-    $('#branch_name').val(account.branch_name || '');
-    $('#ifsc_code').val(account.ifsc_code || '');
-    $('#swift_code').val(account.swift_code || '');
+    function vendorbanklist() {
+        $.ajax({
+            url: `${baseUrl}/${vendor_id}/${type}/BankList`,
+            type: 'GET',
+            success: function(res) {
+                console.log(res); // Debug
+                let data = Array.isArray(res) ? res : res.data;
 
-    // UPI fields
-    $('#upi_vpa').val(account.upi_vpa || '');
-    $('#upi_holder_name').val(account.account_holder || ''); // always stored in account_holder
-
-    toggleFields(account.method);
-
-    $('#bankModal').modal('show');
-}
-
-// Fetch bank list
-function studentbanklist() {
-    $.ajax({
-        url: `{{url('/students/${student_id}/bank-list')}}`,
-        type: 'GET',
-        success: function(res) {
-            if (res.success) {
-                let rows = '';
-                $.each(res.data, function(index, account) {
-                    rows += `
+                if (data && data.length > 0) {
+                    let rows = '';
+                    $.each(data, function(index, account) {
+                        rows += `
                         <tr>
                             <td>${index + 1}</td>
                             <td>${account.method}</td>
                             <td>${account.account_holder || '-'}</td>
                             <td>${account.bank_name || '-'}</td>
+                            <td>${account.account_number_mask || account.account_number || '-'}</td>
                             <td>${account.branch_name || '-'}</td>
                             <td>${account.ifsc_code || '-'}</td>
                             <td>${account.swift_code || '-'}</td>
@@ -173,78 +213,99 @@ function studentbanklist() {
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
-                        </tr>
-                    `;
-                });
-                $('#bank-list').html(rows);
-            }
-        }
-    });
-}
-
-// Edit button click
-$(document).on('click', '.editBankBtn', function() {
-    let account = $(this).data('account');
-    editBank(account);
-});
-
-// Delete bank
-function deleteBank(account_id) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: `{{url('/students/${student_id}/deleteBank/${account_id}')}}`,
-                type: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function(res) {
-                    if (res.success) {
-                        Swal.fire('Deleted!', res.message, 'success');
-                        studentbanklist();
-                    } else {
-                        Swal.fire('Error!', res.message, 'error');
-                    }
+                        </tr>`;
+                    });
+                    $('#bank-list').html(rows);
+                } else {
+                    $('#bank-list').html(`<tr><td colspan="10" class="text-center">No bank details found.</td></tr>`);
                 }
-            });
-        }
-    });
-}
-
-// Submit bank form
-$('#bankDetailsForm').on('submit', function(e) {
-    e.preventDefault();
-    $.ajax({
-        url: `{{url('/students/${student_id}/saveBank')}}`,
-        type: 'POST',
-        data: $(this).serialize(),
-        success: function(res) {
-            Swal.fire({ icon: 'success', title: 'Success!', text: res.message, timer: 1500, showConfirmButton: false });
-            $('#bankModal').modal('hide');
-            studentbanklist();
-        },
-        error: function(xhr) {
-            if (xhr.status === 422) {
-                let html = '';
-                $.each(xhr.responseJSON.errors, function(k, v) { html += v[0] + '<br>'; });
-                Swal.fire({ icon: 'error', title: 'Validation Error', html: html });
-            } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong.' });
             }
-        }
-    });
-});
+        });
+    }
 
-// On page load
-$(document).ready(function() {
-    studentbanklist();
-    $('#method').change(function() {
-        toggleFields($(this).val());
+    $(document).on('click', '.editBankBtn', function() {
+        let account = $(this).data('account');
+        editBank(account);
     });
-});
+
+    function deleteBank(account_id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `${baseUrl}/${vendor_id}/${type}/deleteBank/${account_id}`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(res) {
+                        Swal.fire('Deleted!', res.message, 'success');
+                        vendorbanklist();
+                    }
+                });
+            }
+        });
+    }
+
+    $('#bankDetailsForm').on('submit', function(e) {
+        e.preventDefault();
+        const accountId = $('#account_id').val();
+        const isEdit = accountId && accountId !== '';
+        const method = isEdit ? 'PUT' : 'POST';
+        const url = isEdit
+            ? `${baseUrl}/${vendor_id}/${type}/updateBank/${accountId}`
+            : `${baseUrl}/${vendor_id}/${type}/saveBank`;
+
+        $.ajax({
+            url,
+            type: method,
+            data: $(this).serialize(),
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(res) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: res.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                $('#bankModal').modal('hide');
+                vendorbanklist();
+            },
+            error: function(xhr) {
+                let html = '';
+                if (xhr.status === 422) {
+                    $.each(xhr.responseJSON.errors, function(k, v) {
+                        html += v[0] + '<br>';
+                    });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong.'
+                    });
+                }
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        vendorbanklist();
+        $('#method').change(function() {
+            toggleFields($(this).val());
+        });
+    });
 </script>
 @endsection

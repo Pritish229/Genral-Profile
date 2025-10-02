@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Models\VendorBusinessProfile;
 use App\Models\VendorIndividualProfile;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class VendorController extends Controller
 {
@@ -106,5 +107,186 @@ class VendorController extends Controller
             'message' => 'Vendor created successfully',
             'data'    => $vendor,
         ]);
+    }
+
+    public function manage($id)
+    {
+        return view('Admin.Vendors.VendorProfile.ManageVendor', [
+            'id' => $id
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $vendor = Vendor::findOrFail($id);
+
+        // Only get individual profile for this management page
+        $profile = VendorIndividualProfile::where('vendor_id', $id)->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'vendor' => $vendor,
+                'profile' => $profile
+            ]
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $vendor = Vendor::findOrFail($id);
+
+        $validated = $request->validate([
+            'primary_email'      => 'required|email|unique:vendors,primary_email,' . $id,
+            'primary_phone'      => 'nullable|string|max:20',
+            'first_name'         => 'required|string|max:100',
+            'middle_name'        => 'nullable|string|max:100',
+            'last_name'          => 'required|string|max:100',
+            'dob'                => 'nullable|date',
+            'gender'             => 'nullable|in:male,female,other,unspecified',
+            'marital_status'     => 'nullable|in:single,married,divorced,widowed,other',
+            'vendor_uid'         => 'nullable|string|unique:vendors,vendor_uid,' . $id,
+            'onboarding_channel' => 'nullable|string|max:255',
+            'occupation'         => 'nullable|string|max:255',
+            'nationality'        => 'nullable|string|max:100',
+            'preferred_language' => 'nullable|string|max:100',
+            'preferred_currency' => 'nullable|string|max:3',
+            'status'             => 'nullable|in:active,inactive,suspended',
+            'notes'              => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Store old values for contact sync
+            $oldEmail = $vendor->primary_email;
+            $oldPhone = $vendor->primary_phone;
+
+            // Update vendor record
+            $vendor->update([
+                'vendor_uid'         => $validated['vendor_uid'] ?? $vendor->vendor_uid,
+                'primary_email'      => $validated['primary_email'],
+                'primary_phone'      => $validated['primary_phone'],
+                'onboarding_channel' => $validated['onboarding_channel'] ?? $vendor->onboarding_channel,
+                'status'             => $validated['status'] ?? $vendor->status,
+                'notes'              => $validated['notes'] ?? $vendor->notes,
+            ]);
+
+            // Handle individual profile updates only
+            // Get or create individual profile
+            $profile = VendorIndividualProfile::firstOrCreate(
+                ['vendor_id' => $id],
+                [
+                    'tenant_id' => $vendor->tenant_id,
+                ]
+            );
+
+            $profile->update([
+                'first_name'         => $validated['first_name'],
+                'middle_name'        => $validated['middle_name'],
+                'last_name'          => $validated['last_name'],
+                'dob'                => $validated['dob'],
+                'gender'             => $validated['gender'],
+                'marital_status'     => $validated['marital_status'],
+                'occupation'         => $validated['occupation'],
+                'nationality'        => $validated['nationality'],
+                'preferred_language' => $validated['preferred_language'],
+                'preferred_currency' => $validated['preferred_currency'],
+            ]);
+
+            // Handle avatar upload
+            if ($request->hasFile('avatar_url')) {
+                // Delete old avatar if exists
+                if ($profile->avatar_url && Storage::disk('public')->exists($profile->avatar_url)) {
+                    Storage::disk('public')->delete($profile->avatar_url);
+                }
+
+                $file = $request->file('avatar_url');
+                $extension = $file->getClientOriginalExtension();
+                $fileName = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
+                $file->storeAs('VendorImages', $fileName, 'public');
+
+                $profile->update([
+                    'avatar_url' => "VendorImages/{$fileName}",
+                ]);
+            }
+
+            // Sync primary contacts if email or phone changed
+            $this->syncPrimaryContacts($vendor, $oldEmail, $oldPhone, $validated['primary_email'], $validated['primary_phone'], 'individual');
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vendor updated successfully',
+                'data' => $vendor->fresh()
+            ]);
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update vendor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Sync primary email and phone with vendor_contacts table
+     */
+    private function syncPrimaryContacts($vendor, $oldEmail, $oldPhone, $newEmail, $newPhone, $type)
+    {
+        // Update primary email contact
+        if ($oldEmail !== $newEmail) {
+            // Find existing primary email contact
+            $emailContact = VendorContact::where('vendor_id', $vendor->id)
+                ->where('contact_type', 'email')
+                ->where('profile_type', $type)
+                ->where('is_primary', true)
+                ->first();
+
+            if ($emailContact) {
+                $emailContact->update(['value' => $newEmail]);
+            } else {
+                // Create new primary email contact
+                VendorContact::create([
+                    'vendor_id'    => $vendor->id,
+                    'tenant_id'    => $vendor->tenant_id,
+                    'profile_type' => $type,
+                    'contact_type' => 'email',
+                    'value'        => $newEmail,
+                    'is_primary'   => true,
+                ]);
+            }
+        }
+
+        // Update primary phone contact
+        if ($oldPhone !== $newPhone) {
+            // Find existing primary phone contact
+            $phoneContact = VendorContact::where('vendor_id', $vendor->id)
+                ->where('contact_type', 'phone')
+                ->where('profile_type', $type)
+                ->where('is_primary', true)
+                ->first();
+
+            if ($phoneContact) {
+                if ($newPhone) {
+                    $phoneContact->update(['value' => $newPhone]);
+                } else {
+                    // If new phone is null, remove primary status but keep the contact
+                    $phoneContact->update(['is_primary' => false]);
+                }
+            } else if ($newPhone) {
+                // Create new primary phone contact
+                VendorContact::create([
+                    'vendor_id'    => $vendor->id,
+                    'tenant_id'    => $vendor->tenant_id,
+                    'profile_type' => $type,
+                    'contact_type' => 'phone',
+                    'value'        => $newPhone,
+                    'is_primary'   => true,
+                ]);
+            }
+        }
     }
 }

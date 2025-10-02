@@ -16,6 +16,11 @@ class VendorBusinessProfileController extends Controller
         return view('Admin.Vendors.VendorProfile.AddBusinessInfo', ['id' => $id]);
     }
 
+    public function manageBusiness($id)
+    {
+        return view('Admin.Vendors.VendorProfile.ManageBusinessinfo', ['id' => $id]);
+    }
+
 
     public function addBusinessInfo(Request $request, $id)
     {
@@ -115,5 +120,65 @@ class VendorBusinessProfileController extends Controller
                 'errors' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function manage($id)
+    {
+        return view('Admin.Vendors.VendorProfile.ManageBusinessinfo', ['id' => $id]);
+    }
+
+    public function getBusiness($id)
+    {
+        $profile = VendorBusinessProfile::where('vendor_id', $id)->first();
+        if ($profile) {
+            return response()->json([
+                'success' => true,
+                'data' => $profile
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No business profile found.'
+            ], 404);
+        }
+    }
+
+    public function updateBusiness(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'legal_name' => 'nullable|string|max:180',
+            'trade_name' => 'nullable|string|max:180',
+            'industry' => 'nullable|string|max:120',
+            'business_size' => 'nullable|in:micro,sme,enterprise',
+            'incorporation_date' => 'nullable|date',
+            'website' => 'nullable|url|max:200',
+            'primary_contact_name' => 'nullable|string|max:150',
+            'primary_contact_email' => 'nullable|email|max:150',
+            'primary_contact_phone' => 'nullable|string|max:30',
+            'billing_email' => 'nullable|email|max:150',
+            'billing_phone' => 'nullable|string|max:30',
+            'gst_number' => 'nullable|string|max:15',
+            'pan_number' => 'nullable|string|max:15',
+            'cin_number' => 'nullable|string|max:25',
+            'credit_limit' => 'nullable|numeric|min:0',
+            'payment_terms_days' => 'nullable|integer|min:0',
+            'account_manager' => 'nullable|string|max:120',
+        ]);
+
+        $profile = VendorBusinessProfile::where('vendor_id', $id)->first();
+        if (!$profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business profile not found.'
+            ], 404);
+        }
+
+        $profile->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Business profile updated successfully.',
+            'data' => $profile->fresh()
+        ]);
     }
 }

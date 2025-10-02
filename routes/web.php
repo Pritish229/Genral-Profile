@@ -35,11 +35,11 @@ use App\Http\Controllers\Vendors\VendorBusinessProfileController;
 use App\Http\Controllers\Customers\CustomerBusinessProfileController;
 
 Route::get('/', [DashboardController::class, 'dashBoardPage'])->name('Admin.Dashboard');
-Route::get('/storage-link',function () {
-     $targetFolder = storage_path('app/public');
-     $linkFolder = $_SERVER['DOCUMENT_ROOT'] .'/storage';
-     symlink($targetFolder,$linkFolder);
-    });
+Route::get('/storage-link', function () {
+    $targetFolder = storage_path('app/public');
+    $linkFolder = $_SERVER['DOCUMENT_ROOT'] . '/storage';
+    symlink($targetFolder, $linkFolder);
+});
 
 // Students Module 
 
@@ -184,38 +184,80 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{id}/Details', [VendorProfileController::class, 'Details'])->name('vendors.Details');
     Route::get('{id}/view/Details', [VendorProfileController::class, 'viewDetails'])->name('vendors.viewDetails');
     Route::get('List/All', [VendorProfileController::class, 'listAll'])->name('vendors.paginate');
+    Route::get('{id}/Business', [VendorBusinessProfileController::class, 'Business'])->name('vendors.BusinessProfile');
+
+    // Vendor Management
+    Route::get('{id}/manage', [VendorController::class, 'manage'])->name('vendors.manage');
+    Route::get('{id}/edit', [VendorController::class, 'edit'])->name('vendors.edit');
+    Route::post('{id}/update', [VendorController::class, 'update'])->name('vendors.update');
 
     // Vendor Business Info
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
     Route::post('{id}/Add/BusinessInfo', [VendorBusinessProfileController::class, 'addBusinessInfo'])->name('vendors.AddBusinessInfo');
+    Route::get('{id}/business/manage', [VendorBusinessProfileController::class, 'manageBusiness'])->name('vendors.ManageBusiness');
 
+    // Business Profile Management
+    Route::get('{id}/ManageBusinessinfo', [VendorBusinessProfileController::class, 'manage'])->name('vendors.manageBusinessinfo');
+    Route::get('{id}/Business', [VendorBusinessProfileController::class, 'getBusiness'])->name('vendors.getBusiness');
+    Route::post('{id}/Business/Update', [VendorBusinessProfileController::class, 'updateBusiness'])->name('vendors.updateBusiness');
 
     // Vendor Address 
     Route::get('{id}/Address', [VendorAddressController::class, 'index'])->name('vendors.Address');
-    Route::post('{vendor_id}/Manage/Addresses', [VendorAddressController::class, 'storeAddress'])->name('vendors.addresses.store');
+    Route::get('{id}/{type}/Manage/Address', [VendorAddressController::class, 'manageAddress'])->name('vendors.addresses.manage');
+    Route::get('{id}/{type}/Get/Addresses', [VendorAddressController::class, 'getAddresses'])->name('vendors.addresses.list');
+    Route::get('{vendor_id}/{type}/addresses/{address_id}', [VendorAddressController::class, 'getAddress'])->name('vendors.addresses.get');
+    Route::post('{vendor_id}/{type}/Manage/Addresses', [VendorAddressController::class, 'storeAddress'])->name('vendors.addresses.store');
+    Route::put('{vendor_id}/{type}/addresses/{address_id}', [VendorAddressController::class, 'updateAddress'])->name('vendors.addresses.update');
+    Route::delete('{vendor_id}/{type}/addresses/{address_id}', [VendorAddressController::class, 'deleteAddress'])->name('vendors.addresses.delete');
     Route::get('{vendor_id}/{type}/Address/Permanent', [VendorAddressController::class, 'permanentAddress'])->name('vendors.Address.Permanent');
 
     // Vendor Contact 
     Route::get('{id}/Contact', [VendorContactController::class, 'index'])->name('vendors.Contact');
-    Route::post('{id}/storeContact', [VendorContactController::class, 'storeContact'])->name('vendors.address.StoreContact');
+    Route::get('{id}/{type}/Manage/Contacts', [VendorContactController::class, 'manageContact'])->name('vendors.contacts.manageContact');
+    Route::get('{id}/{type}/Get/Contacts', [VendorContactController::class, 'getContacts'])->name('vendors.contacts.list');
+    Route::get('{vendor_id}/{type}/contacts/{contact_id}', [VendorContactController::class, 'getContact'])->name('vendors.contacts.get');
+    Route::post('{vendor_id}/{type}/Manage/Contacts', [VendorContactController::class, 'storeContact'])->name('vendors.contacts.store');
+    Route::put('{vendor_id}/{type}/contacts/{contact_id}', [VendorContactController::class, 'updateContact'])->name('vendors.contacts.update');
+    Route::delete('{vendor_id}/{type}/contacts/{contact_id}', [VendorContactController::class, 'deleteContact'])->name('vendors.contacts.delete');
     Route::get('{id}/{type}/Contact/Permanent', [VendorContactController::class, 'permanentContact'])->name('vendors.Contact.Permanent');
-    
+
     // Vendor Bank
     Route::get('{id}/Bank', [VendorBankController::class, 'index'])->name('vendors.Bank');
     Route::post('{id}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank');
-    
+    Route::post('{id}/{type}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank.type');
+    Route::get('{id}/{type}/BankDetails', [VendorBankController::class, 'ManageBank'])->name('vendors.ManageBank');
+    Route::get('{id}/{type}/BankList', [VendorBankController::class, 'vendorBanks'])->name('vendors.VendorBanks');
+    Route::get('{id}/{type}/bank/{account_id}', [VendorBankController::class, 'fetchBank'])->name('vendors.bank.fetch');
+    Route::put('{id}/{type}/updateBank/{account_id}', [VendorBankController::class, 'updateBank'])->name('vendors.bank.update');
+    Route::delete('{id}/{type}/deleteBank/{account_id}', [VendorBankController::class, 'deleteBank'])->name('vendors.bank.delete');
+
     // Vendor Document
-    Route::get('{id}/Document', [VendorDocumentController::class, 'index'])->name('vendors.Document');
+    Route::get('{id}/Document', [VendorDocumentController::class, 'index'])->name('vendors.Document'); // Stepping form
+    Route::get('{id}/{type}/Documents', [VendorDocumentController::class, 'manage'])->name('vendors.Documents'); // Manage documents
     Route::post('{id}/storeDocument', [VendorDocumentController::class, 'storeDocument'])->name('vendors.Bank.StoreDocument');
+    Route::get('{id}/{type}/documents', [VendorDocumentController::class, 'getDocuments']);
+    Route::get('{vendor_id}/{type}/documents/{doc_id}', [VendorDocumentController::class, 'getDocument']);
+    Route::delete('{vendor_id}/{type}/documents/{doc_id}', [VendorDocumentController::class, 'deleteDocument']);
+    Route::put('{vendor_id}/{type}/documents/{doc_id}', [VendorDocumentController::class, 'updateDocument']);
 
 
     // Vendor Media
-    Route::get('{id}/Media', [VendorMediaController::class, 'index'])->name('vendors.Document');
+    Route::get('{id}/Media', [VendorMediaController::class, 'index'])->name('vendors.Media'); // Stepping form
+    Route::get('{id}/{type}/Medias', [VendorMediaController::class, 'manage'])->name('vendors.Medias'); // Manage medias
     Route::post('{id}/storeMedia', [VendorMediaController::class, 'storeMedia'])->name('vendors.Bank.storeMedia');
+    Route::get('{id}/{type}/medias', [VendorMediaController::class, 'getMedias']);
+    Route::get('{vendor_id}/{type}/medias/{media_id}', [VendorMediaController::class, 'getMedia']);
+    Route::delete('{vendor_id}/{type}/medias/{media_id}', [VendorMediaController::class, 'deleteMedia']);
+    Route::put('{vendor_id}/{type}/medias/{media_id}', [VendorMediaController::class, 'updateMedia']);
 
     // Vendor Online Profile
     Route::get('{id}/OnlineProfile', [VendorOnlineProfileController::class, 'index'])->name('vendors.OnlineProfile');
     Route::post('{id}/storeOnlineProfile', [VendorOnlineProfileController::class, 'store'])->name('vendors.onlineProfiles.store');
+    Route::get('{id}/{type}/OnlineProfile/Manage', [VendorOnlineProfileController::class, 'manage'])->name('vendors.onlineProfiles.manage');
+    Route::get('{id}/{type}/OnlineProfile/List', [VendorOnlineProfileController::class, 'list'])->name('vendors.onlineProfiles.list');
+    Route::post('{id}/{type}/OnlineProfile', [VendorOnlineProfileController::class, 'storeOne'])->name('vendors.onlineProfiles.storeOne');
+    Route::put('{id}/{type}/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'update'])->name('vendors.onlineProfiles.update');
+    Route::delete('{id}/{type}/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'destroy'])->name('vendors.onlineProfiles.destroy');
 });
 
 Route::prefix('customers/')->group(function () {

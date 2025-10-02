@@ -6,20 +6,46 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\VendorIndividualProfile;
+use App\Models\VendorBusinessProfile;
 use Yajra\DataTables\Facades\DataTables;
 
 class VendorProfileController extends Controller
 {
     public function Details($id)
     {
+        $vendor = Vendor::where('id', $id)->first();
+
+        if (!$vendor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor not found'
+            ], 404);
+        }
+
+        // Always get individual profile for main details
         $data = VendorIndividualProfile::where('vendor_id', $id)->first();
-        $vendors = Vendor::where('id', $id)->first();
 
         return response()->json([
             'success' => true,
             'data' => $data,
-            'primary_details' => $vendors
+            'primary_details' => $vendor
         ], 200);
+    }
+
+    public function Business($id)
+    {
+        $profile = VendorBusinessProfile::where('vendor_id', $id)->first();
+        if ($profile) {
+            return response()->json([
+                'success' => true,
+                'data' => $profile
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No business profile found.'
+            ], 404);
+        }
     }
 
     public function viewDetails($vendor_id)
@@ -56,7 +82,7 @@ class VendorProfileController extends Controller
                 }
                 return '-';
             })
-           
+
             ->addColumn('vendor_uid', function ($vendor) {
                 return $vendor->vendor_uid ?? '-';
             })
