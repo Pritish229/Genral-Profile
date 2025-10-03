@@ -74,12 +74,12 @@
 
                     <!-- Bank Fields -->
                     <div id="bank-fields" class="d-none">
-                        <x-inputbox id="bank_account_holder" name="account_holder" label="Account Holder" type="text" placeholder="John Doe" required="true" />
-                        <x-inputbox id="bank_name" name="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" required="true" />
-                        <x-inputbox id="account_number" name="account_number" label="Account Number" type="text" placeholder="XXXXXXXXXXXX1234" />
-                        <x-inputbox id="branch_name" name="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch" />
-                        <x-inputbox id="ifsc_code" name="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" required="true" />
-                        <x-inputbox id="swift_code" name="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX" />
+                        <x-inputbox id="bank_account_holder" name="account_holder" label="Account Holder" type="text" placeholder="John Doe" required="true" value="" helpertxt="" :required="true"  />
+                        <x-inputbox id="bank_name" name="bank_name" label="Bank Name" type="text" placeholder="State Bank of India" required="true" value="" helpertxt="" :required="true" />
+                        <x-inputbox id="account_number" name="account_number" label="Account Number" type="text" placeholder="XXXXXXXXXXXX1234" value="" helpertxt="" :required="true" />
+                        <x-inputbox id="branch_name" name="branch_name" label="Branch Name" type="text" placeholder="MG Road Branch" value="" helpertxt="" :required="true" />
+                        <x-inputbox id="ifsc_code" name="ifsc_code" label="IFSC Code" type="text" placeholder="SBIN0001234" required="true" value="" helpertxt="" :required="true" />
+                        <x-inputbox id="swift_code" name="swift_code" label="SWIFT Code" type="text" placeholder="SBININBBXXX" value="" helpertxt="" :required="true" />
                         <div class="form-check mt-2">
                             <input class="form-check-input" type="checkbox" value="1" id="is_primary" name="is_primary">
                             <label class="form-check-label" for="is_primary">Set as Primary</label>
@@ -92,8 +92,8 @@
 
                     <!-- UPI Fields -->
                     <div id="upi-fields" class="d-none">
-                        <x-inputbox id="upi_id" name="upi_id" label="UPI ID" type="text" placeholder="example@upi" required="true" />
-                        <x-inputbox id="upi_name" name="upi_name" label="UPI Holder Name" type="text" placeholder="Full Name" required="true" />
+                        <x-inputbox id="upi_id" name="upi_id" label="UPI ID" type="text" placeholder="example@upi" required="true" value="" helpertxt="" :required="true" />
+                        <x-inputbox id="upi_name" name="upi_name" label="UPI Holder Name" type="text" placeholder="Full Name" required="true" value="" helpertxt="" :required="true" />
                     </div>
                 </div>
 

@@ -42,11 +42,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <x-inputbox id="document_type" label="Document Type" type="text" name="document_type"
-                                placeholder="e.g., Passport, Aadhar Card" />
+                                placeholder="e.g., Passport, Aadhar Card" value="" helpertxt="" :required="true" />
                         </div>
                         <div class="col-md-6">
                             <x-inputbox id="document_number" label="Document Number" type="text" name="document_number"
-                                placeholder="Enter Document Number" />
+                                placeholder="Enter Document Number" value="" helpertxt="" :required="false" />
                         </div>
                     </div>
 
@@ -66,7 +66,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <x-inputbox id="file_name" label="File Name" type="text" name="file_name"
-                                placeholder="e.g., Passport Scan" />
+                                placeholder="e.g., Passport Scan" value="" helpertxt="" :required="false" />
                         </div>
                         <div class="col-md-6">
                             <label for="file_url">Upload File</label>
@@ -78,7 +78,7 @@
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <x-textareabox id="remarks" label="Remarks" name="remarks"
-                                placeholder="Enter additional remarks about this document" />
+                                placeholder="Enter additional remarks about this document" value="" helpertxt="" :required="false" />
                         </div>
                     </div>
 

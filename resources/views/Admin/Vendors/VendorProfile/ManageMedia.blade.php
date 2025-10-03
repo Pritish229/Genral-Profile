@@ -53,13 +53,13 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="subject_name" label="Subject Name" type="text" name="subject_name" placeholder="Enter custom purpose" />
+                            <x-inputbox id="subject_name" label="Subject Name" type="text" name="subject_name" placeholder="Enter custom purpose" value="" helpertxt="" :required="true" />
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="file_name_media" label="File Name" type="text" name="file_name" placeholder="Original file name" />
+                            <x-inputbox id="file_name_media" label="File Name" type="text" name="file_name" placeholder="Original file name" value="" helpertxt="" :required="true" />
                         </div>
                         <div class="col-md-6">
                             <label for="file_url_media">Upload File</label>
@@ -69,7 +69,7 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="caption" label="Caption" type="text" name="caption" placeholder="Short description" />
+                            <x-inputbox id="caption" label="Caption" type="text" name="caption" placeholder="Short description" value="" helpertxt="" :required="false" />
                         </div>
                         <div class="col-md-6">
                             <label for="tags">Tags</label>

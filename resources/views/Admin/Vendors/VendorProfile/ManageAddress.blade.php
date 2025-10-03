@@ -47,15 +47,15 @@
             </div>
             <div class="col-md-4">
                 <x-inputbox id="line1" label="Line 1" type="text" placeholder="Enter Line 1" name="line1"
-                    value="{{ old('line1') }}" :required="false" />
+                    value="{{ old('line1') }}" :required="false" helpertxt="" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="line2" label="Line 2" type="text" placeholder="Enter Line 2" name="line2"
-                    value="{{ old('line2') }}" :required="false" />
+                    value="{{ old('line2') }}" :required="false" helpertxt="" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="landmark" label="Landmark" type="text" placeholder="Enter Landmark" name="landmark"
-                    value="{{ old('landmark') }}" :required="false" />
+                    value="{{ old('landmark') }}" :required="false" helpertxt="" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="label" label="Label" type="text" placeholder="Enter Label" name="label"
@@ -84,11 +84,11 @@
             </div>
             <div class="col-md-4">
                 <x-inputbox id="longitude" label="Longitude (Optional)" type="text" placeholder="Enter Longitude" name="longitude"
-                    value="{{ old('longitude') }}" :required="false" />
+                    value="{{ old('longitude') }}" :required="false" helpertxt="" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="latitude" label="Latitude (Optional)" type="text" placeholder="Enter Latitude" name="latitude"
-                    value="{{ old('latitude') }}" :required="false" />
+                    value="{{ old('latitude') }}" :required="false" helpertxt="" />
             </div>
             <div class="col-lg-12 mt-2">
                 <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
