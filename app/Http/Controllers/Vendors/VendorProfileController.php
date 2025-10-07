@@ -11,6 +11,11 @@ use Yajra\DataTables\Facades\DataTables;
 
 class VendorProfileController extends Controller
 {
+
+    public function vendorlist()
+    {
+        return view('Admin.Vendors.VendorProfile.VendorsList',);
+    }
     public function Details($id)
     {
         $vendor = Vendor::where('id', $id)->first();
@@ -55,52 +60,31 @@ class VendorProfileController extends Controller
 
     public function listAll()
     {
-        $vendors = Vendor::with(['individualProfile', 'businessProfile'])->select('vendors.*');
-
-        // Helper closure to get the profile
-        $getProfile = function ($vendor) {
-            return $vendor->individualProfile ?? $vendor->businessProfile;
-        };
+        $vendors = Vendor::with('individualProfile')->select('vendors.*');
 
         return DataTables::of($vendors)
-            ->addColumn('avatar', function ($vendor) use ($getProfile) {
-                $profile = $getProfile($vendor);
+            ->addColumn('avatar', function ($vendor) {
+                $profile = $vendor->individualProfile;
                 if ($profile && $profile->avatar_url) {
-                    return '<img src="' . asset('storage/' . $profile->avatar_url) . '" width="50" height="50" />';
+                    return '<img src="' . asset('storage/' . $profile->avatar_url) . '" 
+                            alt="Avatar" width="50" height="50" 
+                            class="rounded-circle shadow-sm" />';
                 }
-                return '-';
+                return '<span class="text-muted">N/A</span>';
             })
-            ->addColumn('full_name', function ($vendor) use ($getProfile) {
-                $profile = $getProfile($vendor);
-                if ($profile) {
-                    $nameParts = array_filter([
-                        $profile->first_name ?? '',
-                        $profile->middle_name ?? '',
-                        $profile->last_name ?? ''
-                    ]);
-                    return implode(' ', $nameParts);
-                }
-                return '-';
+            ->addColumn('full_name', function ($vendor) {
+                return $vendor->individualProfile->full_name ?? '<span class="text-muted">N/A</span>';
             })
-
-            ->addColumn('vendor_uid', function ($vendor) {
-                return $vendor->vendor_uid ?? '-';
-            })
-            ->addColumn('type', function ($vendor) {
-                return $vendor->type ?? '-';
-            })
-            ->addColumn('primary_email', function ($vendor) {
-                return $vendor->primary_email ?? '-';
-            })
-            ->addColumn('primary_phone', function ($vendor) {
-                return $vendor->primary_phone ?? '-';
-            })
-            ->addColumn('status', function ($vendor) {
-                return ucfirst($vendor->status ?? '-');
-            })
-            ->addColumn('hire_date', function ($vendor) {
-                return $vendor->hire_date ? date('d-M-Y', strtotime($vendor->hire_date)) : '-';
-            })
+            ->addColumn('vendor_uid', fn($vendor) => $vendor->vendor_uid ?? '-')
+            ->addColumn('type', fn($vendor) => ucfirst($vendor->type ?? '-'))
+            ->addColumn('primary_email', fn($vendor) => $vendor->primary_email ?? '-')
+            ->addColumn('primary_phone', fn($vendor) => $vendor->primary_phone ?? '-')
+            ->addColumn('status', fn($vendor) => ucfirst($vendor->status ?? '-'))
+            ->addColumn(
+                'hire_date',
+                fn($vendor) =>
+                $vendor->hire_date ? date('d-M-Y', strtotime($vendor->hire_date)) : '-'
+            )
             ->addColumn('actions', function ($vendor) {
                 $url = route("vendors.viewDetails", $vendor->id);
                 return '<a href="' . $url . '" class="btn btn-sm btn-success">Details</a>';
@@ -110,21 +94,17 @@ class VendorProfileController extends Controller
                     $search = request('search')['value'];
                     $query->where(function ($q) use ($search) {
                         $q->where('vendor_uid', 'like', "%{$search}%")
+                            ->orWhere('primary_email', 'like', "%{$search}%")
                             ->orWhere('primary_phone', 'like', "%{$search}%")
-                            ->orWhereHas('individualProfile', function ($q2) use ($search) {
-                                $q2->where('first_name', 'like', "%{$search}%")
-                                    ->orWhere('middle_name', 'like', "%{$search}%")
-                                    ->orWhere('last_name', 'like', "%{$search}%");
-                            })
-                            ->orWhereHas('businessProfile', function ($q2) use ($search) {
-                                $q2->where('first_name', 'like', "%{$search}%")
+                            ->orWhereHas('individualProfile', function ($sub) use ($search) {
+                                $sub->where('first_name', 'like', "%{$search}%")
                                     ->orWhere('middle_name', 'like', "%{$search}%")
                                     ->orWhere('last_name', 'like', "%{$search}%");
                             });
                     });
                 }
             })
-            ->rawColumns(['avatar', 'actions'])
+            ->rawColumns(['avatar', 'actions', 'full_name'])
             ->make(true);
     }
 }

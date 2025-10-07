@@ -16,6 +16,16 @@ class VendorBusinessProfileController extends Controller
         return view('Admin.Vendors.VendorProfile.AddBusinessInfo', ['id' => $id]);
     }
 
+    public function Businesslist($id)
+    {
+        return view('Admin.Vendors.VendorProfile.BusinessList', ['id' => $id]);
+    }
+
+    public function BusinessDetails($id, $business_id)
+    {
+        return view('Admin.Vendors.VendorProfile.BusinessDetails', ['id' => $id, 'business_id' => $business_id]);
+    }
+
     public function manageBusiness($id)
     {
         return view('Admin.Vendors.VendorProfile.ManageBusinessinfo', ['id' => $id]);
@@ -24,112 +34,65 @@ class VendorBusinessProfileController extends Controller
 
     public function addBusinessInfo(Request $request, $id)
     {
-        // Step 1 — Validate request
-        $request->validate([
-            'legal_name' => 'nullable|string|max:180',
-            'trade_name' => 'nullable|string|max:180',
-            'industry' => 'nullable|string|max:120',
-            'business_size' => 'nullable|in:micro,sme,enterprise',
-            'incorporation_date' => 'nullable|date',
-            'website' => 'nullable|url|max:200',
-            'primary_contact_name' => 'nullable|string|max:150',
-            'primary_contact_email' => 'nullable|email|max:150',
-            'primary_contact_phone' => 'nullable|string|max:30',
-            'billing_email' => 'nullable|email|max:150',
-            'billing_phone' => 'nullable|string|max:30',
-            'gst_number' => 'nullable|string|max:15',
-            'pan_number' => 'nullable|string|max:15',
-            'cin_number' => 'nullable|string|max:25',
-            'credit_limit' => 'nullable|numeric|min:0',
-            'payment_terms_days' => 'nullable|integer|min:0',
-            'account_manager' => 'nullable|string|max:120',
+        // Get vendor and tenant_id
+        $vendor = Vendor::find($id);
 
-            // Address validation
-            'state' => 'nullable|string|max:120',
-            'district' => 'nullable|string|max:120',
-            'city' => 'nullable|string|max:120',
-            'pincode' => 'nullable|string|max:12',
-            'line1' => 'nullable|string|max:180',
-            'line2' => 'nullable|string|max:180',
-            'landmark' => 'nullable|string|max:150',
-            'label' => 'nullable|string|max:120',
-            'longitude' => 'nullable|numeric',
-            'latitude' => 'nullable|numeric',
-        ]);
+        if (!$vendor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid vendor ID.'
+            ], 404);
+        }
+
+        // Validation rules
+        $rules = [
+            'legal_name'          => 'required|string|max:180',
+            'trade_name'          => 'nullable|string|max:180',
+            'industry'            => 'nullable|string|max:120',
+            'incorporation_date'  => 'nullable|date',
+            'business_size'       => 'nullable|in:micro,sme,enterprise',
+            'website'             => 'nullable|url|max:200',
+            'billing_email'       => 'nullable|email|max:150',
+            'billing_phone'       => 'nullable|string|max:30',
+            'gst_number'          => 'nullable|string|max:15',
+            'pan_number'          => 'nullable|string|max:15',
+            'cin_number'          => 'nullable|string|max:25',
+            'credit_limit'        => 'nullable|numeric|min:0',
+            'payment_terms_days'  => 'nullable|integer|min:0',
+            'account_manager'     => 'nullable|string|max:120',
+        ];
+
+        $validatedData = $request->validate($rules);
 
         try {
-            DB::beginTransaction();
-
-
-            // Step 2 — Save Business Profile
-            $businessProfile = VendorBusinessProfile::updateOrCreate(
-                ['vendor_id' => $id, 'tenant_id' => 1],
-                $request->only([
-                    'legal_name',
-                    'trade_name',
-                    'industry',
-                    'business_size',
-                    'incorporation_date',
-                    'website',
-                    'primary_contact_name',
-                    'primary_contact_email',
-                    'primary_contact_phone',
-                    'billing_email',
-                    'billing_phone',
-                    'gst_number',
-                    'pan_number',
-                    'cin_number',
-                    'credit_limit',
-                    'payment_terms_days',
-                    'account_manager'
-                ])
-            );
-
-            // Step 3 — Save Address
-            VendorAddress::create([
+            $profile = VendorBusinessProfile::create(array_merge($validatedData, [
                 'vendor_id' => $id,
-                'tenant_id' => 1,
-                'business_id' => $businessProfile->id,
-                'business_name' => $businessProfile->legal_name,
-                'profile_type' => 'business',
-                'address_type' => 'office', // you can make it dynamic if needed
-                'state' => $request->state,
-                'district' => $request->district,
-                'city' => $request->city,
-                'pincode' => $request->pincode,
-                'line1' => $request->line1,
-                'line2' => $request->line2,
-                'landmark' => $request->landmark,
-                'label' => $request->label,
-                'longitude' => $request->longitude,
-                'latitude' => $request->latitude,
-                'is_primary' => true, // you can make dynamic
-                'is_verified' => false
-            ]);
-
-            DB::commit();
+                'tenant_id' => $vendor->tenant_id
+            ]));
 
             return response()->json([
                 'success' => true,
-                'message' => 'Business info and address saved successfully'
-            ]);
+                'message' => 'Business profile added successfully.',
+                'data' => $profile
+            ], 201);
         } catch (\Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'success' => false,
-                'errors' => $e->getMessage()
+                'message' => 'Failed to add business profile.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
+
 
     public function manage($id)
     {
         return view('Admin.Vendors.VendorProfile.ManageBusinessinfo', ['id' => $id]);
     }
 
-    public function getBusiness($id)
+    public function getBusiness($id, $business_id)
     {
-        $profile = VendorBusinessProfile::where('vendor_id', $id)->first();
+        $profile = VendorBusinessProfile::where('vendor_id', $id)->where('id', $business_id)->first();
         if ($profile) {
             return response()->json([
                 'success' => true,
@@ -141,6 +104,15 @@ class VendorBusinessProfileController extends Controller
                 'message' => 'No business profile found.'
             ], 404);
         }
+    }
+
+    public function allBusiness($id)
+    {
+        $profiles = VendorBusinessProfile::where('vendor_id', $id)->get();
+        return response()->json([
+            'success' => true,
+            'data' => $profiles
+        ]);
     }
 
     public function updateBusiness(Request $request, $id)
@@ -181,4 +153,6 @@ class VendorBusinessProfileController extends Controller
             'data' => $profile->fresh()
         ]);
     }
+
+    
 }

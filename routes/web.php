@@ -177,13 +177,13 @@ Route::prefix('employees/')->group(function () {
 Route::prefix('vendors/')->group(function () {
 
     Route::get('create', [VendorController::class, 'create'])->name('vendors.create');
-    Route::get('list', [VendorController::class, 'vendorlist'])->name('vendors.List');
     Route::post('store', [VendorController::class, 'store'])->name('vendors.store');
 
     // Route Profile Details
+    Route::get('list', [VendorProfileController::class, 'vendorlist'])->name('vendors.List');
+    Route::get('List/All', [VendorProfileController::class, 'listAll'])->name('vendors.paginate');
     Route::get('{id}/Details', [VendorProfileController::class, 'Details'])->name('vendors.Details');
     Route::get('{id}/view/Details', [VendorProfileController::class, 'viewDetails'])->name('vendors.viewDetails');
-    Route::get('List/All', [VendorProfileController::class, 'listAll'])->name('vendors.paginate');
     Route::get('{id}/Business', [VendorBusinessProfileController::class, 'Business'])->name('vendors.BusinessProfile');
 
     // Vendor Management
@@ -193,16 +193,26 @@ Route::prefix('vendors/')->group(function () {
 
     // Vendor Business Info
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
-    Route::post('{id}/Add/BusinessInfo', [VendorBusinessProfileController::class, 'addBusinessInfo'])->name('vendors.AddBusinessInfo');
+    Route::get('{id}/{business_id}/BusinessDetails', [VendorBusinessProfileController::class, 'BusinessDetails'])->name('vendors.BusinessDetails');
+    Route::get('{id}/Businesslist', [VendorBusinessProfileController::class, 'Businesslist'])->name('vendors.Businesslist');
+    Route::get('{id}/all/Business', [VendorBusinessProfileController::class, 'allBusiness'])->name('vendors.AllBusiness');
+    Route::post('/{id}/business/create', [VendorBusinessProfileController::class, 'addBusinessInfo']);
     Route::get('{id}/business/manage', [VendorBusinessProfileController::class, 'manageBusiness'])->name('vendors.ManageBusiness');
 
     // Business Profile Management
     Route::get('{id}/ManageBusinessinfo', [VendorBusinessProfileController::class, 'manage'])->name('vendors.manageBusinessinfo');
-    Route::get('{id}/Business', [VendorBusinessProfileController::class, 'getBusiness'])->name('vendors.getBusiness');
+    Route::get('{id}/{business_id}/Business', [VendorBusinessProfileController::class, 'getBusiness'])->name('vendors.getBusiness');
     Route::post('{id}/Business/Update', [VendorBusinessProfileController::class, 'updateBusiness'])->name('vendors.updateBusiness');
 
     // Vendor Address 
     Route::get('{id}/Address', [VendorAddressController::class, 'index'])->name('vendors.Address');
+    Route::get('{id}/{business_id}/Business/Address', [VendorAddressController::class, 'businessAddress'])->name('vendors.businessAddress');
+    Route::post('{vendor_id}/{business_id}/Business/Address/Add', [VendorAddressController::class, 'storeBusinessAddress']);
+    Route::post('{vendor_id}/{business_id}/Business/Address/{address_id}/Update', [VendorAddressController::class, 'updateBusinessAddress']);
+    Route::post('{vendor_id}/{business_id}/Business/Address/list', [VendorAddressController::class, 'listBusinessAddresses']);
+    Route::get('{vendor_id}/{business_id}/Business/Address/{address_id}', [VendorAddressController::class, 'getBusinessAddress']);
+    Route::delete('{vendor_id}/{business_id}/Business/Address/{address_id}/Delete', [VendorAddressController::class, 'deleteBusinessAddress']);
+    Route::get('{id}/{business_id}/BusinessAddress', [VendorAddressController::class, 'permanentBusinessAddress'])->name('vendors.BusinessAddress');
     Route::get('{id}/{type}/Manage/Address', [VendorAddressController::class, 'manageAddress'])->name('vendors.addresses.manage');
     Route::get('{id}/{type}/Get/Addresses', [VendorAddressController::class, 'getAddresses'])->name('vendors.addresses.list');
     Route::get('{vendor_id}/{type}/addresses/{address_id}', [VendorAddressController::class, 'getAddress'])->name('vendors.addresses.get');
@@ -213,6 +223,14 @@ Route::prefix('vendors/')->group(function () {
 
     // Vendor Contact 
     Route::get('{id}/Contact', [VendorContactController::class, 'index'])->name('vendors.Contact');
+    Route::get('{id}/{business_id}/BusinessContact/Permanent', [VendorContactController::class, 'permanentBusinessContact'])->name('vendors.BusinessContact');
+    Route::get('{id}/{business_id}/Business/Contact', [VendorContactController::class, 'BusinessContact'])->name('vendors.BusinessContact');
+    Route::get('{id}/{business_id}/Business/Contacts/List', [VendorContactController::class, 'getBusinessContacts'])->name('vendors.BusinessContacts.list');
+    Route::get('{id}/{business_id}/Business/Contact/{contact_id}', [VendorContactController::class, 'getBusinessContact']);
+
+    Route::post('{id}/{business_id}/Business/Contacts', [VendorContactController::class, 'addBusinessContact'])->name('vendors.BusinessContacts.store');
+    Route::put('{id}/{business_id}/Business/Contacts/{contact_id}', [VendorContactController::class, 'updateBusinessContact'])->name('vendors.BusinessContacts.update');
+
     Route::get('{id}/{type}/Manage/Contacts', [VendorContactController::class, 'manageContact'])->name('vendors.contacts.manageContact');
     Route::get('{id}/{type}/Get/Contacts', [VendorContactController::class, 'getContacts'])->name('vendors.contacts.list');
     Route::get('{vendor_id}/{type}/contacts/{contact_id}', [VendorContactController::class, 'getContact'])->name('vendors.contacts.get');
@@ -223,6 +241,8 @@ Route::prefix('vendors/')->group(function () {
 
     // Vendor Bank
     Route::get('{id}/Bank', [VendorBankController::class, 'index'])->name('vendors.Bank');
+    Route::get('{id}/{business_id}/Business/Bank', [VendorBankController::class, 'businessBank'])->name('vendors.businessBank');
+    Route::get('{id}/{business_id}/BusinessBank', [VendorBankController::class, 'permanentBusinessBank'])->name('vendors.BusinessBank');
     Route::post('{id}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank');
     Route::post('{id}/{type}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank.type');
     Route::get('{id}/{type}/BankDetails', [VendorBankController::class, 'ManageBank'])->name('vendors.ManageBank');

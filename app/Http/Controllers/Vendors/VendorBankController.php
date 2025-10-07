@@ -21,6 +21,10 @@ class VendorBankController extends Controller
         return view('Admin.Vendors.VendorProfile.ManageBank', ['id' => $id, 'type' => $type]);
     }
 
+    public function businessBank($id , $business_id){
+        return view('Admin.Vendors.VendorProfile.BusinessBank', ['id' => $id, 'business_id' => $business_id]);
+    }
+
     public function saveBank(Request $request, $vendor_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
@@ -256,6 +260,23 @@ class VendorBankController extends Controller
             'success' => true,
             'message' => 'Bank/UPI details deleted successfully'
         ]);
+    }
+
+    public function permanentBusinessBank($vendor_id, $business_id)
+    {
+        $account = VendorPaymentAccount::where('vendor_id', $vendor_id)->where('business_id', $business_id)->where('is_primary', '1')->first();
+        if ($account) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Bank/UPI account fetched successfully',
+                'data'    => $account
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor bank/UPI account not found',
+            ], 404);
+        }
     }
 
 }

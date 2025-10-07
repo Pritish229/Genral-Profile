@@ -19,10 +19,7 @@ class VendorController extends Controller
     {
         return view('Admin.Vendors.VendorProfile.AddVendor');
     }
-    public function vendorlist()
-    {
-        return view('Admin.Vendors.VendorProfile.VendorsList',);
-    }
+    
 
     public function store(Request $request)
     {
