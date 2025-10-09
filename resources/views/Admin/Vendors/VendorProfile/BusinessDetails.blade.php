@@ -107,7 +107,42 @@
         </div>
     </div>`;
 
-        $("#business-info-cards").html(profileCard + contactCard + addressCard + bankCard);
+    let others = `
+    <div class="col-md-6  "> 
+        <div class=" flex-fill equal-height ">
+                <div class="row text-center">
+                   
+                    <div class="col-md-6 col-6 mb-3">
+                        <a href="${baseUrl}/${vendor_id}//OnlineProfile/Manage" class="text-decoration-none ">
+                            <div class="p-2 border rounded">
+                                <i class="fas fa-globe fa-lg"></i><br>
+                                Online Profile
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-6 ">
+                        <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Document" class="text-decoration-none">
+                            <div class="p-2 border rounded">
+                                <i class="fas fa-file-alt fa-lg"></i><br>
+                                Documents
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-6">
+                        <a href="${baseUrl}/${vendor_id}/Medias" class="text-decoration-none">
+                            <div class="p-2 border rounded">
+                                <i class="fas fa-photo-video fa-lg"></i><br>
+                                Medias
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+    </div>
+    
+    `;
+
+        $("#business-info-cards").html(profileCard + contactCard + addressCard + bankCard + others);
 
         permanentContact();
         permanentAddress();
@@ -122,7 +157,7 @@
             dataType: "json",
             success: function(response) {
                 let html = `
-            <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex justify-content-between align-items-center my-2">
                 <h5><i class="fas fa-address-book"></i> Contact Info</h5>
                 <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Contact" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
@@ -202,6 +237,8 @@
             url: `${baseUrl}/${vendor_id}/${business_id}/BusinessBank`,
             dataType: "json",
             success: function(response) {
+                console.log(response);
+
                 let html = `
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-university"></i> Bank Info</h5>
@@ -210,7 +247,16 @@
                 </a>
             </div>`;
                 if (response.success && response.data) {
-                    html += response.data;
+                    html += `
+                     <p><i class="fas fa-address-card"></i> <strong>Account Holder : </strong> ${safe(response.data.account_holder)}</p>
+                     <p><i class="fas fa-th-large"></i> <strong>Account Method : </strong> ${safe(response.data.method)}</p>
+                     <p><i class="fas fa-id-card"></i> <strong>Account Number : </strong> ${safe(response.data.account_number_mask)}</p>
+                     <p><i class="fas fa-university"></i> <strong>Bank : </strong> ${safe(response.data.bank_name)}</p>
+                     <p><i class="fas fa-landmark"></i> <strong>Branch Name : </strong> ${safe(response.data.branch_name)}</p>
+                     <p><i class="far fa-file-alt"></i> <strong>IFSC Code : </strong> ${safe(response.data.ifsc_code)}</p>
+                     <p><i class="far fa-file-alt"></i> <strong>SWIFT Code : </strong> ${safe(response.data.swift_code)}</p>
+                    `;
+
                 } else {
                     html += "<p class='text-muted'>No data found.</p>";
                 }
@@ -247,6 +293,8 @@
             }
         });
     }
+
+
 
     $(document).ready(function() {
         fetchBusinessDetails();

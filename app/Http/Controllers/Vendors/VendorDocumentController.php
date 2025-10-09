@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Vendors;
 
+use Carbon\Carbon;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use App\Models\VendorDocument;
@@ -14,6 +15,10 @@ class VendorDocumentController extends Controller
     public function index($id)
     {
         return view('Admin.Vendors.VendorProfile.AddDocument', ['id' => $id]);
+    }
+    public function BusinessDocs($id, $business_id)
+    {
+        return view('Admin.Vendors.VendorProfile.BusinessDocuments', ['id' => $id, 'business_id' => $business_id]);
     }
 
     public function manage($id, $type)
@@ -92,12 +97,11 @@ class VendorDocumentController extends Controller
         ], 200);
     }
 
-    public function getDocument($vendor_id, $type, $doc_id)
+    public function getDocument($vendor_id, $doc_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
 
         $document = VendorDocument::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
             ->where('id', $doc_id)
             ->firstOrFail();
 
@@ -107,11 +111,12 @@ class VendorDocumentController extends Controller
         ], 200);
     }
 
-    public function updateDocument(Request $request, $vendor_id, $type, $doc_id)
+
+
+    public function updateDocument(Request $request, $vendor_id, $doc_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
         $document = VendorDocument::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
             ->where('id', $doc_id)
             ->firstOrFail();
 
@@ -150,11 +155,10 @@ class VendorDocumentController extends Controller
         ], 200);
     }
 
-    public function deleteDocument($vendor_id, $type, $doc_id)
+    public function deleteDocument($vendor_id, $doc_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
         $document = VendorDocument::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
             ->where('id', $doc_id)
             ->firstOrFail();
 
@@ -170,4 +174,51 @@ class VendorDocumentController extends Controller
             'message' => 'Document deleted successfully'
         ], 200);
     }
+
+    public function businessDocuments($vendor_id, $business_id)
+    {
+        $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
+            ->firstOrFail();
+
+        if ($vendor->type !== 'business' && !$business) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This vendor does not have a business profile.'
+            ], 422);
+        }
+
+        $documents = VendorDocument::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->where('profile_type', 'business')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($doc) {
+                return [
+                    'id' => $doc->id,
+                    'vendor_id' => $doc->vendor_id,
+                    'business_id' => $doc->business_id,
+                    'profile_type' => $doc->profile_type,
+                    'document_type' => $doc->document_type,
+                    'document_number' => $doc->document_number,
+                    'issue_date' => $doc->issue_date
+                        ? Carbon::parse($doc->issue_date)->format('d F Y')
+                        : null,
+                    'expiry_date' => $doc->expiry_date
+                        ? Carbon::parse($doc->expiry_date)->format('d F Y')
+                        : null,
+                    'file_path' => $doc->file_path,
+                    'created_at' => $doc->created_at->format('d M Y, h:i A'),
+                    'updated_at' => $doc->updated_at->format('d M Y, h:i A'),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $documents
+        ], 200);
+    }
+
+    
 }

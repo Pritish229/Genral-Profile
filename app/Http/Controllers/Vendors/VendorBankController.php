@@ -125,6 +125,11 @@ class VendorBankController extends Controller
         return response()->json(['data' => $accounts]);
     }
 
+    public function vendorBusinessBank($id , $business_id   ){
+        $accounts = VendorPaymentAccount::where('vendor_id', $id)->where('business_id', $business_id)->get();
+        return response()->json(['data' => $accounts]);
+    }
+
     public function fetchBank($vendor_id, $type, $account_id)
     {
         $account = VendorPaymentAccount::where('vendor_id', $vendor_id)

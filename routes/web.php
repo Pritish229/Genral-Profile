@@ -242,6 +242,7 @@ Route::prefix('vendors/')->group(function () {
     // Vendor Bank
     Route::get('{id}/Bank', [VendorBankController::class, 'index'])->name('vendors.Bank');
     Route::get('{id}/{business_id}/Business/Bank', [VendorBankController::class, 'businessBank'])->name('vendors.businessBank');
+    Route::get('{id}/{business_id}/business/BankList', [VendorBankController::class, 'vendorBusinessBank'])->name('vendors.vendorBusinessBank');
     Route::get('{id}/{business_id}/BusinessBank', [VendorBankController::class, 'permanentBusinessBank'])->name('vendors.BusinessBank');
     Route::post('{id}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank');
     Route::post('{id}/{type}/saveBank', [VendorBankController::class, 'saveBank'])->name('vendors.Bank.saveBank.type');
@@ -256,9 +257,13 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{id}/{type}/Documents', [VendorDocumentController::class, 'manage'])->name('vendors.Documents'); // Manage documents
     Route::post('{id}/storeDocument', [VendorDocumentController::class, 'storeDocument'])->name('vendors.Bank.StoreDocument');
     Route::get('{id}/{type}/documents', [VendorDocumentController::class, 'getDocuments']);
-    Route::get('{vendor_id}/{type}/documents/{doc_id}', [VendorDocumentController::class, 'getDocument']);
-    Route::delete('{vendor_id}/{type}/documents/{doc_id}', [VendorDocumentController::class, 'deleteDocument']);
-    Route::put('{vendor_id}/{type}/documents/{doc_id}', [VendorDocumentController::class, 'updateDocument']);
+    Route::get('{vendor_id}/documents/{doc_id}', [VendorDocumentController::class, 'getDocument']);
+    Route::delete('{vendor_id}/delete/documents/{doc_id}', [VendorDocumentController::class, 'deleteDocument']);
+    Route::put('{vendor_id}/documents/{doc_id}', [VendorDocumentController::class, 'updateDocument']);
+    Route::get('{id}/{business_id}/Business/Document', [VendorDocumentController::class, 'BusinessDocs'])->name('vendors.BusinessDocs'); // Stepping form
+    Route::get('{id}/{business_id}/Business/Document/List', [VendorDocumentController::class, 'businessDocuments'])->name('vendors.businessDocuments'); // Stepping form
+    Route::get('{id}/{business_id}/Business/Document/Details', [VendorDocumentController::class, 'businessDocuments'])->name('vendors.businessDocuments'); // Stepping form
+    
 
 
     // Vendor Media
