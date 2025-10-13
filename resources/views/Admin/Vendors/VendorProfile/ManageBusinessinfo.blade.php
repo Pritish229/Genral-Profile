@@ -5,17 +5,19 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Business Information"
+        title="Business Address"
         :links="[
         'Home' => 'Admin.Dashboard',
         'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-        'Manage Business Info' => ''
-    ]" />
+        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
+        'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+            'Manage Business Info' => ''
+        ]" />
 
     <form id="businessForm" enctype="multipart/form-data">
         @csrf
         <input type="hidden" id="vendor_id" name="vendor_id" value="{{ $id }}">
+        <input type="hidden" id="business_id" name="business_id" value="{{ $business_id }}">
 
         <div class="row g-3">
             <h5>Business Information</h5>
@@ -62,18 +64,7 @@
             <h5>Contact Information</h5>
             <hr style="color:#5156be">
 
-            <div class="col-md-4">
-                <x-inputbox id="primary_contact_name" label="Primary Contact Name" type="text" placeholder="Enter Contact Name" name="primary_contact_name"
-                    value="" :required="false" helpertxt="Primary Contact Maximum 150 Characters" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="primary_contact_email" label="Primary Contact Email" type="email" placeholder="Enter Contact Email" name="primary_contact_email"
-                    value="" :required="false" helpertxt="Primary Contact Email Maximum 150 Characters" />
-            </div>
-            <div class="col-md-4">
-                <x-inputbox id="primary_contact_phone" label="Primary Contact Phone" type="text" placeholder="Enter Contact Phone" name="primary_contact_phone"
-                    value="" :required="false" helpertxt="Primary Contact Phone Maximum 30 Characters" />
-            </div>
+           
 
             <div class="col-md-6">
                 <x-inputbox id="billing_email" label="Billing Email" type="email" placeholder="Enter Billing Email" name="billing_email"
@@ -121,12 +112,12 @@
 </div>
 @endsection
 
-
 @section('script')
 <script>
     jQuery(function($) {
         let baseUrl = "{{ url('/vendors') }}";
         let vendorId = "{{ $id }}";
+        let businessId = "{{ $business_id ?? '' }}"; // Use null coalescing operator for safety
 
         // Initialize date picker
         $(".flatpickr").flatpickr({
@@ -144,8 +135,18 @@
 
         // Load business data
         function loadBusinessData() {
+            if (!businessId) {
+                console.error('Business ID is not defined');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Business ID is missing. Please ensure a valid business profile is selected.'
+                });
+                return;
+            }
+
             $.ajax({
-                url: `${baseUrl}/${vendorId}/Business`,
+                url: `${baseUrl}/${vendorId}/${businessId}/Business/Details`, // Corrected URL
                 type: 'GET',
                 success: function(response) {
                     console.log('Business data loaded:', response);
@@ -181,17 +182,20 @@
                         $('#account_manager').val(business.account_manager || '');
                     } else {
                         console.log('No business profile found or failed to load');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'No Data',
+                            text: response.message || 'No business profile found.'
+                        });
                     }
                 },
                 error: function(xhr) {
                     console.error('Error loading business data:', xhr);
-                    if (xhr.status !== 404) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to load business data: ' + (xhr.responseJSON?.message || xhr.statusText)
-                        });
-                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to load business data: ' + (xhr.responseJSON?.message || xhr.statusText)
+                    });
                 }
             });
         }
@@ -212,62 +216,62 @@
             });
 
             $.ajax({
-                    url: `${baseUrl}/${vendorId}/Business/Update`,
-                    type: "POST",
-                    data: formData,
-                    contentType: false,
-                    processData: false
-                })
-                .done(function(response) {
-                    Swal.close();
+                url: `${baseUrl}/${vendorId}/Business/Update`, // Corrected URL
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false
+            })
+            .done(function(response) {
+                Swal.close();
 
-                    if (response && response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: response.message || 'Business information updated successfully.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = `${baseUrl}/${vendorId}/view/Details`;
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: (response && response.message) ? response.message : 'Update failed.'
-                        });
-                    }
-                })
-                .fail(function(xhr) {
-                    Swal.close();
-                    $btn.prop('disabled', false);
+                if (response && response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message || 'Business information updated successfully.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = `${baseUrl}/${vendorId}/view/Details`;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: (response && response.message) ? response.message : 'Update failed.'
+                    });
+                }
+            })
+            .fail(function(xhr) {
+                Swal.close();
+                $btn.prop('disabled', false);
 
-                    if (xhr.status === 422) {
-                        const errors = (xhr.responseJSON && xhr.responseJSON.errors) ? xhr.responseJSON.errors : {};
-                        let html = '<div class="alert alert-danger"><ul>';
-                        Object.keys(errors).forEach(k => {
-                            const v = errors[k];
-                            html += '<li><strong>' + k + ':</strong> ' + (Array.isArray(v) ? v[0] : v) + '</li>';
-                        });
-                        html += '</ul></div>';
+                if (xhr.status === 422) {
+                    const errors = (xhr.responseJSON && xhr.responseJSON.errors) ? xhr.responseJSON.errors : {};
+                    let html = '<div class="alert alert-danger"><ul>';
+                    Object.keys(errors).forEach(k => {
+                        const v = errors[k];
+                        html += '<li><strong>' + k + ':</strong> ' + (Array.isArray(v) ? v[0] : v) + '</li>';
+                    });
+                    html += '</ul></div>';
 
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Validation Error',
-                            html: html
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Something went wrong, please try again. Status: ' + xhr.status
-                        });
-                    }
-                })
-                .always(function() {
-                    $btn.prop('disabled', false);
-                });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: html
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong, please try again. Status: ' + xhr.status
+                    });
+                }
+            })
+            .always(function() {
+                $btn.prop('disabled', false);
+            });
         });
 
         // Load data on page load

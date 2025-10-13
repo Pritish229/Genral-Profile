@@ -16,16 +16,17 @@ class VendorBankController extends Controller
         return view('Admin.Vendors.VendorProfile.AddBankinfo', ['id' => $id]);
     }
 
-    public function ManageBank($id, $type)
+    public function ManageBank($id)
     {
-        return view('Admin.Vendors.VendorProfile.ManageBank', ['id' => $id, 'type' => $type]);
+        return view('Admin.Vendors.VendorProfile.ManageBank', ['id' => $id]);
     }
 
-    public function businessBank($id , $business_id){
+    public function businessBank($id, $business_id)
+    {
         return view('Admin.Vendors.VendorProfile.BusinessBank', ['id' => $id, 'business_id' => $business_id]);
     }
 
-    public function saveBank(Request $request, $vendor_id)
+    public function saveBank(Request $request, $vendor_id, $business_id = null)
     {
         $vendor = Vendor::findOrFail($vendor_id);
 
@@ -67,7 +68,6 @@ class VendorBankController extends Controller
         $data = [
             'tenant_id'           => $vendor->tenant_id,
             'vendor_id'           => $vendor->id,
-            'profile_type'        => $request->route('type'),
             'method'              => $validated['method'],
             'status'              => 'active',
             'is_primary'          => $is_primary,
@@ -83,16 +83,20 @@ class VendorBankController extends Controller
             'account_number_hash' => $account_number_hash,
         ];
 
-        if ($vendor->type === 'business') {
-            $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->first();
+        // Determine profile_type based on business_id
+        if ($business_id) {
+            $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->where('id', $business_id)->first();
             if (!$business) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Business profile not found for this vendor.'
                 ], 422);
             }
-            $data['business_id']   = $business->id;
+            $data['profile_type'] = 'business';
+            $data['business_id']  = $business_id;
             $data['business_name'] = $business->trade_name;
+        } else {
+            $data['profile_type'] = 'individual';
         }
 
         if ($request->account_id) {
@@ -105,11 +109,17 @@ class VendorBankController extends Controller
         }
 
         if ($is_primary == 1) {
-            VendorPaymentAccount::where('vendor_id', $vendor_id)->where('id', '!=', $account->id)->update(['is_primary' => 0]);
+            VendorPaymentAccount::where('vendor_id', $vendor_id)
+                ->where('profile_type', $data['profile_type'])
+                ->where('id', '!=', $account->id)
+                ->update(['is_primary' => 0]);
         }
 
         if ($is_default_payout == 1) {
-            VendorPaymentAccount::where('vendor_id', $vendor_id)->where('id', '!=', $account->id)->update(['is_default_payout' => 0]);
+            VendorPaymentAccount::where('vendor_id', $vendor_id)
+                ->where('profile_type', $data['profile_type'])
+                ->where('id', '!=', $account->id)
+                ->update(['is_default_payout' => 0]);
         }
 
         return response()->json([
@@ -119,23 +129,28 @@ class VendorBankController extends Controller
         ]);
     }
 
-    public function vendorBanks($id,$type)
+    public function vendorBanks($id)
     {
-        $accounts = VendorPaymentAccount::where('vendor_id', $id)->where('profile_type', $type)->get();
+        $accounts = VendorPaymentAccount::where('vendor_id', $id)->where('profile_type', 'individual')->get();
         return response()->json(['data' => $accounts]);
     }
 
-    public function vendorBusinessBank($id , $business_id   ){
-        $accounts = VendorPaymentAccount::where('vendor_id', $id)->where('business_id', $business_id)->get();
+    public function vendorBusinessBank($id, $business_id)
+    {
+        $accounts = VendorPaymentAccount::where('vendor_id', $id)->where('profile_type', 'business')->where('business_id', $business_id)->get();
         return response()->json(['data' => $accounts]);
     }
 
-    public function fetchBank($vendor_id, $type, $account_id)
+    public function fetchBank($vendor_id, $account_id, $business_id = null)
     {
-        $account = VendorPaymentAccount::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
-            ->where('id', $account_id)
-            ->first();
+        $query = VendorPaymentAccount::where('vendor_id', $vendor_id)->where('id', $account_id);
+        if ($business_id) {
+            $query->where('business_id', $business_id)->where('profile_type', 'business');
+        } else {
+            $query->where('profile_type', 'individual');
+        }
+
+        $account = $query->first();
 
         if (!$account) {
             return response()->json([
@@ -150,7 +165,7 @@ class VendorBankController extends Controller
         ]);
     }
 
-    public function updateBank(Request $request, $vendor_id, $type, $account_id)
+    public function updateBank(Request $request, $vendor_id, $account_id, $business_id = null)
     {
         $vendor = Vendor::findOrFail($vendor_id);
 
@@ -192,7 +207,6 @@ class VendorBankController extends Controller
         $data = [
             'tenant_id'           => $vendor->tenant_id,
             'vendor_id'           => $vendor->id,
-            'profile_type'        => $type,
             'method'              => $validated['method'],
             'status'              => 'active',
             'is_primary'          => $is_primary,
@@ -211,31 +225,41 @@ class VendorBankController extends Controller
             $data['account_number_hash'] = $account_number_hash;
         }
 
-        if ($vendor->type === 'business') {
-            $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->first();
+        // Determine profile_type based on business_id
+        if ($business_id) {
+            $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->where('id', $business_id)->first();
             if (!$business) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Business profile not found for this vendor.'
                 ], 422);
             }
-            $data['business_id']   = $business->id;
+            $data['profile_type'] = 'business';
+            $data['business_id']  = $business_id;
             $data['business_name'] = $business->trade_name;
+        } else {
+            $data['profile_type'] = 'individual';
         }
 
         $account = VendorPaymentAccount::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
             ->where('id', $account_id)
+            ->where('profile_type', $data['profile_type'])
             ->firstOrFail();
 
         $account->update($data);
 
         if ($is_primary == 1) {
-            VendorPaymentAccount::where('vendor_id', $vendor_id)->where('id', '!=', $account->id)->update(['is_primary' => 0]);
+            VendorPaymentAccount::where('vendor_id', $vendor_id)
+                ->where('profile_type', $data['profile_type'])
+                ->where('id', '!=', $account->id)
+                ->update(['is_primary' => 0]);
         }
 
         if ($is_default_payout == 1) {
-            VendorPaymentAccount::where('vendor_id', $vendor_id)->where('id', '!=', $account->id)->update(['is_default_payout' => 0]);
+            VendorPaymentAccount::where('vendor_id', $vendor_id)
+                ->where('profile_type', $data['profile_type'])
+                ->where('id', '!=', $account->id)
+                ->update(['is_default_payout' => 0]);
         }
 
         return response()->json([
@@ -245,12 +269,16 @@ class VendorBankController extends Controller
         ]);
     }
 
-    public function deleteBank($vendor_id, $type, $account_id)
+    public function deleteBank($vendor_id, $account_id, $business_id = null)
     {
-        $account = VendorPaymentAccount::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
-            ->where('id', $account_id)
-            ->first();
+        $query = VendorPaymentAccount::where('vendor_id', $vendor_id)->where('id', $account_id);
+        if ($business_id) {
+            $query->where('business_id', $business_id)->where('profile_type', 'business');
+        } else {
+            $query->where('profile_type', 'individual');
+        }
+
+        $account = $query->first();
 
         if (!$account) {
             return response()->json([
@@ -265,6 +293,23 @@ class VendorBankController extends Controller
             'success' => true,
             'message' => 'Bank/UPI details deleted successfully'
         ]);
+    }
+
+    function permanentBank($vendor_id)
+    {
+        $account = VendorPaymentAccount::where('vendor_id', $vendor_id)->where('profile_type', 'individual')->where('is_primary', '1')->first();
+        if ($account) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Bank/UPI account fetched successfully',
+                'data'    => $account
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor bank/UPI account not found',
+            ], 404);
+        }
     }
 
     public function permanentBusinessBank($vendor_id, $business_id)
@@ -283,5 +328,4 @@ class VendorBankController extends Controller
             ], 404);
         }
     }
-
 }

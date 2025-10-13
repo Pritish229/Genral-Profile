@@ -5,8 +5,13 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Business Contact"
-        :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List', 'Vendor Detail' => ['vendors.viewDetails', $id], 'Business Contact' => '']" />
+        title="Business Address"
+        :links="[
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
+        'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Business Contact' => '']" />
 
     <div class="mt-4">
         <form id="vendorContactForm">

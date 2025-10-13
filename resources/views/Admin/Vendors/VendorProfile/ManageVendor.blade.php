@@ -80,15 +80,7 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <x-inputbox id="primary_email" label="Primary Email" type="email" placeholder="Enter vendor email" name="primary_email"
-                            value="" :required="true" helpertxt="Vendor Email - This will update contact records" />
-                    </div>
-
-                    <div class="col-md-6">
-                        <x-inputbox id="primary_phone" label="Primary Phone" type="text" placeholder="Enter phone number" name="primary_phone"
-                            value="" :required="false" helpertxt="Vendor number - This will update contact records" />
-                    </div>
+                    
                     <div class="col-md-6">
                         <x-inputbox id="occupation" label="Occupation" type="text" placeholder="Enter Occupation" name="occupation"
                             value="" :required="false" helpertxt="Enter Occupation" />

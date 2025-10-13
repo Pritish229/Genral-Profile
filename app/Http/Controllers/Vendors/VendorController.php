@@ -134,7 +134,7 @@ class VendorController extends Controller
         $vendor = Vendor::findOrFail($id);
 
         $validated = $request->validate([
-            'primary_email'      => 'required|email|unique:vendors,primary_email,' . $id,
+            'primary_email'      => 'nullable|email|unique:vendors,primary_email,' . $id,
             'primary_phone'      => 'nullable|string|max:20',
             'first_name'         => 'required|string|max:100',
             'middle_name'        => 'nullable|string|max:100',
@@ -155,29 +155,20 @@ class VendorController extends Controller
         DB::beginTransaction();
 
         try {
-            // Store old values for contact sync
-            $oldEmail = $vendor->primary_email;
-            $oldPhone = $vendor->primary_phone;
-
+    
             // Update vendor record
             $vendor->update([
                 'vendor_uid'         => $validated['vendor_uid'] ?? $vendor->vendor_uid,
-                'primary_email'      => $validated['primary_email'],
-                'primary_phone'      => $validated['primary_phone'],
                 'onboarding_channel' => $validated['onboarding_channel'] ?? $vendor->onboarding_channel,
                 'status'             => $validated['status'] ?? $vendor->status,
                 'notes'              => $validated['notes'] ?? $vendor->notes,
             ]);
-
-            // Handle individual profile updates only
-            // Get or create individual profile
             $profile = VendorIndividualProfile::firstOrCreate(
                 ['vendor_id' => $id],
                 [
                     'tenant_id' => $vendor->tenant_id,
                 ]
             );
-
             $profile->update([
                 'first_name'         => $validated['first_name'],
                 'middle_name'        => $validated['middle_name'],
@@ -207,9 +198,6 @@ class VendorController extends Controller
                     'avatar_url' => "VendorImages/{$fileName}",
                 ]);
             }
-
-            // Sync primary contacts if email or phone changed
-            $this->syncPrimaryContacts($vendor, $oldEmail, $oldPhone, $validated['primary_email'], $validated['primary_phone'], 'individual');
 
             DB::commit();
 

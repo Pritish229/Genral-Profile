@@ -46,19 +46,27 @@ class VendorDocumentController extends Controller
 
         $validated = $request->validate($rules);
 
+        // ✅ Choose folder based on vendor type
+        $folder = $vendor->type === 'business' ? 'VendorBusinessDocuments' : 'VendorDocuments';
+
+        // ✅ Handle file upload
         if ($request->hasFile('file_url')) {
             $file      = $request->file('file_url');
             $extension = $file->getClientOriginalExtension();
             $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->storeAs('VendorDocuments', $fileName, 'public');
-            $validated['file_url'] = "VendorDocuments/{$fileName}";
+
+            $file->storeAs($folder, $fileName, 'public');
+            $validated['file_url'] = "{$folder}/{$fileName}";
         }
 
-        // Use the profile_type from the form if provided, otherwise use vendor type
-        $validated['profile_type'] = $request->input('profile_type', $vendor->type);
-        $validated['tenant_id']    = $vendor->tenant_id;
-        $validated['vendor_id']    = $vendor->id;
+        // ✅ Always set profile_type from vendor
+        $validated['profile_type'] = $vendor->type;
 
+        // ✅ Vendor reference
+        $validated['tenant_id'] = $vendor->tenant_id;
+        $validated['vendor_id'] = $vendor->id;
+
+        // ✅ If vendor is a business, attach business profile
         if ($vendor->type === 'business') {
             $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->first();
 
@@ -73,6 +81,7 @@ class VendorDocumentController extends Controller
             $validated['business_name'] = $business->trade_name;
         }
 
+        // ✅ Create document record
         $document = VendorDocument::create($validated);
 
         return response()->json([
@@ -80,6 +89,8 @@ class VendorDocumentController extends Controller
             'data'    => $document
         ], 200);
     }
+
+
 
     public function getDocuments($vendor_id, $type)
     {
@@ -133,27 +144,40 @@ class VendorDocumentController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Handle file upload if new file is provided
+        // Set profile_type automatically
+        $validated['profile_type'] = $vendor->type;
+
+        // Decide folder based on vendor type
+        $folder = $vendor->type === 'individual' ? 'VendorMedia' : 'VendorBusiness';
+
+        // Handle file upload if a new file is provided
         if ($request->hasFile('file_url')) {
-            // Delete old file if exists
+            // Delete old file if it exists
             if ($document->file_url && Storage::disk('public')->exists($document->file_url)) {
                 Storage::disk('public')->delete($document->file_url);
             }
 
-            $file      = $request->file('file_url');
+            $file = $request->file('file_url');
             $extension = $file->getClientOriginalExtension();
-            $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->storeAs('VendorDocuments', $fileName, 'public');
-            $validated['file_url'] = "VendorDocuments/{$fileName}";
+
+            // Generate clean filename
+            $fileName = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
+
+            // Store file
+            $file->storeAs($folder, $fileName, 'public');
+            $validated['file_url'] = "{$folder}/{$fileName}";
         }
 
+        // Update document
         $document->update($validated);
 
         return response()->json([
             'success' => true,
-            'data'    => $document->fresh()
+            'message' => 'Document updated successfully.',
+            'data'    => $document->fresh(),
         ], 200);
     }
+
 
     public function deleteDocument($vendor_id, $doc_id)
     {
@@ -219,6 +243,4 @@ class VendorDocumentController extends Controller
             'data'    => $documents
         ], 200);
     }
-
-    
 }

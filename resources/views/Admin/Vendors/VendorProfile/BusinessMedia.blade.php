@@ -5,21 +5,16 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Medias"
+        title="Business Address"
         :links="[
-            'Home' => 'Admin.Dashboard',
-            'Vendors' => 'vendors.List',
-            'Vendor Detail' => ['vendors.viewDetails', $id],
-            'Manage Media' => ''
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
+        'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+            'Business Media' => ''
         ]" />
 
-    <!-- Page Header -->
-    <div class="mt-3">
-        <h4 class="mb-3">
-            <i class="fas fa-photo-video"></i>
-            <span id="mediaTypeTitle">{{ $type === 'individual' ? 'Personal' : 'Business' }} Media</span>
-        </h4>
-    </div>
+  
 
     <!-- Media List -->
     <div class="row" id="mediaList"></div>
@@ -91,7 +86,8 @@
 @section('script')
 <script>
     let vendorId = "{{ $id }}";
-    let vendorType = "{{ $type }}"; // Get type from backend
+    let business_Id = "{{ $business_id }}"; 
+    let vendorType = "Business";
 
     $(document).ready(function() {
         // Initialize Select2
@@ -110,14 +106,14 @@
             $("#media_id").val("");
             $("#profile_type").val("");
             $("#tags").val(null).trigger('change');
-            let mediaTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+            let mediaTypeLabel = 'Business';
             $("#mediaModalLabel").text("Add " + mediaTypeLabel + " Media");
         });
     });
 
     // Load all media files
     function loadMedias() {
-        $.get("{{ url('/vendors') }}/" + vendorId + "/" + vendorType + "/medias", function(res) {
+        $.get("{{ url('/vendors') }}/" + vendorId + "/" + business_Id  +"/Business/Media/List", function(res) {
             let html = '';
 
             // Always show Add Media button
@@ -166,7 +162,7 @@
     // Open add modal with current profile type
     function openAddModal() {
         $("#profile_type").val(vendorType);
-        let mediaTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+        let mediaTypeLabel =  'Business';
         $("#mediaModalLabel").text("Add " + mediaTypeLabel + " Media");
         $("#media_id").val("");
     }
@@ -179,7 +175,7 @@
         let url, method;
 
         if (mediaId) {
-            url = `{{ url('/vendors') }}/${vendorId}/${vendorType}/medias/${mediaId}`;
+            url = `{{ url('/vendors') }}/${vendorId}/medias/${mediaId}`;
             method = "POST";
             formData.append("_method", "PUT");
         } else {
@@ -207,7 +203,7 @@
     // Edit media
     $(document).on("click", ".editMedia", function() {
         let mediaId = $(this).data("id");
-        $.get(`{{ url('/vendors') }}/${vendorId}/${vendorType}/medias/${mediaId}`, function(res) {
+        $.get(`{{ url('/vendors') }}/${vendorId}/medias/${mediaId}`, function(res) {
             console.log(res);
 
             let m = res.data;
@@ -218,7 +214,7 @@
             $("#caption").val(m.caption);
             $("#tags").val(m.tags || []).trigger("change");
             $("#profile_type").val(m.profile_type);
-            let mediaTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+            let mediaTypeLabel = 'Business';
             $("#mediaModalLabel").text("Edit " + mediaTypeLabel + " Media");
             $("#mediaModal").modal("show");
         });
@@ -238,7 +234,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `{{ url('/vendors') }}/${vendorId}/${vendorType}/medias/${mediaId}`,
+                    url: `{{ url('/vendors') }}/${vendorId}}/medias/delete/${mediaId}`,
                     type: "DELETE",
                     success: function() {
                         loadMedias();

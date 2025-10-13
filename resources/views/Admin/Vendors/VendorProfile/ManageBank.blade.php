@@ -112,7 +112,6 @@
 @section('script')
 <script>
     let vendor_id = "{{ $id }}";
-    let type = "{{ $type }}";
     let baseUrl = "{{ url('/vendors') }}";
 
     function toggleFields(method) {
@@ -156,7 +155,7 @@
         $('#modalSaveText').text('Update');
         // Fetch latest account details to ensure fresh data
         $.ajax({
-            url: `${baseUrl}/${vendor_id}/${type}/bank/${account.id}`,
+            url: `${baseUrl}/${vendor_id}/bank/${account.id}`,
             type: 'GET',
             success: function(res) {
                 const acc = res.data || account;
@@ -185,7 +184,7 @@
 
     function vendorbanklist() {
         $.ajax({
-            url: `${baseUrl}/${vendor_id}/${type}/BankList`,
+            url: `${baseUrl}/${vendor_id}/BankList`,
             type: 'GET',
             success: function(res) {
                 console.log(res); // Debug
@@ -238,7 +237,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `${baseUrl}/${vendor_id}/${type}/deleteBank/${account_id}`,
+                    url: `${baseUrl}/${vendor_id}/deleteBank/${account_id}`,
                     type: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -258,8 +257,8 @@
         const isEdit = accountId && accountId !== '';
         const method = isEdit ? 'PUT' : 'POST';
         const url = isEdit
-            ? `${baseUrl}/${vendor_id}/${type}/updateBank/${accountId}`
-            : `${baseUrl}/${vendor_id}/${type}/saveBank`;
+            ? `${baseUrl}/${vendor_id}/updateBank/${accountId}`
+            : `${baseUrl}/${vendor_id}/saveBank`;
 
         $.ajax({
             url,

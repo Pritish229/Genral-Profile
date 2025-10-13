@@ -23,6 +23,12 @@ class VendorMediaController extends Controller
             'type' => $type
         ]);
     }
+
+    public function businessMedia($id, $business_id)
+    {
+        return view('Admin.Vendors.VendorProfile.BusinessMedia', ['id' => $id, 'business_id' => $business_id]);
+    }
+
     public function storeMedia(Request $request, $vendor_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
@@ -39,17 +45,23 @@ class VendorMediaController extends Controller
 
         $validated = $request->validate($rules);
 
+        // ✅ Folder based on vendor type
+        $folder = $vendor->type === 'business' ? 'VendorBusiness' : 'VendorMedia';
+
         if ($request->hasFile('file_url')) {
             $file      = $request->file('file_url');
             $extension = $file->getClientOriginalExtension();
             $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->storeAs('VendorMedia', $fileName, 'public');
-            $validated['file_url'] = "VendorMedia/{$fileName}";
+
+            // Store in correct folder
+            $file->storeAs($folder, $fileName, 'public');
+
+            $validated['file_url'] = "{$folder}/{$fileName}";
         }
 
         $validated['tags'] = $validated['tags'] ?? [];
 
-        // Use the profile_type from the form if provided, otherwise use vendor type
+        // Use profile_type from form if provided, otherwise vendor type
         $profile_type = $request->input('profile_type', $vendor->type);
 
         if ($vendor->type === 'business') {
@@ -67,17 +79,17 @@ class VendorMediaController extends Controller
         }
 
         $media = VendorMedia::create([
-            'tenant_id'    => $vendor->tenant_id,
-            'vendor_id'    => $vendor->id,
-            'profile_type' => $profile_type,
-            'media_usage'  => $validated['media_usage'],
-            'subject_name' => $validated['subject_name'] ?? null,
-            'file_name'    => $validated['file_name'] ?? ($file->getClientOriginalName() ?? null),
-            'file_url'     => $validated['file_url'],
-            'caption'      => $validated['caption'] ?? null,
-            'tags'         => json_encode($this->normalizeTags($validated['tags'])),
-            'status'       => 'active',
-            'business_id'  => $validated['business_id'] ?? null,
+            'tenant_id'     => $vendor->tenant_id,
+            'vendor_id'     => $vendor->id,
+            'profile_type'  => $profile_type,
+            'media_usage'   => $validated['media_usage'],
+            'subject_name'  => $validated['subject_name'] ?? null,
+            'file_name'     => $validated['file_name'] ?? ($file->getClientOriginalName() ?? null),
+            'file_url'      => $validated['file_url'],
+            'caption'       => $validated['caption'] ?? null,
+            'tags'          => json_encode($this->normalizeTags($validated['tags'])),
+            'status'        => 'active',
+            'business_id'   => $validated['business_id'] ?? null,
             'business_name' => $validated['business_name'] ?? null,
         ]);
 
@@ -86,6 +98,8 @@ class VendorMediaController extends Controller
             'data'    => $this->formatMedia($media)
         ], 201);
     }
+
+
 
     public function getMedias($vendor_id, $type)
     {
@@ -105,12 +119,11 @@ class VendorMediaController extends Controller
         ], 200);
     }
 
-    public function getMedia($vendor_id, $type, $media_id)
+    public function getMedia($vendor_id, $media_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
 
         $media = VendorMedia::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
             ->where('id', $media_id)
             ->firstOrFail();
 
@@ -120,11 +133,30 @@ class VendorMediaController extends Controller
         ], 200);
     }
 
-    public function updateMedia(Request $request, $vendor_id, $type, $media_id)
+
+    public function businessMideaList($vendor_id, $business_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->where('id', $business_id)->firstOrFail();
+
+        $medias = VendorMedia::where('vendor_id', $vendor_id)
+            ->where('business_id', $business->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $medias->map(function ($media) {
+                return $this->formatMedia($media);
+            })
+        ], 200);
+    }
+
+    public function updateMedia(Request $request, $vendor_id, $media_id)
+    {
+        $vendor = Vendor::findOrFail($vendor_id);
+
         $media = VendorMedia::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
             ->where('id', $media_id)
             ->firstOrFail();
 
@@ -140,9 +172,12 @@ class VendorMediaController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Handle file upload if new file is provided
+        // ✅ Folder based on vendor type
+        $folder = $vendor->type === 'business' ? 'VendorBusiness' : 'VendorMedia';
+
+        // ✅ Handle file upload if new file is provided
         if ($request->hasFile('file_url')) {
-            // Delete old file if exists
+            // Delete old file if it exists
             if ($media->file_url && Storage::disk('public')->exists($media->file_url)) {
                 Storage::disk('public')->delete($media->file_url);
             }
@@ -150,11 +185,14 @@ class VendorMediaController extends Controller
             $file      = $request->file('file_url');
             $extension = $file->getClientOriginalExtension();
             $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-            $file->storeAs('VendorMedia', $fileName, 'public');
-            $validated['file_url'] = "VendorMedia/{$fileName}";
+
+            // Store new file in correct folder
+            $file->storeAs($folder, $fileName, 'public');
+
+            $validated['file_url'] = "{$folder}/{$fileName}";
         }
 
-        // Normalize tags
+        // ✅ Normalize tags
         if (isset($validated['tags'])) {
             $validated['tags'] = json_encode($this->normalizeTags($validated['tags']));
         }
@@ -167,15 +205,14 @@ class VendorMediaController extends Controller
         ], 200);
     }
 
-    public function deleteMedia($vendor_id, $type, $media_id)
+
+    public function deleteMedia($vendor_id, $media_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
         $media = VendorMedia::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
             ->where('id', $media_id)
             ->firstOrFail();
 
-        // Delete associated file
         if ($media->file_url && Storage::disk('public')->exists($media->file_url)) {
             Storage::disk('public')->delete($media->file_url);
         }

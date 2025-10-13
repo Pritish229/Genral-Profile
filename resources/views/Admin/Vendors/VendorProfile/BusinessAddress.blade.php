@@ -6,8 +6,13 @@
 <div class="page-content">
     <x-breadcrumb
         title="Business Address"
-        :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List', 'Vendor Detail' => ['vendors.viewDetails', $id], 'Business Address' => '']" />
-
+        :links="[
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
+        'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Business Address' => ''
+    ]" />
     <div class="mt-4">
         <!-- FORM -->
         <form id="businessAddressForm">
@@ -92,16 +97,18 @@
 
 @section('script')
 <script>
-$(function() {
-    const vendorId = "{{ $id }}";
-    const businessId = "{{ $business_id }}";
+    $(function() {
+        const vendorId = "{{ $id }}";
+        const businessId = "{{ $business_id }}";
 
-    function loadAddresses() {
-        $.post(`/vendors/${vendorId}/${businessId}/Business/Address/list`, {_token: '{{ csrf_token() }}'}, function(data) {
-            if (data.success) {
-                const tbody = $('#addressTable tbody').empty();
-                data.data.forEach(address => {
-                    tbody.append(`
+        function loadAddresses() {
+            $.get(`/vendors/${vendorId}/${businessId}/Business/Address/list`, {
+                _token: '{{ csrf_token() }}'
+            }, function(data) {
+                if (data.success) {
+                    const tbody = $('#addressTable tbody').empty();
+                    data.data.forEach(address => {
+                        tbody.append(`
                         <tr data-id="${address.id}">
                             <td>${address.label}</td>
                             <td>${address.address_type}</td>
@@ -113,86 +120,98 @@ $(function() {
                             </td>
                         </tr>
                     `);
-                });
-            }
-        });
-    }
-
-    loadAddresses();
-
-    // SAVE FORM (Insert/Update)
-    $('#businessAddressForm').on('submit', function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
-        let addressId = $('#address_id').val();
-        let url = `/vendors/${vendorId}/${businessId}/Business/Address/Add`;
-        if (addressId) url = `/vendors/${vendorId}/${businessId}/Business/Address/${addressId}/Update`;
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(data) {
-                if (data.success) {
-                    alert(data.message);
-                    $('#businessAddressForm')[0].reset();
-                    $('#address_id').val('');
-                    $('#cancel-edit').hide();
-                    loadAddresses();
-                } else {
-                    alert(data.message || "Something went wrong");
+                    });
                 }
+            });
+        }
+
+        loadAddresses();
+
+        // SAVE FORM (Insert/Update)
+        $('#businessAddressForm').on('submit', function(e) {
+            e.preventDefault();
+            let addressId = $('#address_id').val();
+            let url = `/vendors/${vendorId}/${businessId}/Business/Address/Add`;
+            let method = 'POST';
+            if (addressId) {
+                url = `/vendors/${vendorId}/${businessId}/Business/Address/${addressId}/Update`;
+                method = 'PUT';
             }
+
+            // Convert FormData to object for PUT since jQuery's processData:false+method:PUT has issues
+            let formDataObj = {};
+            (new FormData(this)).forEach((value, key) => {
+                formDataObj[key] = value;
+            });
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: formDataObj,
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
+                success: function(data) {
+                    if (data.success) {
+                        alert(data.message);
+                        $('#businessAddressForm')[0].reset();
+                        $('#address_id').val('');
+                        $('#cancel-edit').hide();
+                        loadAddresses();
+                    } else {
+                        alert(data.message || "Something went wrong");
+                    }
+                }
+            });
+        });
+
+        // EDIT ADDRESS
+        $(document).on('click', '.edit-btn', function() {
+            let id = $(this).data('id');
+            $.get(`/vendors/${vendorId}/${businessId}/Business/Address/${id}`, function(data) {
+                if (data.success) {
+                    let a = data.data;
+                    $('#address_id').val(a.id);
+                    $('#state').val(a.state);
+                    $('#district').val(a.district);
+                    $('#city').val(a.city);
+                    $('#pincode').val(a.pincode);
+                    $('#line1').val(a.line1);
+                    $('#line2').val(a.line2);
+                    $('#landmark').val(a.landmark);
+                    $('#label').val(a.label);
+                    $('#address_type').val(a.address_type);
+                    $('#longitude').val(a.longitude);
+                    $('#latitude').val(a.latitude);
+                    $('#is_primary').prop('checked', a.is_primary);
+                    $('#cancel-edit').show();
+                }
+            });
+        });
+
+        // CANCEL EDIT
+        $('#cancel-edit').click(function() {
+            $('#businessAddressForm')[0].reset();
+            $('#address_id').val('');
+            $(this).hide();
+        });
+
+        // DELETE ADDRESS
+        $(document).on('click', '.delete-btn', function() {
+            if (!confirm("Are you sure?")) return;
+            let id = $(this).data('id');
+            $.ajax({
+                url: `/vendors/${vendorId}/${businessId}/Business/Address/${id}/Delete`,
+                method: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(data) {
+                    if (data.success) loadAddresses();
+                    else alert(data.message);
+                }
+            });
         });
     });
-
-    // EDIT ADDRESS
-    $(document).on('click', '.edit-btn', function() {
-        let id = $(this).data('id');
-        $.get(`/vendors/${vendorId}/${businessId}/Business/Address/${id}`, function(data) {
-            if (data.success) {
-                let a = data.data;
-                $('#address_id').val(a.id);
-                $('#state').val(a.state);
-                $('#district').val(a.district);
-                $('#city').val(a.city);
-                $('#pincode').val(a.pincode);
-                $('#line1').val(a.line1);
-                $('#line2').val(a.line2);
-                $('#landmark').val(a.landmark);
-                $('#label').val(a.label);
-                $('#address_type').val(a.address_type);
-                $('#longitude').val(a.longitude);
-                $('#latitude').val(a.latitude);
-                $('#is_primary').prop('checked', a.is_primary);
-                $('#cancel-edit').show();
-            }
-        });
-    });
-
-    // CANCEL EDIT
-    $('#cancel-edit').click(function() {
-        $('#businessAddressForm')[0].reset();
-        $('#address_id').val('');
-        $(this).hide();
-    });
-
-    // DELETE ADDRESS
-    $(document).on('click', '.delete-btn', function() {
-        if (!confirm("Are you sure?")) return;
-        let id = $(this).data('id');
-        $.ajax({
-            url: `/vendors/${vendorId}/${businessId}/Business/Address/${id}/Delete`,
-            method: 'DELETE',
-            data: {_token: '{{ csrf_token() }}'},
-            success: function(data) {
-                if (data.success) loadAddresses();
-                else alert(data.message);
-            }
-        });
-    });
-});
 </script>
 @endsection

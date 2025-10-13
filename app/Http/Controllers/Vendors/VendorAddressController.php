@@ -5,32 +5,31 @@ namespace App\Http\Controllers\Vendors;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use App\Models\VendorAddress;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\VendorBusinessProfile;
 
 class VendorAddressController extends Controller
 {
+    // Individual Address Methods
+
     public function index($id)
     {
+        $vendor = Vendor::findOrFail($id);
         return view('Admin.Vendors.VendorProfile.AddAddress', ['id' => $id]);
     }
-    public function businessAddress($id, $business_id)
-    {
-        return view('Admin.Vendors.VendorProfile.BusinessAddress', ['id' => $id, 'business_id' => $business_id]);
-    }
 
-    
-    public function manageAddress($id, $type)
+    public function manageAddress($id, $type = 'individual')
     {
+        $vendor = Vendor::findOrFail($id);
         return view('Admin.Vendors.VendorProfile.ManageAddress', ['id' => $id, 'type' => $type]);
     }
 
-    public function getAddresses($vendor_id, $type)
+    public function getAddresses($id)
     {
-        $addresses = VendorAddress::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
-            ->orderBy('is_primary', 'desc')
-            ->orderBy('created_at', 'desc')
+        $vendor = Vendor::findOrFail($id);
+        $addresses = VendorAddress::where('vendor_id', $id)
+            ->where('profile_type', 'individual')
             ->get();
 
         return response()->json([
@@ -39,18 +38,12 @@ class VendorAddressController extends Controller
         ]);
     }
 
-    public function getAddress($vendor_id, $business_id, $address_id)
+    public function getAddress($vendor_id, $address_id)
     {
+        $vendor = Vendor::findOrFail($vendor_id);
         $address = VendorAddress::where('vendor_id', $vendor_id)
-            ->where('business_id', $business_id)
-            ->find($address_id);
-
-        if (!$address) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found'
-            ], 404);
-        }
+            ->where('profile_type', 'individual')
+            ->findOrFail($address_id);
 
         return response()->json([
             'success' => true,
@@ -58,32 +51,24 @@ class VendorAddressController extends Controller
         ]);
     }
 
-    public function storeAddress(Request $request, $vendor_id, $type)
+    public function storeAddress(Request $request, $vendor_id, $type = 'individual')
     {
+        $vendor = Vendor::findOrFail($vendor_id);
         $validated = $request->validate([
-            'state'        => 'required|string|max:120',
-            'district'     => 'required|string|max:120',
-            'city'         => 'required|string|max:120',
-            'pincode'      => 'required|digits:6',
-            'line1'        => 'nullable|string|max:120',
-            'line2'        => 'nullable|string|max:120',
-            'landmark'     => 'nullable|string|max:150',
-            'label'        => 'nullable|string|max:100',
-            'longitude'    => 'nullable|string|max:50',
-            'latitude'     => 'nullable|string|max:50',
-            'address_type' => 'nullable|string|in:permanent,temporary,office,billing,shipping',
-            'is_primary'   => 'nullable|boolean',
+            'state' => 'required|string|max:120',
+            'district' => 'required|string|max:120',
+            'city' => 'required|string|max:120',
+            'pincode' => 'required|digits:6',
+            'line1' => 'nullable|string|max:120',
+            'line2' => 'nullable|string|max:120',
+            'landmark' => 'nullable|string|max:150',
+            'label' => 'nullable|string|max:100',
+            'longitude' => 'nullable|string|max:50',
+            'latitude' => 'nullable|string|max:50',
+            'address_type' => 'required|string|in:permanent,temporary,office',
+            'is_primary' => 'nullable|boolean',
         ]);
 
-        $vendor = Vendor::find($vendor_id);
-        if (!$vendor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vendor not found'
-            ], 404);
-        }
-
-        // Check if business profile exists for business type
         if ($type === 'business') {
             $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->first();
             if (!$business) {
@@ -94,7 +79,6 @@ class VendorAddressController extends Controller
             }
         }
 
-        // If setting as primary, remove primary status from other addresses of same type
         if ($validated['is_primary'] ?? false) {
             VendorAddress::where('vendor_id', $vendor_id)
                 ->where('profile_type', $type)
@@ -102,109 +86,135 @@ class VendorAddressController extends Controller
         }
 
         $address = VendorAddress::create([
-            'tenant_id'    => 1,
-            'vendor_id'    => $vendor_id,
+            'tenant_id' => $vendor->tenant_id,
+            'vendor_id' => $vendor_id,
             'profile_type' => $type,
-            'state'        => $validated['state'],
-            'district'     => $validated['district'],
-            'city'         => $validated['city'],
-            'pincode'      => $validated['pincode'],
-            'line1'        => $validated['line1'],
-            'line2'        => $validated['line2'],
-            'landmark'     => $validated['landmark'],
-            'label'        => $validated['label'],
-            'longitude'    => $validated['longitude'],
-            'latitude'     => $validated['latitude'],
-            'address_type' => $validated['address_type'] ?? 'permanent',
-            'is_primary'   => $validated['is_primary'] ?? false,
+            'state' => $validated['state'],
+            'district' => $validated['district'],
+            'city' => $validated['city'],
+            'pincode' => $validated['pincode'],
+            'line1' => $validated['line1'],
+            'line2' => $validated['line2'],
+            'landmark' => $validated['landmark'],
+            'label' => $validated['label'],
+            'longitude' => $validated['longitude'],
+            'latitude' => $validated['latitude'],
+            'address_type' => $validated['address_type'],
+            'is_primary' => $validated['is_primary'] ?? false,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Address added successfully',
-            'data'    => $address
+            'data' => $address
         ]);
     }
 
     public function updateAddress(Request $request, $vendor_id, $type, $address_id)
     {
-        $validated = $request->validate([
-            'state'        => 'required|string|max:120',
-            'district'     => 'required|string|max:120',
-            'city'         => 'required|string|max:120',
-            'pincode'      => 'required|digits:6',
-            'line1'        => 'nullable|string|max:120',
-            'line2'        => 'nullable|string|max:120',
-            'landmark'     => 'nullable|string|max:150',
-            'label'        => 'nullable|string|max:100',
-            'longitude'    => 'nullable|string|max:50',
-            'latitude'     => 'nullable|string|max:50',
-            'address_type' => 'nullable|string|in:permanent,temporary,office,billing,shipping',
-            'is_primary'   => 'nullable|boolean',
-        ]);
+        try {
+            $vendor = Vendor::findOrFail($vendor_id);
 
-        $address = VendorAddress::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
-            ->where('id', $address_id)
-            ->first();
+            if ($type !== 'individual') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid profile type for individual address update'
+                ], 400);
+            }
 
-        if (!$address) {
+            // Validate request data
+            $validated = $request->validate([
+                'state' => 'required|string|max:120',
+                'district' => 'required|string|max:120',
+                'city' => 'required|string|max:120',
+                'pincode' => 'required|digits:6',
+                'line1' => 'nullable|string|max:120',
+                'line2' => 'nullable|string|max:120',
+                'landmark' => 'nullable|string|max:150',
+                'label' => 'nullable|string|max:100',
+                'longitude' => 'nullable|string|max:50',
+                'latitude' => 'nullable|string|max:50',
+                'address_type' => 'required|string|in:permanent,temporary,office',
+                'is_primary' => 'nullable|boolean',
+            ]);
+
+            // Find the address
+            $address = VendorAddress::where('vendor_id', $vendor_id)
+                ->where('profile_type', $type)
+                ->findOrFail($address_id);
+
+            // If setting as primary, reset other addresses
+            if ($validated['is_primary'] ?? false) {
+                VendorAddress::where('vendor_id', $vendor_id)
+                    ->where('profile_type', $type)
+                    ->where('id', '!=', $address_id)
+                    ->update(['is_primary' => false]);
+            }
+
+            // Update the address
+            $address->update([
+                'state' => $validated['state'],
+                'district' => $validated['district'],
+                'city' => $validated['city'],
+                'pincode' => $validated['pincode'],
+                'line1' => $validated['line1'],
+                'line2' => $validated['line2'],
+                'landmark' => $validated['landmark'],
+                'label' => $validated['label'],
+                'longitude' => $validated['longitude'],
+                'latitude' => $validated['latitude'],
+                'address_type' => $validated['address_type'],
+                'is_primary' => $validated['is_primary'] ?? false,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Address updated successfully',
+                'data' => $address->fresh()
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error in updateAddress', [
+                'vendor_id' => $vendor_id,
+                'address_id' => $address_id,
+                'profile_type' => $type,
+                'errors' => $e->errors(),
+                'request_data' => $request->all(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Address not found'
-            ], 404);
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error in updateAddress', [
+                'vendor_id' => $vendor_id,
+                'address_id' => $address_id,
+                'profile_type' => $type,
+                'error' => $e->getMessage(),
+                'timestamp' => now()->toDateTimeString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating the address'
+            ], 500);
         }
-
-        // If setting as primary, remove primary status from other addresses of same type
-        if ($validated['is_primary'] ?? false) {
-            VendorAddress::where('vendor_id', $vendor_id)
-                ->where('profile_type', $type)
-                ->where('id', '!=', $address_id)
-                ->update(['is_primary' => false]);
-        }
-
-        $address->update([
-            'state'        => $validated['state'],
-            'district'     => $validated['district'],
-            'city'         => $validated['city'],
-            'pincode'      => $validated['pincode'],
-            'line1'        => $validated['line1'],
-            'line2'        => $validated['line2'],
-            'landmark'     => $validated['landmark'],
-            'label'        => $validated['label'],
-            'longitude'    => $validated['longitude'],
-            'latitude'     => $validated['latitude'],
-            'address_type' => $validated['address_type'] ?? $address->address_type,
-            'is_primary'   => $validated['is_primary'] ?? false,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Address updated successfully',
-            'data'    => $address->fresh()
-        ]);
     }
 
     public function deleteAddress($vendor_id, $type, $address_id)
     {
+        $vendor = Vendor::findOrFail($vendor_id);
         $address = VendorAddress::where('vendor_id', $vendor_id)
             ->where('profile_type', $type)
-            ->where('id', $address_id)
-            ->first();
+            ->findOrFail($address_id);
 
-        if (!$address) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found'
-            ], 404);
-        }
-
-        // Prevent deletion of primary address
         if ($address->is_primary) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cannot delete primary address. Please set another address as primary first.'
-            ], 400);
+            ], 403);
         }
 
         $address->delete();
@@ -215,17 +225,19 @@ class VendorAddressController extends Controller
         ]);
     }
 
-    public function permanentAddress($vendor_id, $type)
+    public function permanentAddress($vendor_id, $type = 'individual')
     {
-        $address = VendorAddress::where('vendor_id', $vendor_id)->where('profile_type', $type)
+        $vendor = Vendor::findOrFail($vendor_id);
+        $address = VendorAddress::where('vendor_id', $vendor_id)
+            ->where('profile_type', $type)
             ->where('is_primary', 1)
             ->first();
 
         if ($address) {
             return response()->json([
                 'success' => true,
-                'message' => 'Address Fetched Successfully',
-                'data'    => $address
+                'message' => 'Address fetched successfully',
+                'data' => $address
             ]);
         }
 
@@ -235,27 +247,22 @@ class VendorAddressController extends Controller
         ], 404);
     }
 
-    public function permanentBusinessAddress($vendor_id, $business_id)
+    // Business Address Methods
+
+    public function businessAddress($id, $business_id)
     {
-        $address = VendorAddress::where('vendor_id', $vendor_id)->where('business_id', $business_id)->where('is_primary', '1')->first();
-        if ($address) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Address fetched successfully',
-                'data'    => $address
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vendor address not found',
-            ], 404);
-        }
+        $vendor = Vendor::findOrFail($id);
+        $business = VendorBusinessProfile::where('vendor_id', $id)->findOrFail($business_id);
+        return view('Admin.Vendors.VendorProfile.BusinessAddress', ['id' => $id, 'business_id' => $business_id]);
     }
 
-    public function listBusinessAddresses($vendor_id, $business_id)
+    public function getBusinessAddresses($vendor_id, $business_id)
     {
+        $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->findOrFail($business_id);
         $addresses = VendorAddress::where('vendor_id', $vendor_id)
             ->where('business_id', $business_id)
+            ->where('profile_type', 'business')
             ->orderBy('is_primary', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -268,16 +275,12 @@ class VendorAddressController extends Controller
 
     public function getBusinessAddress($vendor_id, $business_id, $address_id)
     {
+        $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->findOrFail($business_id);
         $address = VendorAddress::where('vendor_id', $vendor_id)
             ->where('business_id', $business_id)
-            ->find($address_id);
-
-        if (!$address) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found'
-            ], 404);
-        }
+            ->where('profile_type', 'business')
+            ->findOrFail($address_id);
 
         return response()->json([
             'success' => true,
@@ -287,11 +290,13 @@ class VendorAddressController extends Controller
 
     public function storeBusinessAddress(Request $request, $vendor_id, $business_id)
     {
+        $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->findOrFail($business_id);
         $validated = $request->validate([
-            'state' => 'nullable|string|max:120',
-            'district' => 'nullable|string|max:120',
-            'city' => 'nullable|string|max:120',
-            'pincode' => 'nullable|string|max:10',
+            'state' => 'required|string|max:120',
+            'district' => 'required|string|max:120',
+            'city' => 'required|string|max:120',
+            'pincode' => 'required|digits:6',
             'line1' => 'nullable|string|max:255',
             'line2' => 'nullable|string|max:255',
             'landmark' => 'nullable|string|max:255',
@@ -302,24 +307,21 @@ class VendorAddressController extends Controller
             'latitude' => 'nullable|string|max:50'
         ]);
 
-        $vendor = Vendor::findOrFail($vendor_id);
+        if ($validated['is_primary'] ?? false) {
+            VendorAddress::where('vendor_id', $vendor_id)
+                ->where('business_id', $business_id)
+                ->where('profile_type', 'business')
+                ->where('address_type', $validated['address_type'])
+                ->update(['is_primary' => false]);
+        }
 
         $address = VendorAddress::create(array_merge($validated, [
             'vendor_id' => $vendor_id,
             'business_id' => $business_id,
             'tenant_id' => $vendor->tenant_id,
+            'profile_type' => 'business',
+            'business_name' => $business->business_name
         ]));
-
-        if (!empty($validated['is_primary'])) {
-            VendorAddress::where('vendor_id', $vendor_id)
-                ->where('business_id', $business_id)
-                ->where('address_type', $validated['address_type'])
-                ->where('id', '!=', $address->id)
-                ->update(['is_primary' => false]);
-
-            $address->is_primary = true;
-            $address->save();
-        }
 
         return response()->json([
             'success' => true,
@@ -330,11 +332,15 @@ class VendorAddressController extends Controller
 
     public function updateBusinessAddress(Request $request, $vendor_id, $business_id, $address_id)
     {
+        $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->findOrFail($business_id);
+
         $validated = $request->validate([
-            'state' => 'nullable|string|max:120',
-            'district' => 'nullable|string|max:120',
-            'city' => 'nullable|string|max:120',
-            'pincode' => 'nullable|string|max:10',
+            'state' => 'required|string|max:120',
+            'district' => 'required|string|max:120',
+            'city' => 'required|string|max:120',
+            'pincode' => 'required|digits:6',
             'line1' => 'nullable|string|max:255',
             'line2' => 'nullable|string|max:255',
             'landmark' => 'nullable|string|max:255',
@@ -342,32 +348,26 @@ class VendorAddressController extends Controller
             'address_type' => 'required|string|in:permanent,office,billing,shipping',
             'is_primary' => 'nullable|boolean',
             'longitude' => 'nullable|string|max:50',
-            'latitude' => 'nullable|string|max:50'
+            'latitude' => 'nullable|string|max:50',
         ]);
+
+        $validated['business_name'] = $business->business_name;
 
         $address = VendorAddress::where('vendor_id', $vendor_id)
             ->where('business_id', $business_id)
-            ->find($address_id);
+            ->where('profile_type', 'business')
+            ->findOrFail($address_id);
 
-        if (!$address) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found'
-            ], 404);
+        if ($validated['is_primary'] ?? false) {
+            VendorAddress::where('vendor_id', $vendor_id)
+                ->where('business_id', $business_id)
+                ->where('profile_type', 'business')
+                ->where('address_type', $validated['address_type'])
+                ->where('id', '!=', $address_id)
+                ->update(['is_primary' => false]);
         }
 
         $address->update($validated);
-
-        if (!empty($validated['is_primary'])) {
-            VendorAddress::where('vendor_id', $vendor_id)
-                ->where('business_id', $business_id)
-                ->where('address_type', $validated['address_type'])
-                ->where('id', '!=', $address->id)
-                ->update(['is_primary' => false]);
-
-            $address->is_primary = true;
-            $address->save();
-        }
 
         return response()->json([
             'success' => true,
@@ -376,18 +376,15 @@ class VendorAddressController extends Controller
         ]);
     }
 
+
     public function deleteBusinessAddress($vendor_id, $business_id, $address_id)
     {
+        $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->findOrFail($business_id);
         $address = VendorAddress::where('vendor_id', $vendor_id)
             ->where('business_id', $business_id)
-            ->find($address_id);
-
-        if (!$address) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found'
-            ], 404);
-        }
+            ->where('profile_type', 'business')
+            ->findOrFail($address_id);
 
         if ($address->is_primary) {
             return response()->json([
@@ -402,5 +399,33 @@ class VendorAddressController extends Controller
             'success' => true,
             'message' => 'Address deleted successfully'
         ]);
+    }
+
+    public function permanentBusinessAddress($id, $business_id)
+    {
+        try {
+            $address = VendorAddress::where('business_id', $business_id)
+                ->where('vendor_id', $id)
+                ->where('profile_type', 'business')
+                ->where('is_primary', 1)
+                ->first();
+
+            if (!$address) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No address found for this business.',
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $address,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server Error: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -37,7 +37,7 @@
         <div class="card p-3 flex-fill">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5><i class="fas fa-building"></i> Basic Details</h5>
-                <a href="${baseUrl}/${vendor_id}/business/manage" class="text-decoration-none">
+                <a href="${baseUrl}/${vendor_id}/${business_id}/ManageBusinessinfo" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>
@@ -107,7 +107,7 @@
         </div>
     </div>`;
 
-    let others = `
+        let others = `
     <div class="col-md-6  "> 
         <div class=" flex-fill equal-height ">
                 <div class="row text-center">
@@ -129,7 +129,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-6">
-                        <a href="${baseUrl}/${vendor_id}/Medias" class="text-decoration-none">
+                        <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Media" class="text-decoration-none">
                             <div class="p-2 border rounded">
                                 <i class="fas fa-photo-video fa-lg"></i><br>
                                 Medias
@@ -193,9 +193,11 @@
         let business_id = "{{ $business_id }}";
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/${business_id}/BusinessAddress`,
+            url: `${baseUrl}/${vendor_id}/${business_id}/Permanat/Business/Address`,
             dataType: "json",
             success: function(response) {
+                console.log(response);
+                
                 let html = `
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-map-marker-alt"></i> Address Info</h5>
@@ -203,7 +205,7 @@
                     <i class="fas fa-edit"></i>
                 </a>
             </div>`;
-
+                
                 if (response.success && response.data) {
                     html += `
                 <p><i class="fas fa-map-marker-alt"></i> <strong>Address Line 1:</strong> ${safe(response.data.line1)}</p>
@@ -237,7 +239,7 @@
             url: `${baseUrl}/${vendor_id}/${business_id}/BusinessBank`,
             dataType: "json",
             success: function(response) {
-                console.log(response);
+
 
                 let html = `
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -279,7 +281,7 @@
         let business_id = "{{ $business_id }}";
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/${business_id}/Business`,
+            url: `${baseUrl}/${vendor_id}/${business_id}/Business/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success && response.data) {

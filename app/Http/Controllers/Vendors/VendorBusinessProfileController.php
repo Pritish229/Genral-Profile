@@ -70,6 +70,9 @@ class VendorBusinessProfileController extends Controller
                 'tenant_id' => $vendor->tenant_id
             ]));
 
+            $vendor->type = 'business';
+            $vendor->save();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Business profile added successfully.',
@@ -85,12 +88,12 @@ class VendorBusinessProfileController extends Controller
     }
 
 
-    public function manage($id)
+    public function manage($id, $business_id)
     {
-        return view('Admin.Vendors.VendorProfile.ManageBusinessinfo', ['id' => $id]);
+        return view('Admin.Vendors.VendorProfile.ManageBusinessinfo', ['id' => $id, 'business_id' => $business_id]);
     }
 
-    public function getBusiness($id, $business_id)
+    public function fetchBusinessDetails($id, $business_id)
     {
         $profile = VendorBusinessProfile::where('vendor_id', $id)->where('id', $business_id)->first();
         if ($profile) {
@@ -153,6 +156,4 @@ class VendorBusinessProfileController extends Controller
             'data' => $profile->fresh()
         ]);
     }
-
-    
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vendors;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use App\Models\VendorContact;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\VendorBusinessProfile;
 
@@ -12,37 +13,23 @@ class VendorContactController extends Controller
 {
     public function index($id)
     {
-        return view('Admin.Vendors.VendorProfile.AddContact', ['id' => $id]);
+        return view('Admin.Vendors.VendorProfile.ManageContact', ['id' => $id]);
     }
 
-    public function BusinessContact($id, $business_id)
+    public function businessContact($id, $business_id)
     {
         return view('Admin.Vendors.VendorProfile.BusinessContact', ['id' => $id, 'business_id' => $business_id]);
     }
 
-    public function manageContact($id, $type)
+    public function manageContact($id)
     {
-        return view('Admin.Vendors.VendorProfile.ManageContact', ['id' => $id, 'type' => $type]);
+        return view('Admin.Vendors.VendorProfile.ManageContact', ['id' => $id]);
     }
 
-    public function getContacts($vendor_id, $type)
+    public function getContacts($vendor_id)
     {
         $contacts = VendorContact::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
-            ->orderBy('is_primary', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $contacts
-        ]);
-    }
-
-    public function getBusinessContacts($vendor_id, $business_id)
-    {
-        $contacts = VendorContact::where('vendor_id', $vendor_id)
-            ->where('business_id', $business_id)
+            ->where('profile_type', 'individual')
             ->orderBy('is_primary', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -57,8 +44,7 @@ class VendorContactController extends Controller
     {
         $contact = VendorContact::where('vendor_id', $vendor_id)
             ->where('profile_type', $type)
-            ->where('id', $contact_id)
-            ->first();
+            ->find($contact_id);
 
         if (!$contact) {
             return response()->json([
@@ -75,145 +61,173 @@ class VendorContactController extends Controller
 
     public function storeContact(Request $request, $vendor_id)
     {
-        $vendor = Vendor::findOrFail($vendor_id);
-
-        $rules = [
-            'contact_type' => 'required|string|max:120',
-            'value'        => 'required|string|max:120',
-            'label'        => 'nullable|string|max:120',
-            'is_primary'   => 'nullable|boolean',
+        $validated = $request->validate([
+            'contact_type' => 'required|string|in:phone,email,mobile,whatsapp,telegram,skype,other',
+            'value' => 'required|string|max:255',
+            'country_code' => 'nullable|string|max:10',
+            'label' => 'nullable|string|max:100',
+            'is_primary' => 'nullable|boolean',
             'is_emergency' => 'nullable|boolean',
-        ];
+        ]);
 
-        $validated = $request->validate($rules);
+        $vendor = Vendor::find($vendor_id);
+        if (!$vendor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor not found'
+            ], 404);
+        }
 
-        $profile_type = $request->route('type') ?? 'individual';
-
-        $existingContacts = VendorContact::where('vendor_id', $vendor->id)
-            ->where('profile_type', $profile_type)
-            ->count();
-
-        $data = [
-            'contact_type' => $validated['contact_type'],
-            'label'        => $validated['label'] ?? null,
-            'value'        => $validated['value'],
-            'vendor_id'    => $vendor->id,
-            'tenant_id'    => $vendor->tenant_id,
-            'profile_type' => $profile_type,
-            'is_primary'   => $validated['is_primary'] ?? ($existingContacts === 0),
-            'is_emergency' => $validated['is_emergency'] ?? false,
-        ];
-
-        if ($data['is_primary']) {
-            VendorContact::where('vendor_id', $vendor->id)
-                ->where('profile_type', $profile_type)
+        // If setting as primary for phone or email, unset other primary contacts of the same contact_type
+        if (($validated['is_primary'] ?? false) && in_array($validated['contact_type'], ['phone', 'email'])) {
+            VendorContact::where('vendor_id', $vendor_id)
+                ->where('profile_type', 'individual')
+                ->where('contact_type', $validated['contact_type'])
                 ->update(['is_primary' => false]);
         }
 
-        if ($vendor->type === 'business') {
-            $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->first();
+        $contact = VendorContact::create([
+            'tenant_id' => $vendor->tenant_id,
+            'vendor_id' => $vendor_id,
+            'profile_type' => 'individual',
+            'contact_type' => $validated['contact_type'],
+            'value' => $validated['value'],
+            'country_code' => $validated['country_code'],
+            'label' => $validated['label'],
+            'is_primary' => $validated['is_primary'] ?? false,
+            'is_emergency' => $validated['is_emergency'] ?? false,
+        ]);
 
-            if (!$business) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Business profile not found for this vendor.'
-                ], 422);
+        // Sync primary_email or primary_phone in Vendor model
+        if ($contact->is_primary && in_array($contact->contact_type, ['phone', 'email'])) {
+            $updateData = [];
+            if ($contact->contact_type === 'email') {
+                $updateData['primary_email'] = $contact->value;
+            } elseif ($contact->contact_type === 'phone') {
+                $updateData['primary_phone'] = $contact->country_code ? $contact->country_code . $contact->value : $contact->value;
             }
-
-            $data['business_id']   = $business->id;
-            $data['business_name'] = $business->trade_name;
-        }
-
-        $contact = VendorContact::create($data);
-
-        if ($data['is_primary']) {
-            $this->syncPrimaryContact($contact);
+            $vendor->update($updateData);
         }
 
         return response()->json([
             'success' => true,
-            'data'    => $contact
-        ], 201);
+            'message' => 'Contact added successfully',
+            'data' => $contact
+        ]);
     }
 
-    public function permanentContact($vendor_id, $type)
+    public function updateContact(Request $request, $vendor_id, $type, $contact_id)
     {
-        $contact = VendorContact::where('vendor_id', $vendor_id)
-            ->where('is_primary', '1')
-            ->where('profile_type', $type)
-            ->first();
+        $validated = $request->validate([
+            'contact_type' => 'required|string|in:phone,email,mobile,whatsapp,telegram,skype,other',
+            'value' => 'required|string|max:255',
+            'country_code' => 'nullable|string|max:10',
+            'label' => 'nullable|string|max:100',
+            'is_primary' => 'nullable|boolean',
+            'is_emergency' => 'nullable|boolean',
+        ]);
 
-        if ($contact) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Contact fetched successfully.',
-                'data'    => [
-                    'id' => $contact->id,
-                    'contact_type' => $contact->contact_type,
-                    'contact_value' => $contact->value,
-                    'country_code' => $contact->country_code,
-                    'contact_label' => $contact->label,
-                    'emergency' => $contact->is_emergency ? 'Yes' : 'No',
-                    'is_primary' => $contact->is_primary,
-                    'profile_type' => $contact->profile_type,
-                ]
-            ], 200);
-        } else {
+        $contact = VendorContact::where('vendor_id', $vendor_id)
+            ->where('profile_type', $type)
+            ->find($contact_id);
+
+        if (!$contact) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vendor contact not found',
+                'message' => 'Contact not found'
             ], 404);
         }
-    }
 
-    public function updateContact(Request $request, Vendor $vendor, $type, VendorContact $contact)
-    {
-        $rules = [
-            'contact_type' => 'required|string|max:120',
-            'value'        => 'required|string|max:120',
-            'label'        => 'nullable|string|max:120',
-            'is_primary'   => 'nullable|boolean',
-            'is_emergency' => 'nullable|boolean',
-        ];
-        $validated = $request->validate($rules);
+        $vendor = Vendor::find($vendor_id);
+        if (!$vendor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor not found'
+            ], 404);
+        }
 
-        $data = [
-            'contact_type' => $validated['contact_type'],
-            'label'        => $validated['label'] ?? null,
-            'value'        => $validated['value'],
-            'profile_type' => $type,
-            'is_primary'   => $validated['is_primary'] ?? $contact->is_primary,
-            'is_emergency' => $validated['is_emergency'] ?? $contact->is_emergency,
-        ];
-
-        if ($data['is_primary'] && !$contact->is_primary) {
-            VendorContact::where('vendor_id', $vendor->id)
+        // If setting as primary for phone or email, unset other primary contacts of the same contact_type
+        if (($validated['is_primary'] ?? false) && in_array($validated['contact_type'], ['phone', 'email'])) {
+            VendorContact::where('vendor_id', $vendor_id)
                 ->where('profile_type', $type)
-                ->where('id', '!=', $contact->id)
+                ->where('contact_type', $validated['contact_type'])
+                ->where('id', '!=', $contact_id)
                 ->update(['is_primary' => false]);
         }
 
-        $contact->update($data);
+        // Check if the contact was previously primary and is being unset
+        $wasPrimary = $contact->is_primary;
+        $isPrimaryNow = $validated['is_primary'] ?? false;
 
-        if ($data['is_primary']) {
-            $this->syncPrimaryContact($contact);
+        $contact->update([
+            'contact_type' => $validated['contact_type'],
+            'value' => $validated['value'],
+            'country_code' => $validated['country_code'],
+            'label' => $validated['label'],
+            'is_primary' => $isPrimaryNow,
+            'is_emergency' => $validated['is_emergency'] ?? false,
+        ]);
+
+        // Sync primary_email or primary_phone in Vendor model
+        if (in_array($validated['contact_type'], ['phone', 'email'])) {
+            $updateData = [];
+            if ($isPrimaryNow) {
+                // Set primary_email or primary_phone
+                if ($validated['contact_type'] === 'email') {
+                    $updateData['primary_email'] = $validated['value'];
+                } elseif ($validated['contact_type'] === 'phone') {
+                    $updateData['primary_phone'] = $validated['country_code'] ? $validated['country_code'] . $validated['value'] : $validated['value'];
+                }
+            } elseif ($wasPrimary && !$isPrimaryNow) {
+                // Clear primary_email or primary_phone if no other primary contact exists for this type
+                $hasOtherPrimary = VendorContact::where('vendor_id', $vendor_id)
+                    ->where('profile_type', $type)
+                    ->where('contact_type', $validated['contact_type'])
+                    ->where('id', '!=', $contact_id)
+                    ->where('is_primary', true)
+                    ->exists();
+
+                if (!$hasOtherPrimary) {
+                    if ($validated['contact_type'] === 'email') {
+                        $updateData['primary_email'] = null;
+                    } elseif ($validated['contact_type'] === 'phone') {
+                        $updateData['primary_phone'] = null;
+                    }
+                }
+            }
+            if (!empty($updateData)) {
+                $vendor->update($updateData);
+            }
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Contact updated successfully',
-            'data'    => $contact,
+            'data' => $contact->fresh()
         ]);
     }
 
-    public function deleteContact(Vendor $vendor, $type, VendorContact $contact)
+    public function deleteContact($vendor_id, $type, $contact_id)
     {
-        $wasPrimary = $contact->is_primary;
-        $contact->delete();
+        $contact = VendorContact::where('vendor_id', $vendor_id)
+            ->where('profile_type', $type)
+            ->find($contact_id);
 
-        if ($wasPrimary) {
-            $this->assignNewPrimaryContactIndividual($vendor->id, $type);
+        if (!$contact) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Contact not found'
+            ], 404);
         }
+
+        if ($contact->is_primary) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete primary contact. Please set another contact as primary first.'
+            ], 400);
+        }
+
+        $contact->delete();
 
         return response()->json([
             'success' => true,
@@ -221,152 +235,72 @@ class VendorContactController extends Controller
         ]);
     }
 
-    // ================= BUSINESS CONTACTS ================= //
-
-    public function addBusinessContact(Request $request, $vendor_id, $business_id)
-    {
-        $validated = $request->validate([
-            'contact_type' => 'required|string|max:120',
-            'value' => 'required|string|max:120',
-            'country_code' => 'nullable|string|max:2',
-            'label' => 'nullable|string|max:120',
-            'is_primary' => 'nullable|boolean',
-            'is_emergency' => 'nullable|boolean',
-        ]);
-
-        $vendor = Vendor::findOrFail($vendor_id);
-        $business = VendorBusinessProfile::findOrFail($business_id);
-
-        $type = strtolower($validated['contact_type']); // phone/email
-
-        $isPrimary = $validated['is_primary'] ?? false; // No automatic primary
-
-        if ($isPrimary) {
-            // Remove other primary of same type
-            VendorContact::where('vendor_id', $vendor_id)
-                ->where('business_id', $business_id)
-                ->where('contact_type', $type)
-                ->update(['is_primary' => false]);
-        }
-
-        $contact = VendorContact::create([
-            'contact_type' => $validated['contact_type'],
-            'value' => $validated['value'],
-            'vendor_id' => $vendor_id,
-            'business_id' => $business_id,
-            'country_code' => $validated['country_code'],
-            'label' => $validated['label'] ?? null,
-            'is_primary' => $isPrimary,
-            'is_emergency' => $validated['is_emergency'] ?? false,
-            'profile_type' => 'business',
-            'tenant_id' => $vendor->tenant_id,
-            'business_name' => $business->trade_name
-        ]);
-
-        // If primary, update VendorBusinessProfile field
-        if ($isPrimary) {
-            if ($type === 'phone') {
-                $business->primary_contact_phone = $contact->value;
-            } elseif ($type === 'email') {
-                $business->primary_contact_email = $contact->value;
-            }
-            $business->save();
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Business contact added successfully',
-            'data' => $contact
-        ], 201);
-    }
-
-    public function updateBusinessContact(Request $request, $vendor_id, $business_id, $contact_id)
-    {
-        $validated = $request->validate([
-            'contact_type' => 'required|string|max:120',
-            'value' => 'required|string|max:120',
-            'label' => 'nullable|string|max:120',
-            'country_code' => 'nullable|string|max:2',
-            'is_primary' => 'nullable|boolean',
-            'is_emergency' => 'nullable|boolean',
-        ]);
-
-        $contact = VendorContact::where('vendor_id', $vendor_id)
-            ->where('business_id', $business_id)
-            ->where('id', $contact_id)
-            ->firstOrFail();
-
-        $type = strtolower($validated['contact_type']);
-
-        $isPrimary = $validated['is_primary'] ?? $contact->is_primary;
-
-        if ($isPrimary && !$contact->is_primary) {
-            // Remove other primary of same type
-            VendorContact::where('vendor_id', $vendor_id)
-                ->where('business_id', $business_id)
-                ->where('contact_type', $type)
-                ->update(['is_primary' => false]);
-        }
-
-        $contact->update([
-            'contact_type' => $validated['contact_type'],
-            'value' => $validated['value'],
-            'country_code' => $validated['country_code'] ?? $contact->country_code,
-            'label' => $validated['label'] ?? $contact->label,
-            'is_emergency' => $validated['is_emergency'] ?? $contact->is_emergency,
-            'is_primary' => $isPrimary
-        ]);
-
-        // If primary, update VendorBusinessProfile
-        if ($isPrimary) {
-            $business = VendorBusinessProfile::find($business_id);
-            if ($type === 'phone') {
-                $business->primary_contact_phone = $contact->value;
-            } elseif ($type === 'email') {
-                $business->primary_contact_email = $contact->value;
-            }
-            $business->save();
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Business contact updated successfully',
-            'data' => $contact
-        ]);
-    }
-
-
-    public function deleteBusinessContact($vendor_id, $business_id, $contact_id)
+    public function permanentContact($vendor_id)
     {
         $contact = VendorContact::where('vendor_id', $vendor_id)
-            ->where('business_id', $business_id)
-            ->where('id', $contact_id)
-            ->firstOrFail();
-
-        $wasPrimary = $contact->is_primary;
-        $contact->delete();
-
-        if ($wasPrimary) {
-            $this->assignNewPrimaryContact($vendor_id, $business_id);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Business contact deleted successfully'
-        ]);
-    }
-
-    public function getBusinessContact($id, $business_id, $contact_id)
-    {
-        $contact = VendorContact::where('vendor_id', $id)
-            ->where('business_id', $business_id)
-            ->where('id', $contact_id)
+            ->where('profile_type', 'individual')
+            ->where('is_primary', 1)
             ->first();
+
+        if ($contact) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Contact fetched successfully',
+                'data' => $contact
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No primary contact found'
+        ], 404);
+    }
+
+    public function permanentBusinessContact($vendor_id, $business_id)
+    {
+        $contact = VendorContact::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->where('is_primary', 1)
+            ->first();
+
+        if ($contact) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Contact fetched successfully',
+                'data' => $contact
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No primary business contact found'
+        ], 404);
+    }
+
+    public function getBusinessContacts($vendor_id, $business_id)
+    {
+        $contacts = VendorContact::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->orderBy('is_primary', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $contacts
+        ]);
+    }
+
+    public function getBusinessContact($vendor_id, $business_id, $contact_id)
+    {
+        $contact = VendorContact::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->find($contact_id);
 
         if (!$contact) {
             return response()->json([
                 'success' => false,
-                'message' => 'Business contact not found'
+                'message' => 'Contact not found'
             ], 404);
         }
 
@@ -376,74 +310,168 @@ class VendorContactController extends Controller
         ]);
     }
 
-    public function permanentBusinessContact($vendor_id, $business_id)
+    public function addBusinessContact(Request $request, $vendor_id, $business_id)
     {
+        $validated = $request->validate([
+            'contact_type' => 'required|string|in:phone,email,mobile,whatsapp,telegram,skype,other',
+            'value' => 'required|string|max:255',
+            'country_code' => 'nullable|string|max:10',
+            'label' => 'nullable|string|max:100',
+            'is_primary' => 'nullable|boolean',
+            'is_emergency' => 'nullable|boolean',
+        ]);
+
+        $vendor = Vendor::find($vendor_id);
+        if (!$vendor) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor not found'
+            ], 404);
+        }
+
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
+            ->first();
+        if (!$business) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business profile not found'
+            ], 404);
+        }
+
+        // If setting as primary for phone or email, unset other primary contacts of the same contact_type
+        if (($validated['is_primary'] ?? false) && in_array($validated['contact_type'], ['phone', 'email'])) {
+            VendorContact::where('vendor_id', $vendor_id)
+                ->where('business_id', $business_id)
+                ->where('contact_type', $validated['contact_type'])
+                ->update(['is_primary' => false]);
+        }
+
+        $contact = VendorContact::create([
+            'tenant_id' => $vendor->tenant_id,
+            'vendor_id' => $vendor_id,
+            'business_id' => $business_id,
+            'profile_type' => 'business',
+            'contact_type' => $validated['contact_type'],
+            'value' => $validated['value'],
+            'country_code' => $validated['country_code'],
+            'label' => $validated['label'],
+            'is_primary' => $validated['is_primary'] ?? false,
+            'is_emergency' => $validated['is_emergency'] ?? false,
+        ]);
+
+        // Sync primary_email or primary_phone in Vendor model
+        if ($contact->is_primary && in_array($contact->contact_type, ['phone', 'email'])) {
+            $updateData = [];
+            if ($contact->contact_type === 'email') {
+                $updateData['primary_email'] = $contact->value;
+            } elseif ($contact->contact_type === 'phone') {
+                $updateData['primary_phone'] = $contact->country_code ? $contact->country_code . $contact->value : $contact->value;
+            }
+            $vendor->update($updateData);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Business contact added successfully',
+            'data' => $contact
+        ]);
+    }
+
+    public function updateBusinessContact(Request $request, $vendor_id, $business_id, $contact_id)
+    {
+        $validated = $request->validate([
+            'contact_type' => 'required|string|in:phone,email,mobile,whatsapp,telegram,skype,other',
+            'value' => 'required|string|max:255',
+            'country_code' => 'nullable|string|max:10',
+            'label' => 'nullable|string|max:100',
+            'is_primary' => 'nullable|boolean',
+            'is_emergency' => 'nullable|boolean',
+        ]);
+
         $contact = VendorContact::where('vendor_id', $vendor_id)
             ->where('business_id', $business_id)
-            ->where('is_primary', '1')
-            ->first();
+            ->find($contact_id);
 
-        if ($contact) {
-            return response()->json(['success' => true, 'message' => 'Contact fetched successfully.', 'data' => $contact], 200);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Vendor contact not found'], 404);
+        if (!$contact) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Contact not found'
+            ], 404);
         }
-    }
 
-    // ================= HELPER METHODS ================= //
-
-    private function assignNewPrimaryContact($vendor_id, $business_id)
-    {
-        $newPrimary = VendorContact::where('vendor_id', $vendor_id)
-            ->where('business_id', $business_id)
-            ->orderBy('created_at', 'asc')
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
             ->first();
-
-        if ($newPrimary) {
-            $newPrimary->is_primary = true;
-            $newPrimary->save();
-            $this->syncPrimaryContact($newPrimary);
+        if (!$business) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business profile not found'
+            ], 404);
         }
-    }
 
-    private function assignNewPrimaryContactIndividual($vendor_id, $profile_type)
-    {
-        $newPrimary = VendorContact::where('vendor_id', $vendor_id)
-            ->where('profile_type', $profile_type)
-            ->orderBy('created_at', 'asc')
-            ->first();
-
-        if ($newPrimary) {
-            $newPrimary->is_primary = true;
-            $newPrimary->save();
-            $this->syncPrimaryContact($newPrimary);
+        // If setting as primary for phone or email, unset other primary contacts of the same contact_type
+        if (($validated['is_primary'] ?? false) && in_array($validated['contact_type'], ['phone', 'email'])) {
+            VendorContact::where('vendor_id', $vendor_id)
+                ->where('business_id', $business_id)
+                ->where('contact_type', $validated['contact_type'])
+                ->where('id', '!=', $contact_id)
+                ->update(['is_primary' => false]);
         }
-    }
 
-    private function syncPrimaryContact(VendorContact $contact)
-    {
-        if ($contact->profile_type === 'business' && $contact->business_id) {
-            $business = VendorBusinessProfile::find($contact->business_id);
-            if (!$business) return;
+        // Check if the contact was previously primary and is being unset
+        $wasPrimary = $contact->is_primary;
+        $isPrimaryNow = $validated['is_primary'] ?? false;
 
-            if (strtolower($contact->contact_type) === 'email') {
-                $business->primary_contact_email = $contact->value;
-            } elseif (strtolower($contact->contact_type) === 'phone') {
-                $business->primary_contact_phone = $contact->value;
+        $contact->update([
+            'contact_type' => $validated['contact_type'],
+            'value' => $validated['value'],
+            'country_code' => $validated['country_code'],
+            'label' => $validated['label'],
+            'is_primary' => $isPrimaryNow,
+            'is_emergency' => $validated['is_emergency'] ?? false,
+        ]);
+
+        // Sync primary_contact_email or primary_contact_phone in VendorBusinessProfile model
+        if (in_array($validated['contact_type'], ['phone', 'email'])) {
+            $updateData = [];
+            if ($isPrimaryNow) {
+                // Set primary_contact_email or primary_contact_phone
+                if ($validated['contact_type'] === 'email') {
+                    $updateData['primary_contact_email'] = $validated['value'];
+                    // Debug: Log or verify the value being set
+                    Log::info('Setting primary_contact_email to: ' . $validated['value']);
+                } elseif ($validated['contact_type'] === 'phone') {
+                    $updateData['primary_contact_phone'] = $validated['country_code'] ? $validated['country_code'] . $validated['value'] : $validated['value'];
+                }
+            } elseif ($wasPrimary && !$isPrimaryNow) {
+                // Clear primary_contact_email or primary_contact_phone if no other primary contact exists for this type
+                $hasOtherPrimary = VendorContact::where('vendor_id', $vendor_id)
+                    ->where('business_id', $business_id)
+                    ->where('contact_type', $validated['contact_type'])
+                    ->where('id', '!=', $contact_id)
+                    ->where('is_primary', true)
+                    ->exists();
+
+                if (!$hasOtherPrimary) {
+                    if ($validated['contact_type'] === 'email') {
+                        $updateData['primary_contact_email'] = null;
+                        Log::info('Clearing primary_contact_email');
+                    } elseif ($validated['contact_type'] === 'phone') {
+                        $updateData['primary_contact_phone'] = null;
+                    }
+                }
             }
-
-            $business->save();
-        } else {
-            $vendor = Vendor::find($contact->vendor_id);
-            if (!$vendor) return;
-
-            if (strtolower($contact->contact_type) === 'email') {
-                $vendor->primary_contact_email = $contact->value;
-            } elseif (strtolower($contact->contact_type) === 'phone') {
-                $vendor->primary_contact_phone = $contact->value;
+            if (!empty($updateData)) {
+                $business->update($updateData);
+                Log::info('Updated VendorBusinessProfile with: ', $updateData);
             }
-
-            $vendor->save();
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Business contact updated successfully',
+            'data' => $contact->fresh()
+        ]);
     }
 }

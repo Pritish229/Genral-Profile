@@ -5,11 +5,12 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Business Documents"
+        title="Business Address"
         :links="[
-            'Home' => 'Admin.Dashboard',
-            'Vendors' => 'vendors.List',
-            'Vendor Detail' => ['vendors.viewDetails', $id],
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
+        'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
             'Business Documents' => ''
         ]" />
 
@@ -174,8 +175,8 @@
 
     // Open add modal with current profile type
     function openAddModal() {
-        $("#profile_type").val(vendorType);
-        let docTypeLabel = vendorType === 'individual' ? 'Personal' : 'Business';
+      
+        let docTypeLabel ='Business';
         $("#documentModalLabel").text("Add " + docTypeLabel + " Document");
         $("#doc_id").val("");
     }

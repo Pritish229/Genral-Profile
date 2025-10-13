@@ -5,11 +5,11 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Business List"
+        title="Business Address"
         :links="[
-            'Home' => 'Admin.Dashboard',
-            'Vendors' => 'vendors.List',
-            'Vendor Detail' => ['vendors.viewDetails', $id],
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
             'Business List' => ''
         ]" />
 

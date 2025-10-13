@@ -1,15 +1,16 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Dashboard')
+@section('title', 'Home | Vendors | Bank Details')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Vendor Detail"
+        title="Business Address"
         :links="[
         'Home' => 'Admin.Dashboard',
         'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
+        'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
         'Manage Bank' => ''
     ]" />
 
@@ -109,11 +110,10 @@
 </div>
 @endsection
 
-
 @section('script')
 <script>
     let vendor_id = "{{ $id }}";
-    let type = 'business';
+    let business_id = "{{ $business_id }}";
     let baseUrl = "{{ url('/vendors') }}";
 
     function toggleFields(method) {
@@ -122,7 +122,6 @@
             $('#bank-fields').removeClass('d-none');
             $('#upi-fields').addClass('d-none');
             $('#bank_account_holder, #bank_name, #ifsc_code').attr('required', true);
-            // account_number required only when adding
             if (!isEdit) {
                 $('#account_number').attr('required', true);
             } else {
@@ -146,7 +145,6 @@
         $('#bankDetailsForm')[0].reset();
         $('#account_id').val('');
         $('#account_number').attr('placeholder', 'XXXXXXXXXXXX1234');
-        // ensure account_number can become required when switching to bank
         $('#account_number').removeAttr('required');
         toggleFields('');
         $('#bankModal').modal('show');
@@ -156,7 +154,7 @@
         $('#bankModalLabel').text('Edit Bank / UPI');
         $('#modalSaveText').text('Update');
         $.ajax({
-            url: `${baseUrl}/${vendor_id}/${type}/bank/${account.id}`,
+            url: `${baseUrl}/${vendor_id}/${business_id}/business/bank/${account.id}`, // Matches vendors.business.bank.fetch
             type: 'GET',
             success: function(res) {
                 const acc = res.data || account;
@@ -164,11 +162,9 @@
                 $('#method').val(acc.method).trigger('change');
                 $('#bank_account_holder').val(acc.account_holder || '');
                 $('#bank_name').val(acc.bank_name || '');
-                // Do not prefill account number; show masked as placeholder
                 const masked = acc.account_number_mask || '';
                 $('#account_number').val('');
                 $('#account_number').attr('placeholder', masked || 'XXXXXXXXXXXX1234');
-                // set checkboxes
                 $('#is_primary').prop('checked', acc.is_primary == 1);
                 $('#is_default_payout').prop('checked', acc.is_default_payout == 1);
                 $('#branch_name').val(acc.branch_name || '');
@@ -176,22 +172,26 @@
                 $('#swift_code').val(acc.swift_code || '');
                 $('#upi_id').val(acc.upi_vpa || '');
                 $('#upi_name').val(acc.account_holder || '');
-
                 toggleFields(acc.method);
                 $('#bankModal').modal('show');
+            },
+            error: function(xhr) {
+                console.error('Error fetching bank details:', xhr.responseText);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load bank details.'
+                });
             }
         });
     }
 
     function vendorbanklist() {
-        const businessId = "{{ $business_id }}"; 
         $.ajax({
-            url: `${baseUrl}/${vendor_id}/${businessId}/business/BankList`,
+            url: `${baseUrl}/${vendor_id}/${business_id}/business/BankList`, // Matches vendors.vendorBusinessBank
             type: 'GET',
             success: function(res) {
-              
                 let data = Array.isArray(res) ? res : res.data;
-
                 if (data && data.length > 0) {
                     let rows = '';
                     $.each(data, function(index, account) {
@@ -218,8 +218,12 @@
                     });
                     $('#bank-list').html(rows);
                 } else {
-                    $('#bank-list').html(`<tr><td colspan="10" class="text-center">No bank details found.</td></tr>`);
+                    $('#bank-list').html('<tr><td colspan="10" class="text-center">No bank details found.</td></tr>');
                 }
+            },
+            error: function(xhr) {
+                console.error('Error fetching bank list:', xhr.responseText);
+                $('#bank-list').html('<tr><td colspan="10" class="text-center">Failed to load bank details.</td></tr>');
             }
         });
     }
@@ -239,7 +243,7 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `${baseUrl}/${vendor_id}/${type}/deleteBank/${account_id}`,
+                    url: `${baseUrl}/${vendor_id}/${business_id}/business/deleteBank/${account_id}`, // Matches vendors.business.bank.delete
                     type: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -247,6 +251,14 @@
                     success: function(res) {
                         Swal.fire('Deleted!', res.message, 'success');
                         vendorbanklist();
+                    },
+                    error: function(xhr) {
+                        console.error('Error deleting bank:', xhr.responseText);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to delete bank account.'
+                        });
                     }
                 });
             }
@@ -259,11 +271,11 @@
         const isEdit = accountId && accountId !== '';
         const method = isEdit ? 'PUT' : 'POST';
         const url = isEdit
-            ? `${baseUrl}/${vendor_id}/${type}/updateBank/${accountId}`
-            : `${baseUrl}/${vendor_id}/${type}/saveBank`;
+            ? `${baseUrl}/${vendor_id}/${business_id}/business/updateBank/${accountId}` // Matches vendors.business.bank.update
+            : `${baseUrl}/${vendor_id}/${business_id}/business/saveBank`; // Matches vendors.business.saveBank
 
         $.ajax({
-            url,
+            url: url,
             type: method,
             data: $(this).serialize(),
             headers: {
@@ -281,6 +293,7 @@
                 vendorbanklist();
             },
             error: function(xhr) {
+                console.error('Error saving bank:', xhr.responseText);
                 let html = '';
                 if (xhr.status === 422) {
                     $.each(xhr.responseJSON.errors, function(k, v) {
@@ -289,7 +302,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Validation Error',
-                        html
+                        html: html
                     });
                 } else {
                     Swal.fire({
