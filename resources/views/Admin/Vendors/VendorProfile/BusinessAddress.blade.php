@@ -9,8 +9,9 @@
         :links="[
         'Home' => 'Admin.Dashboard',
         'Vendors' => 'vendors.List',
-        'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
-        'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Business List' => ['vendors.Businesslist', $id],
+        'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
         'Business Address' => ''
     ]" />
     <div class="mt-4">

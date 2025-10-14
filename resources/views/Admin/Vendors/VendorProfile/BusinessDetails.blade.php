@@ -7,9 +7,11 @@
     <x-breadcrumb
         title="Business Details"
         :links="[
-            'Home' => 'Admin.Dashboard',
-            'Vendors' => 'vendors.List',
-            'Vendor Detail' => ['vendors.viewDetails', $id],
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Business List' => ['vendors.Businesslist', $id],
+            'Vendor Details' => ['vendors.viewDetails', $id],
             'Business Details' => ''
         ]" />
 
@@ -121,7 +123,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-6 ">
-                        <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Document" class="text-decoration-none">
+                        <a href="${baseUrl}/${vendor_id}/documents/business/${business_id}/manage" class="text-decoration-none">
                             <div class="p-2 border rounded">
                                 <i class="fas fa-file-alt fa-lg"></i><br>
                                 Documents
@@ -129,7 +131,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-6">
-                        <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Media" class="text-decoration-none">
+                        <a href="${baseUrl}/${vendor_id}/${business_id}/media/business" class="text-decoration-none">
                             <div class="p-2 border rounded">
                                 <i class="fas fa-photo-video fa-lg"></i><br>
                                 Medias
@@ -197,7 +199,7 @@
             dataType: "json",
             success: function(response) {
                 console.log(response);
-                
+
                 let html = `
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-map-marker-alt"></i> Address Info</h5>
@@ -205,7 +207,7 @@
                     <i class="fas fa-edit"></i>
                 </a>
             </div>`;
-                
+
                 if (response.success && response.data) {
                     html += `
                 <p><i class="fas fa-map-marker-alt"></i> <strong>Address Line 1:</strong> ${safe(response.data.line1)}</p>

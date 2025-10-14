@@ -196,7 +196,7 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{id}/Businesslist', [VendorBusinessProfileController::class, 'Businesslist'])->name('vendors.Businesslist');
     Route::get('{id}/all/Business', [VendorBusinessProfileController::class, 'allBusiness'])->name('vendors.AllBusiness');
     Route::post('/{id}/business/create', [VendorBusinessProfileController::class, 'addBusinessInfo']);
-    
+
     // Business Profile Management
     Route::get('{id}/{business_id}/ManageBusinessinfo', [VendorBusinessProfileController::class, 'manage'])->name('vendors.manageBusinessinfo');
     Route::get('{id}/{business_id}/Business/Details', [VendorBusinessProfileController::class, 'fetchBusinessDetails'])->name('vendors.fetchBusinessDetails');
@@ -262,30 +262,61 @@ Route::prefix('vendors/')->group(function () {
     Route::put('{id}/{business_id}/business/updateBank/{account_id}', [VendorBankController::class, 'updateBank'])->name('vendors.business.bank.update'); // New
     Route::delete('{id}/{business_id}/business/deleteBank/{account_id}', [VendorBankController::class, 'deleteBank'])->name('vendors.business.bank.delete'); // New Removed {type}
 
-    // Vendor Document
-    Route::get('{id}/Document', [VendorDocumentController::class, 'index'])->name('vendors.Document'); // Stepping form
-    Route::get('{id}/{type}/Documents', [VendorDocumentController::class, 'manage'])->name('vendors.Documents'); // Manage documents
-    Route::post('{id}/storeDocument', [VendorDocumentController::class, 'storeDocument'])->name('vendors.Bank.StoreDocument');
-    Route::get('{id}/{type}/documents', [VendorDocumentController::class, 'getDocuments']);
-    Route::get('{vendor_id}/documents/{doc_id}', [VendorDocumentController::class, 'getDocument']);
-    Route::delete('{vendor_id}/delete/documents/{doc_id}', [VendorDocumentController::class, 'deleteDocument']);
-    Route::put('{vendor_id}/documents/{doc_id}', [VendorDocumentController::class, 'updateDocument']);
-    Route::get('{id}/{business_id}/Business/Document', [VendorDocumentController::class, 'BusinessDocs'])->name('vendors.BusinessDocs'); // Stepping form
-    Route::get('{id}/{business_id}/Business/Document/List', [VendorDocumentController::class, 'businessDocuments'])->name('vendors.businessDocuments'); // Stepping form
-    Route::get('{id}/{business_id}/Business/Document/Details', [VendorDocumentController::class, 'businessDocuments'])->name('vendors.businessDocuments'); // Stepping form
+    Route::get('{vendor_id}/documents/add', [VendorDocumentController::class, 'index'])
+        ->name('vendors.documents.add');
 
+    Route::get('{vendor_id}/documents/business/{business_id}/add', [VendorDocumentController::class, 'BusinessDocs'])
+        ->name('vendors.documents.business.add');
+
+    /* Individual management page */
+
+
+    /* Business management page */
+
+    /*  (Individual Documents )  */
+    Route::get('{vendor_id}/documents/individual/manage', [VendorDocumentController::class, 'manageIndividual'])->name('vendors.documents.individual.manage');
+    Route::post('{vendor_id}/documents/individual/store',  [VendorDocumentController::class, 'storeIndividualDocument']);
+    Route::get('{vendor_id}/documents/individual',        [VendorDocumentController::class, 'getIndividualDocuments']);
+    Route::get('{vendor_id}/documents/individual/{doc_id}', [VendorDocumentController::class, 'getIndividualDocument']);
+    Route::match(['put', 'patch'], '{vendor_id}/documents/individual/{doc_id}', [VendorDocumentController::class, 'updateIndividualDocument']);
+    Route::delete('{vendor_id}/documents/individual/{doc_id}', [VendorDocumentController::class, 'deleteIndividualDocument']);
+
+
+    /* (Business Documents)  */
+    Route::post('{vendor_id}/{business_id}/documents/business/store', [VendorDocumentController::class, 'storeBusinessDocument']);
+    Route::get('{vendor_id}/documents/business/{business_id}/manage', [VendorDocumentController::class, 'manageBusiness'])
+        ->name('vendors.documents.business.manage');
+    Route::get('{vendor_id}/documents/business/profile/{business_id}', [VendorDocumentController::class, 'businessDocuments'])
+        ->name('vendors.documents.business.profile');
+    Route::get('{vendor_id}/documents/business/{business_id}', [VendorDocumentController::class, 'getBusinessDocuments'])
+        ->name('vendors.documents.business.index');
+    Route::get('{vendor_id}/documents/business/{business_id}/{doc_id}', [VendorDocumentController::class, 'getBusinessDocument'])
+        ->name('vendors.documents.business.show');
+    Route::match(['put', 'patch'], '{vendor_id}/documents/business/{business_id}/{doc_id}', [VendorDocumentController::class, 'updateBusinessDocument'])
+        ->name('vendors.documents.business.update');
+    Route::delete('{vendor_id}/documents/business/{business_id}/{doc_id}', [VendorDocumentController::class, 'deleteBusinessDocument'])
+        ->name('vendors.documents.business.destroy');
 
 
     // Vendor Media
-    Route::get('{id}/Media', [VendorMediaController::class, 'index'])->name('vendors.Media'); // Stepping form
-    Route::get('{id}/{type}/Medias', [VendorMediaController::class, 'manage'])->name('vendors.Medias'); // Manage medias
-    Route::post('{id}/storeMedia', [VendorMediaController::class, 'storeMedia'])->name('vendors.Bank.storeMedia');
-    Route::get('{id}/{type}/medias', [VendorMediaController::class, 'getMedias']);
-    Route::get('{vendor_id}/medias/{media_id}', [VendorMediaController::class, 'getMedia']);
-    Route::delete('{vendor_id}/medias/delete/{media_id}', [VendorMediaController::class, 'deleteMedia']);
-    Route::put('{vendor_id}/medias/{media_id}', [VendorMediaController::class, 'updateMedia']);
-    Route::get('{id}/{business_id}/Business/Media', [VendorMediaController::class, 'businessMedia'])->name('vendors.BusinessMedias');
-    Route::get('{id}/{business_id}/Business/Media/List', [VendorMediaController::class, 'businessMideaList'])->name('vendors.businessMideaList');
+    Route::get('{id}/media/index', [VendorMediaController::class, 'index']);
+    Route::get('{id}/media/manage', [VendorMediaController::class, 'manage']);
+    Route::get('{id}/{business_id}/media/business', [VendorMediaController::class, 'businessMedia']);
+
+    // Individual Media CRUD
+    Route::post('{vendor_id}/media/individual/store', [VendorMediaController::class, 'storeIndividualMedia']);
+    Route::get('{vendor_id}/media/individual', [VendorMediaController::class, 'getIndividualMedias']);
+    Route::get('{vendor_id}/media/individual/{media_id}', [VendorMediaController::class, 'getIndividualMedia']);
+    Route::match(['put', 'patch'], '{vendor_id}/media/individual/{media_id}', [VendorMediaController::class, 'updateIndividualMedia']);
+    Route::delete('{vendor_id}/media/individual/{media_id}', [VendorMediaController::class, 'deleteIndividualMedia']);
+
+    // Business Media CRUD
+    Route::post('{vendor_id}/{business_id}/media/business/store',[VendorMediaController::class, 'storeBusinessMedia'])->name('vendors.media.business.store');
+    Route::get('{vendor_id}/{business_id}/media/business/List',[VendorMediaController::class, 'getBusinessMedias'])->name('vendors.media.business.index');
+    Route::get('{vendor_id}/{business_id}/media/business/{media_id}',[VendorMediaController::class, 'getBusinessMedia'])->name('vendors.media.business.show');
+    Route::match(['put', 'patch'],'{vendor_id}/{business_id}/media/business/{media_id}',[VendorMediaController::class, 'updateBusinessMedia'])->name('vendors.media.business.update');
+
+    Route::delete('{vendor_id}/{business_id}/media/business/{media_id}',[VendorMediaController::class, 'deleteBusinessMedia'])->name('vendors.media.business.destroy');
 
 
     // Vendor Online Profile

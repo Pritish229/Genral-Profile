@@ -81,21 +81,21 @@
                 <div class="row text-center">
                        
                         <div class="col-md-4 col-6 mb-2">
-                            <a href="${baseUrl}/${vendor_id}/${vendorType}/OnlineProfile/Manage" class="text-decoration-none">
+                            <a href="${baseUrl}/${vendor_id}/OnlineProfile/Manage" class="text-decoration-none">
                                 <div class="p-2 border rounded">
                                     <i class="fas fa-globe fa-lg"></i><br>Online Profile
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-4 col-6 mb-2">
-                            <a href="${baseUrl}/${vendor_id}/${vendorType}/Documents" class="text-decoration-none">
+                            <a href="${baseUrl}/${vendor_id}/documents/individual/manage" class="text-decoration-none">
                                 <div class="p-2 border rounded">
                                     <i class="fas fa-file-alt fa-lg"></i><br>Documents
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-4 col-6 mb-2">
-                            <a href="${baseUrl}/${vendor_id}/${vendorType}/Medias" class="text-decoration-none">
+                            <a href="${baseUrl}/${vendor_id}/media/manage" class="text-decoration-none">
                                 <div class="p-2 border rounded">
                                     <i class="fas fa-photo-video fa-lg"></i><br>Medias
                                 </div>
@@ -110,7 +110,7 @@
             <div class="card p-3 flex-fill equal-height" id="contact-info">
             <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                        <a href="${baseUrl}/${vendor_id}/${vendorType}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                        <a href="${baseUrl}/${vendor_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
                     </div>
                 <div class="card-body"><p>Loading Contact Information...</p></div>
             </div>
@@ -144,6 +144,7 @@
             url: `${baseUrl}/${vendor_id}/Contact/Permanent`,
             dataType: "json",
             success: function(res) {
+                console.log(res);
                 
                 let contactHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -170,7 +171,7 @@
                 let contactHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/${type}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                    <a href="${baseUrl}/${vendor_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
                 </div>
                 <p class='text-muted mb-0'>No contact information provided.</p>`;
                 $(contactInfoId).html(contactHtml);

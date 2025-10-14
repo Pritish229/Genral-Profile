@@ -1,295 +1,337 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Vendors | Documents & Media')
+@section('title', 'Manage Business Documents')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Documents & Media"
-        :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List' ,'Documents & Media'=>'' ]" />
+        title="Business Documents"
+        :links="[
+            'Home' => 'Admin.Dashboard',
+            'Vendors' => 'vendors.List',
+            'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
+            'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+            'Business Documents' => ''
+        ]" />
 
-    <!-- vendor Details -->
-    <div class="mt-2">
-        <div class="card">
-            <div class="p-3" id="vendor-details">
-                Loading details...
-            </div>
-        </div>
+    <!-- Page Header -->
+    <div class="mt-3">
+        <h4 class="mb-3">
+            <i class="fas fa-file-alt"></i>
+            Business Documents
+        </h4>
     </div>
 
-    <!-- Alert Box -->
-    <div id="alert-box" class="mt-2"></div>
+    <!-- Cards container -->
+    <div class="row p-3" id="documentList"></div>
+</div>
 
-    <!-- Progress Bar -->
-    <div class="progress mb-3" style="height: 25px; display:none;" id="progressContainer">
-        <div class="progress-bar bg-success" role="progressbar" style="width:0%;" id="progressBar">0%</div>
+<!-- Document Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="documentForm" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentModalLabel">Add Business Document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="doc_id">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <x-inputbox id="document_type" label="Document Type" type="text" name="document_type"
+                                placeholder="e.g., Passport, Aadhar Card" value="" helpertxt="" :required="true" />
+                        </div>
+                        <div class="col-md-6">
+                            <x-inputbox id="document_number" label="Document Number" type="text" name="document_number"
+                                placeholder="Enter Document Number" value="" helpertxt="" :required="true" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="issue_date">Issue Date</label>
+                            <input type="text" id="issue_date" name="issue_date" class="form-control flatpickr"
+                                placeholder="Select issue date">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="expiry_date">Expiry Date</label>
+                            <input type="text" id="expiry_date" name="expiry_date" class="form-control flatpickr"
+                                placeholder="Select expiry date">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <x-inputbox id="file_name" label="File Name" type="text" name="file_name"
+                                placeholder="e.g., Passport Scan" value="" helpertxt="" :required="false" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="file_url">Upload File</label>
+                            <input type="file" class="form-control" id="file_url" name="file_url">
+                            <small class="form-text text-muted">Upload scanned copy or PDF ( accepted formats: jpg, jpeg, png, pdf; max 5MB).</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <x-textareabox id="remarks" label="Remarks" name="remarks"
+                                placeholder="Enter additional remarks about this document" value="" helpertxt="" :required="false" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <x-inputbox id="issuing_authority" label="Issuing Authority" type="text" name="issuing_authority"
+                                placeholder="e.g., Government of India" value="" helpertxt="" :required="false" />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <!-- Media Form -->
-    <h5 class="mt-4">Upload Vendor Media</h5>
-    <hr style="color:#5156be">
-    <form id="mediaForm" enctype="multipart/form-data">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="media_usage">Media Usage</label>
-                <select class="form-select" id="media_usage" name="media_usage" required>
-                    <option value="" disabled selected>-- Select Usage --</option>
-                    <option value="profile">Profile</option>
-                    <option value="logo">Logo</option>
-                    <option value="banner">Banner</option>
-                    <option value="gallery">Gallery</option>
-                    <option value="kyc">KYC</option>
-                    <option value="doc_scan">Document Scan</option>
-                    <option value="other">Other</option>
-                </select>
-                <small class="form-text text-muted">Purpose of the media file.</small>
-            </div>
-            <div class="col-md-6" id="subject_name_wrapper">
-                <x-inputbox id="subject_name" label="Subject Name" type="text" placeholder="Enter Subject Name" name="subject_name" value="{{old('subject_name')}}" :required="false" helpertxt="" />
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <x-inputbox id="file_name_media" label="File Name" type="text" placeholder="Original file name" name="file_name_media" value="{{old('file_name_media')}}" :required="true" helpertxt=""  />
-            </div>
-            <div class="col-md-6">
-                <label for="file_url_media">Upload File</label>
-                <input type="file" class="form-control" id="file_url_media" name="file_url" required>
-                <small class="form-text text-muted">Upload media (image, pdf, etc.).</small>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <x-inputbox id="caption" label="Caption" type="text" placeholder="Short description" name="caption" value="{{old('caption')}}" :required="false" helpertxt=""/>
-            </div>
-            <div class="col-md-6">
-                <label for="tags">Tags</label>
-                <select id="tags" name="tags[]" class="js-example-basic-single js-states form-control" multiple></select>
-                <small class="form-text text-muted">Add labels (press Enter to create new).</small>
-            </div>
-        </div>
-
-        <div class="mt-3">
-            <button type="submit" class="btn btn-primary">Save Media & Finish</button>
-            <button type="button" class="btn btn-secondary" id="skipBtn">Skip</button>
-        </div>
-    </form>
-
 </div>
 @endsection
+
 @section('script')
 <script>
-function updateProgress(percent) {
-    $("#progressContainer").show();
-    $("#progressBar").css("width", percent + "%").text(percent + "%");
-}
-
-$(document).ready(function() {
-    let baseUrl = "{{ url('/vendors') }}";
-    let vendor_id = "{{ $id }}";
-
-    function fetchDetails() {
-        $.ajax({
-            type: "GET",
-            url: `${baseUrl}/${vendor_id}/Details`,
-            dataType: "json",
-            success: function(response) {
-                if (response.success) {
-                    
-                    let imgSrc = `storage/${response.data.avatar_url}`;
-                    let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
-                    let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
-                    let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
-
-                    $("#vendor-details").html(`
-                <div class="d-flex align-items-start justify-content-between">
-                    <!-- Profile + Info -->
-                    <div class="d-flex align-items-start gap-3">
-                        <div style="flex: 0 0 160px;">
-                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
-                        </div>
-                        <div class="flex-grow-1">
-                                <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
-                                <p><strong>Name:</strong> ${response.data.full_name}</p>
-                                <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
-                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Status badge on top-right -->
-                    <div>
-                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
-                            ${response.primary_details.status}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Footer with Documents & Media -->
-                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
-                    <a href="${manageBankUrl}" class="text-decoration-none">
-                        <i class="fas fa-university me-1"></i> Bank Details
-                    </a>
-                    <a href="${manageDocUrl}" class="text-decoration-none">
-                        <i class="fas fa-file-alt me-1"></i> Documents
-                    </a>
-                    <a href="${managemediaUrl}" class="text-decoration-none">
-                        <i class="fas fa-photo-video me-1"></i> Medias
-                    </a>
-                </div>
-            `);
-
-                } else {
-                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
-                }
-            },
-            error: function(xhr) {
-                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
-                console.error(xhr.responseText);
-            }
-        });
-    }
-
-    $("#tags").select2({
-        tags: true,
-        tokenSeparators: [',', ' '],
-        placeholder: "Add tags",
-        width: '100%'
-    });
-
+    // Initialize flatpickr
     $(".flatpickr").flatpickr({
         dateFormat: "Y-m-d",
         altInput: true,
-        altFormat: "j F Y",
+        altFormat: "j F vendorId F Y",
         allowInput: true
     });
 
-    
+    let vendorId = "{{ $id }}";
+    let businessId = "{{ $business_id }}";
+    let apiSubpath = 'business';
+    let baseUrl = "{{ url('/vendors') }}";
 
-    fetchDetails();
-    updateProgress(80);
+    // Fetch and render documents
+    function loadDocuments() {
+        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}`;
 
-    // Document Upload
-    $("#documentForm").on("submit", function(e) {
+        $.get(url, function(res) {
+            let html = '';
+
+            if (res.data.length === 0) {
+                html = `
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No business documents found</h5>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#documentModal" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> Add Document
+                    </button>
+                </div>`;
+            } else {
+                html = `
+                <div class="col-12 d-flex justify-content-end mb-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" onclick="openAddModal()">
+                        <i class="fas fa-plus"></i> Add Document
+                    </button>
+                </div>`;
+
+                res.data.forEach(doc => {
+                    let fileUrl = doc.file_url; // Full URL from backend
+                    let preview = '';
+                    if (doc.file_url) {
+                        let ext = doc.file_url.split('.').pop().toLowerCase().split('?')[0];
+                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                            preview = `<img src="${fileUrl}" class="img-fluid rounded mb-2" style="max-height:120px;object-fit:cover;">`;
+                        } else if (ext === 'pdf') {
+                            preview = `<i class="fas fa-file-pdf fa-3x text-danger mb-2"></i><p class="small">PDF Document</p>`;
+                        } else {
+                            preview = `<i class="fas fa-file-alt fa-3x text-secondary mb-2"></i>`;
+                        }
+                    }
+
+                    let downloadName = (doc.file_name ? doc.file_name.replace(/\s+/g, '_') : `document_${doc.id}`);
+                    let issueDate = doc.issue_date || '-';
+                    let expiryDate = doc.expiry_date || '-';
+
+                    html += `
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                ${preview}
+                                <h5 class="card-title">${doc.document_type}</h5>
+                                <p class="mb-1"><strong>Number:</strong> ${doc.document_number}</p>
+                                <p class="mb-1"><strong>Issue:</strong> ${issueDate}</p>
+                                <p class="mb-1"><strong>Expiry:</strong> ${expiryDate}</p>
+                                <p class="mb-1"><strong>Authority:</strong> ${doc.issuing_authority || '-'}</p>
+                                <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                                <a href="${fileUrl}" download="${downloadName}" class="btn btn-sm btn-outline-success">Download</a>
+                                <div class="dropdown float-end">
+                                    <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#" class="dropdown-item editDoc" data-id="${doc.id}">Edit</a></li>
+                                        <li><a href="#" class="dropdown-item deleteDoc" data-id="${doc.id}">Delete</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
+
+            $('#documentList').html(html);
+        }).fail(function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load documents.'
+            });
+        });
+    }
+
+    // Open add modal
+    function openAddModal() {
+        $('#documentForm')[0].reset();
+        $('.flatpickr').each(function() {
+            this._flatpickr.clear();
+        });
+        $('#doc_id').val('');
+        $('#documentModalLabel').text('Add Business Document');
+        $('#save-btn').text('Save');
+    }
+
+    // Submit form (add/edit)
+    $('#documentForm').on('submit', function(e) {
         e.preventDefault();
         let formData = new FormData(this);
-        updateProgress(0);
+        let docId = $('#doc_id').val();
+        let url = `${baseUrl}/${vendorId}/${businessId}/documents/${apiSubpath}/store`;
+        let method = 'POST';
+
+        if (docId) {
+            url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${docId}`;
+            formData.append('_method', 'PUT');
+            method = 'POST'; // Laravel uses POST with _method for PUT
+        }
 
         $.ajax({
-            xhr: function() {
-                let xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function(evt) {
-                    if (evt.lengthComputable) {
-                        let percentComplete = Math.round((evt.loaded / evt.total) * 50); // 0-50%
-                        updateProgress(percentComplete);
-                    }
-                }, false);
-                return xhr;
-            },
-            type: "POST",
-            url: `${baseUrl}/${vendor_id}/storeDocument`,
+            url,
+            method,
             data: formData,
-            processData: false,
             contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    updateProgress(90);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Document Saved!',
-                        text: 'Document uploaded successfully.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                }
+            processData: false,
+            success: function(res) {
+                $('#documentModal').modal('hide');
+                loadDocuments();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved!',
+                    text: res.message || 'Document saved successfully',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let html = '<div class="alert alert-danger"><ul>';
-                    $.each(errors, function(key, value) {
-                        html += '<li>' + value[0] + '</li>';
-                    });
-                    html += '</ul></div>';
-                    $("#alert-box").html(html);
-                } else {
-                    Swal.fire("Error", "Something went wrong.", "error");
+            error: function(err) {
+                let errorMsg = 'Error saving document';
+                if (err.responseJSON && err.responseJSON.message) {
+                    errorMsg = err.responseJSON.message;
                 }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMsg
+                });
             }
         });
     });
 
-    // Media Upload
-    $("#mediaForm").on("submit", function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
+    // Edit document
+    $(document).on('click', '.editDoc', function() {
+        let id = $(this).data('id');
+        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
+        $.get(url, function(res) {
+            let d = res.data;
 
-        $.ajax({
-            xhr: function() {
-                let xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function(evt) {
-                    if (evt.lengthComputable) {
-                        let percentComplete = 50 + Math.round((evt.loaded / evt.total) * 50); // 50-100%
-                        updateProgress(percentComplete);
-                    }
-                }, false);
-                return xhr;
-            },
-            type: "POST",
-            url: "{{ route('vendors.Bank.storeMedia', ['id' => $id]) }}",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    updateProgress(90);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Save',
-                        text: 'Media uploaded successfully.',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.href = `${baseUrl}/${vendor_id}/OnlineProfile`;
-                    });
-                }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let html = '<div class="alert alert-danger"><ul>';
-                    $.each(errors, function(key, value) {
-                        html += '<li>' + value[0] + '</li>';
-                    });
-                    html += '</ul></div>';
-                    $("#alert-box").html(html);
-                } else {
-                    Swal.fire("Error", "Something went wrong.", "error");
-                }
+            $('#doc_id').val(d.id);
+            $('#document_type').val(d.document_type);
+            $('#document_number').val(d.document_number);
+            $('#file_name').val(d.file_name);
+            $('#remarks').val(d.remarks);
+            $('#issuing_authority').val(d.issuing_authority);
+
+            if (d.issue_date_raw) {
+                document.querySelector('#issue_date')._flatpickr.setDate(d.issue_date_raw, true, 'Y-m-d');
+            } else {
+                document.querySelector('#issue_date')._flatpickr.clear();
             }
+
+            if (d.expiry_date_raw) {
+                document.querySelector('#expiry_date')._flatpickr.setDate(d.expiry_date_raw, true, 'Y-m-d');
+            } else {
+                document.querySelector('#expiry_date')._flatpickr.clear();
+            }
+
+            $('#documentModalLabel').text('Edit Business Document');
+            $('#save-btn').text('Update');
+            $('#documentModal').modal('show');
+        }).fail(function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load document details.'
+            });
         });
     });
 
-    // Skip Button
-    $("#skipBtn").on("click", function() {
+    // Delete document
+    $(document).on('click', '.deleteDoc', function() {
+        let id = $(this).data('id');
+
         Swal.fire({
-            icon: 'info',
-            title: 'Skipped!',
-            text: 'You have skipped this step.',
-            timer: 1200,
-            showConfirmButton: false,
-            allowOutsideClick: false
-        }).then(() => {
-            window.location.href = `${baseUrl}/${vendor_id}/OnlineProfile`;
+            title: 'Are you sure?',
+            text: 'This document will be permanently deleted!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    success: function(res) {
+                        loadDocuments();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: res.message || 'Document deleted.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Delete failed'
+                        });
+                    }
+                });
+            }
         });
     });
-});
 
-
+    // Initial load
+    $(document).ready(function() {
+        loadDocuments();
+    });
 </script>
 @endsection

@@ -9,7 +9,7 @@
         :links="[
             'Home' => 'Admin.Dashboard',
             'Vendors' => 'vendors.List',
-            'Vendor Detail' => ['vendors.viewDetails', $id],
+            'Vendor Details' => ['vendors.viewDetails', $id],
             'Manage Vendor' => ''
         ]" />
 

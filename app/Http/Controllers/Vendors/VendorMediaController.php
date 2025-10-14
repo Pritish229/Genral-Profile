@@ -11,17 +11,15 @@ use Illuminate\Support\Facades\Storage;
 
 class VendorMediaController extends Controller
 {
+    // Plain view returns (no JSON wrapper)
     public function index($id)
     {
         return view('Admin.Vendors.VendorProfile.AddMedias', ['id' => $id]);
     }
 
-    public function manage($id, $type)
+    public function manage($id)
     {
-        return view('Admin.Vendors.VendorProfile.ManageMedia', [
-            'id' => $id,
-            'type' => $type
-        ]);
+        return view('Admin.Vendors.VendorProfile.ManageMedia', ['id' => $id]);
     }
 
     public function businessMedia($id, $business_id)
@@ -29,11 +27,14 @@ class VendorMediaController extends Controller
         return view('Admin.Vendors.VendorProfile.BusinessMedia', ['id' => $id, 'business_id' => $business_id]);
     }
 
-    public function storeMedia(Request $request, $vendor_id)
+    // === Individual Media CRUD (profile_type = 'individual') ===
+
+    // Insert (Store) - Individual
+    public function storeIndividualMedia(Request $request, $vendor_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
 
-        $rules = [
+        $request->validate([
             'media_usage'  => 'required|in:profile,logo,banner,gallery,kyc,doc_scan,other',
             'subject_name' => 'nullable|string|max:191',
             'file_name'    => 'nullable|string|max:191',
@@ -41,126 +42,85 @@ class VendorMediaController extends Controller
             'caption'      => 'nullable|string|max:500',
             'tags'         => 'nullable|array',
             'tags.*'       => 'string|max:50',
-        ];
+        ]);
 
-        $validated = $request->validate($rules);
-
-        // ✅ Folder based on vendor type
-        $folder = $vendor->type === 'business' ? 'VendorBusiness' : 'VendorMedia';
-
-        if ($request->hasFile('file_url')) {
-            $file      = $request->file('file_url');
-            $extension = $file->getClientOriginalExtension();
-            $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-
-            // Store in correct folder
-            $file->storeAs($folder, $fileName, 'public');
-
-            $validated['file_url'] = "{$folder}/{$fileName}";
+        if (!$request->hasFile('file_url')) {
+            return response()->json(['success' => false, 'message' => 'File is required.'], 422);
         }
 
-        $validated['tags'] = $validated['tags'] ?? [];
+        $file = $request->file('file_url');
+        $extension = $file->getClientOriginalExtension();
+        $fileName = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
+        $file->storeAs('VendorMedia', $fileName, 'public');
+        $filePath = "VendorMedia/{$fileName}";
 
-        // Use profile_type from form if provided, otherwise vendor type
-        $profile_type = $request->input('profile_type', $vendor->type);
-
-        if ($vendor->type === 'business') {
-            $business = VendorBusinessProfile::where('vendor_id', $vendor->id)->first();
-
-            if (!$business) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Business profile not found for this vendor.'
-                ], 422);
-            }
-
-            $validated['business_id']   = $business->id;
-            $validated['business_name'] = $business->trade_name;
-        }
+        $tags = $request->tags ? json_encode(array_values(array_unique(array_map(fn($tag) => trim(strtolower($tag)), $request->tags)))) : json_encode([]);
 
         $media = VendorMedia::create([
             'tenant_id'     => $vendor->tenant_id,
             'vendor_id'     => $vendor->id,
-            'profile_type'  => $profile_type,
-            'media_usage'   => $validated['media_usage'],
-            'subject_name'  => $validated['subject_name'] ?? null,
-            'file_name'     => $validated['file_name'] ?? ($file->getClientOriginalName() ?? null),
-            'file_url'      => $validated['file_url'],
-            'caption'       => $validated['caption'] ?? null,
-            'tags'          => json_encode($this->normalizeTags($validated['tags'])),
+            'profile_type'  => 'individual',
+            'media_usage'   => $request->media_usage,
+            'subject_name'  => $request->subject_name,
+            'file_name'     => $request->file_name ?? $file->getClientOriginalName(),
+            'file_url'      => $filePath,
+            'caption'       => $request->caption,
+            'tags'          => $tags,
             'status'        => 'active',
-            'business_id'   => $validated['business_id'] ?? null,
-            'business_name' => $validated['business_name'] ?? null,
+            'business_id'   => null,
+            'business_name' => null,
         ]);
 
         return response()->json([
             'success' => true,
-            'data'    => $this->formatMedia($media)
+            'message' => 'Media added successfully.',
+            'data' => $this->formatMedia($media)
         ], 201);
     }
 
-
-
-    public function getMedias($vendor_id, $type)
+    // List - Individual
+    public function getIndividualMedias($vendor_id)
     {
-        $vendor = Vendor::findOrFail($vendor_id);
+        Vendor::findOrFail($vendor_id);
 
-        // Filter medias by the specific profile type
         $medias = VendorMedia::where('vendor_id', $vendor_id)
-            ->where('profile_type', $type)
+            ->where('profile_type', 'individual')
             ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
             'success' => true,
-            'data'    => $medias->map(function ($media) {
-                return $this->formatMedia($media);
-            })
-        ], 200);
+            'data' => $medias->map(fn($media) => $this->formatMedia($media))->toArray()
+        ]);
     }
 
-    public function getMedia($vendor_id, $media_id)
+    // Details (Show) - Individual
+    public function getIndividualMedia($vendor_id, $media_id)
+    {
+        Vendor::findOrFail($vendor_id);
+
+        $media = VendorMedia::where('vendor_id', $vendor_id)
+            ->where('id', $media_id)
+            ->where('profile_type', 'individual')
+            ->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->formatMedia($media)
+        ]);
+    }
+
+    // Update - Individual
+    public function updateIndividualMedia(Request $request, $vendor_id, $media_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
 
         $media = VendorMedia::where('vendor_id', $vendor_id)
             ->where('id', $media_id)
+            ->where('profile_type', 'individual')
             ->firstOrFail();
 
-        return response()->json([
-            'success' => true,
-            'data'    => $this->formatMedia($media)
-        ], 200);
-    }
-
-
-    public function businessMideaList($vendor_id, $business_id)
-    {
-        $vendor = Vendor::findOrFail($vendor_id);
-        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->where('id', $business_id)->firstOrFail();
-
-        $medias = VendorMedia::where('vendor_id', $vendor_id)
-            ->where('business_id', $business->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data'    => $medias->map(function ($media) {
-                return $this->formatMedia($media);
-            })
-        ], 200);
-    }
-
-    public function updateMedia(Request $request, $vendor_id, $media_id)
-    {
-        $vendor = Vendor::findOrFail($vendor_id);
-
-        $media = VendorMedia::where('vendor_id', $vendor_id)
-            ->where('id', $media_id)
-            ->firstOrFail();
-
-        $rules = [
+        $request->validate([
             'media_usage'  => 'required|in:profile,logo,banner,gallery,kyc,doc_scan,other',
             'subject_name' => 'nullable|string|max:191',
             'file_name'    => 'nullable|string|max:191',
@@ -168,48 +128,221 @@ class VendorMediaController extends Controller
             'caption'      => 'nullable|string|max:500',
             'tags'         => 'nullable|array',
             'tags.*'       => 'string|max:50',
+        ]);
+
+        $data = [
+            'media_usage'  => $request->media_usage,
+            'subject_name' => $request->subject_name,
+            'file_name'    => $request->file_name,
+            'caption'      => $request->caption,
         ];
 
-        $validated = $request->validate($rules);
-
-        // ✅ Folder based on vendor type
-        $folder = $vendor->type === 'business' ? 'VendorBusiness' : 'VendorMedia';
-
-        // ✅ Handle file upload if new file is provided
         if ($request->hasFile('file_url')) {
-            // Delete old file if it exists
             if ($media->file_url && Storage::disk('public')->exists($media->file_url)) {
                 Storage::disk('public')->delete($media->file_url);
             }
-
-            $file      = $request->file('file_url');
+            $file = $request->file('file_url');
             $extension = $file->getClientOriginalExtension();
-            $fileName  = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
-
-            // Store new file in correct folder
-            $file->storeAs($folder, $fileName, 'public');
-
-            $validated['file_url'] = "{$folder}/{$fileName}";
+            $fileName = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
+            $file->storeAs('VendorMedia', $fileName, 'public');
+            $data['file_url'] = "VendorMedia/{$fileName}";
         }
 
-        // ✅ Normalize tags
-        if (isset($validated['tags'])) {
-            $validated['tags'] = json_encode($this->normalizeTags($validated['tags']));
+        if ($request->has('tags')) {
+            $data['tags'] = json_encode(array_values(array_unique(array_map(fn($tag) => trim(strtolower($tag)), $request->tags ?? []))));
         }
 
-        $media->update($validated);
+        $media->update($data);
 
         return response()->json([
             'success' => true,
-            'data'    => $this->formatMedia($media->fresh())
-        ], 200);
+            'message' => 'Media updated successfully.',
+            'data' => $this->formatMedia($media)
+        ]);
     }
 
+    // Delete - Individual
+    public function deleteIndividualMedia($vendor_id, $media_id)
+    {
+        Vendor::findOrFail($vendor_id);
 
-    public function deleteMedia($vendor_id, $media_id)
+        $media = VendorMedia::where('vendor_id', $vendor_id)
+            ->where('id', $media_id)
+            ->where('profile_type', 'individual')
+            ->firstOrFail();
+
+        if ($media->file_url && Storage::disk('public')->exists($media->file_url)) {
+            Storage::disk('public')->delete($media->file_url);
+        }
+
+        $media->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Media deleted successfully.'
+        ]);
+    }
+
+    // === Business Media CRUD (profile_type = 'business') ===
+
+    // Insert (Store) - Business
+    public function storeBusinessMedia(Request $request, $vendor_id, $business_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
+            ->firstOrFail();
+
+        $request->validate([
+            'media_usage'  => 'required|in:profile,logo,banner,gallery,kyc,doc_scan,other',
+            'subject_name' => 'nullable|string|max:191',
+            'file_name'    => 'nullable|string|max:191',
+            'file_url'     => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'caption'      => 'nullable|string|max:500',
+            'tags'         => 'nullable|array',
+            'tags.*'       => 'string|max:50',
+        ]);
+
+        if (!$request->hasFile('file_url')) {
+            return response()->json(['success' => false, 'message' => 'File is required.'], 422);
+        }
+
+        $file = $request->file('file_url');
+        $extension = $file->getClientOriginalExtension();
+        $fileName = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
+        $file->storeAs('VendorBusinessMedia', $fileName, 'public');
+        $filePath = "VendorBusinessMedia/{$fileName}";
+
+        $tags = $request->tags ? json_encode(array_values(array_unique(array_map(fn($tag) => trim(strtolower($tag)), $request->tags)))) : json_encode([]);
+
+        $media = VendorMedia::create([
+            'tenant_id'     => $vendor->tenant_id,
+            'vendor_id'     => $vendor->id,
+            'profile_type'  => 'business',
+            'media_usage'   => $request->media_usage,
+            'subject_name'  => $request->subject_name,
+            'file_name'     => $request->file_name ?? $file->getClientOriginalName(),
+            'file_url'      => $filePath,
+            'caption'       => $request->caption,
+            'tags'          => $tags,
+            'status'        => 'active',
+            'business_id'   => $business->id,
+            'business_name' => $business->trade_name,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Media added successfully.',
+            'data' => $this->formatMedia($media)
+        ], 201);
+    }
+
+    // List - Business
+    public function getBusinessMedias($vendor_id, $business_id)
+    {
+        Vendor::findOrFail($vendor_id);
+        VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
+            ->firstOrFail();
+
+        $medias = VendorMedia::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->where('profile_type', 'business')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $medias->map(fn($media) => $this->formatMedia($media))->toArray()
+        ]);
+    }
+
+    // Details (Show) - Business
+    public function getBusinessMedia($vendor_id, $business_id, $media_id)
+    {
+        Vendor::findOrFail($vendor_id);
+        VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
+            ->firstOrFail();
+
         $media = VendorMedia::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->where('profile_type', 'business')
+            ->where('id', $media_id)
+            ->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->formatMedia($media)
+        ]);
+    }
+
+    // Update - Business
+    public function updateBusinessMedia(Request $request, $vendor_id, $business_id, $media_id)
+    {
+        $vendor = Vendor::findOrFail($vendor_id);
+        VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
+            ->firstOrFail();
+
+        $media = VendorMedia::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->where('profile_type', 'business')
+            ->where('id', $media_id)
+            ->firstOrFail();
+
+        $request->validate([
+            'media_usage'  => 'required|in:profile,logo,banner,gallery,kyc,doc_scan,other',
+            'subject_name' => 'nullable|string|max:191',
+            'file_name'    => 'nullable|string|max:191',
+            'file_url'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'caption'      => 'nullable|string|max:500',
+            'tags'         => 'nullable|array',
+            'tags.*'       => 'string|max:50',
+        ]);
+
+        $data = [
+            'media_usage'  => $request->media_usage,
+            'subject_name' => $request->subject_name,
+            'file_name'    => $request->file_name,
+            'caption'      => $request->caption,
+        ];
+
+        if ($request->hasFile('file_url')) {
+            if ($media->file_url && Storage::disk('public')->exists($media->file_url)) {
+                Storage::disk('public')->delete($media->file_url);
+            }
+            $file = $request->file('file_url');
+            $extension = $file->getClientOriginalExtension();
+            $fileName = ($vendor->vendor_uid ?? 'vendor') . '_' . now()->format('Ymd_His') . '.' . $extension;
+            $file->storeAs('VendorBusinessMedia', $fileName, 'public');
+            $data['file_url'] = "VendorBusinessMedia/{$fileName}";
+        }
+
+        if ($request->has('tags')) {
+            $data['tags'] = json_encode(array_values(array_unique(array_map(fn($tag) => trim(strtolower($tag)), $request->tags ?? []))));
+        }
+
+        $media->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Media updated successfully.',
+            'data' => $this->formatMedia($media)
+        ]);
+    }
+
+    // Delete - Business
+    public function deleteBusinessMedia($vendor_id, $business_id, $media_id)
+    {
+        Vendor::findOrFail($vendor_id);
+        VendorBusinessProfile::where('vendor_id', $vendor_id)
+            ->where('id', $business_id)
+            ->firstOrFail();
+
+        $media = VendorMedia::where('vendor_id', $vendor_id)
+            ->where('business_id', $business_id)
+            ->where('profile_type', 'business')
             ->where('id', $media_id)
             ->firstOrFail();
 
@@ -221,33 +354,28 @@ class VendorMediaController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Media deleted successfully'
-        ], 200);
+            'message' => 'Media deleted successfully.'
+        ]);
     }
 
-    private function normalizeTags(array $tags): array
-    {
-        return array_values(array_unique(array_map(function ($tag) {
-            return trim(strtolower($tag)); // normalize to lowercase & trim
-        }, $tags)));
-    }
-
-    private function formatMedia(VendorMedia $media)
+    // Helper to format media output
+    private function formatMedia($media)
     {
         return [
-            'id'          => $media->id,
-            'tenant_id'   => $media->tenant_id,
-            'vendor_id'   => $media->vendor_id,
-            'profile_type' => $media->profile_type,
-            'media_usage' => $media->media_usage,
-            'subject_name' => $media->subject_name,
-            'file_name'   => $media->file_name,
-            'file_url'    => asset('storage/' . $media->file_url),
-            'caption'     => $media->caption,
-            'tags'        => is_array($media->tags) ? $media->tags : json_decode($media->tags, true),
-            'status'      => $media->status,
-            'created_at'  => $media->created_at,
-            'updated_at'  => $media->updated_at,
+            'id'            => $media->id,
+            'vendor_id'     => $media->vendor_id,
+            'profile_type'  => $media->profile_type,
+            'media_usage'   => $media->media_usage,
+            'subject_name'  => $media->subject_name,
+            'file_name'     => $media->file_name,
+            'file_url'      => asset('storage/' . $media->file_url),
+            'caption'       => $media->caption,
+            'tags'          => json_decode($media->tags, true) ?? [],
+            'status'        => $media->status,
+            'business_id'   => $media->business_id,
+            'business_name' => $media->business_name,
+            'created_at'    => $media->created_at->toDateTimeString(),
+            'updated_at'    => $media->updated_at->toDateTimeString(),
         ];
     }
 }
