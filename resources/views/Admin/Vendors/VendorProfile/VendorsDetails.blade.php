@@ -81,7 +81,7 @@
                 <div class="row text-center">
                        
                         <div class="col-md-4 col-6 mb-2">
-                            <a href="${baseUrl}/${vendor_id}/OnlineProfile/Manage" class="text-decoration-none">
+                            <a href="${baseUrl}/${vendor_id}/individual/OnlineProfile/Manage" class="text-decoration-none">
                                 <div class="p-2 border rounded">
                                     <i class="fas fa-globe fa-lg"></i><br>Online Profile
                                 </div>

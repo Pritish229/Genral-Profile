@@ -8,7 +8,8 @@
         title="Vendors"
         :links="['Home' => 'Admin.Dashboard', 'Vendors' => '']" />
 
-    <div class="mt-4">
+    <div class=" mt-4">
+        <div class="card p-3">
         <table id="vendors-table" class="table table-bordered">
             <thead>
                 <tr>
@@ -23,6 +24,7 @@
                 </tr>
             </thead>
         </table>
+        </div>
     </div>
 </div>
 @endsection

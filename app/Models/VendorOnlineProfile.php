@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class VendorOnilneProfile extends Model
+class VendorOnlineProfile extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'vendor_onilne_profiles';

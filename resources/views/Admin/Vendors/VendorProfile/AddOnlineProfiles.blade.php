@@ -144,7 +144,7 @@
             let formData = $(this).serialize();
 
             $.ajax({
-                url: "{{ route('vendors.onlineProfiles.store', ['id' => $id]) }}",
+                url: "{{ route('individual.store', ['id' => $id]) }}",
                 type: "POST",
                 data: formData,
                 success: function(response) {

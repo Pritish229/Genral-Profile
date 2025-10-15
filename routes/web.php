@@ -178,6 +178,7 @@ Route::prefix('vendors/')->group(function () {
 
     Route::get('create', [VendorController::class, 'create'])->name('vendors.create');
     Route::post('store', [VendorController::class, 'store'])->name('vendors.store');
+    
     // Route Profile Details
     Route::get('list', [VendorProfileController::class, 'vendorlist'])->name('vendors.List');
     Route::get('List/All', [VendorProfileController::class, 'listAll'])->name('vendors.paginate');
@@ -191,13 +192,15 @@ Route::prefix('vendors/')->group(function () {
     Route::post('{id}/update', [VendorController::class, 'update'])->name('vendors.update');
 
     // Vendor Business Info
+    
+    // Business Profile Management
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
+    Route::get('/AllBusiness', [VendorBusinessProfileController::class, 'allBusinessPage'])->name('vendors.allBusinessPage');
+    Route::post('/{id}/business/create', [VendorBusinessProfileController::class, 'addBusinessInfo']);
     Route::get('{id}/{business_id}/BusinessDetails', [VendorBusinessProfileController::class, 'BusinessDetails'])->name('vendors.BusinessDetails');
     Route::get('{id}/Businesslist', [VendorBusinessProfileController::class, 'Businesslist'])->name('vendors.Businesslist');
     Route::get('{id}/all/Business', [VendorBusinessProfileController::class, 'allBusiness'])->name('vendors.AllBusiness');
-    Route::post('/{id}/business/create', [VendorBusinessProfileController::class, 'addBusinessInfo']);
-
-    // Business Profile Management
+    Route::get('/vendor-businesses/data', [VendorBusinessProfileController::class, 'totalBusiness'])->name('vendors.totalBusiness');
     Route::get('{id}/{business_id}/ManageBusinessinfo', [VendorBusinessProfileController::class, 'manage'])->name('vendors.manageBusinessinfo');
     Route::get('{id}/{business_id}/Business/Details', [VendorBusinessProfileController::class, 'fetchBusinessDetails'])->name('vendors.fetchBusinessDetails');
     Route::get('{id}/business/manage', [VendorBusinessProfileController::class, 'manageBusiness'])->name('vendors.ManageBusiness');
@@ -268,12 +271,9 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{vendor_id}/documents/business/{business_id}/add', [VendorDocumentController::class, 'BusinessDocs'])
         ->name('vendors.documents.business.add');
 
-    /* Individual management page */
-
-
-    /* Business management page */
 
     /*  (Individual Documents )  */
+    Route::get('{vendor_id}/Document', [VendorDocumentController::class, 'index'])->name('vendors.documents.index');
     Route::get('{vendor_id}/documents/individual/manage', [VendorDocumentController::class, 'manageIndividual'])->name('vendors.documents.individual.manage');
     Route::post('{vendor_id}/documents/individual/store',  [VendorDocumentController::class, 'storeIndividualDocument']);
     Route::get('{vendor_id}/documents/individual',        [VendorDocumentController::class, 'getIndividualDocuments']);
@@ -299,7 +299,7 @@ Route::prefix('vendors/')->group(function () {
 
 
     // Vendor Media
-    Route::get('{id}/media/index', [VendorMediaController::class, 'index']);
+    Route::get('{id}/Media', [VendorMediaController::class, 'index']);
     Route::get('{id}/media/manage', [VendorMediaController::class, 'manage']);
     Route::get('{id}/{business_id}/media/business', [VendorMediaController::class, 'businessMedia']);
 
@@ -311,22 +311,30 @@ Route::prefix('vendors/')->group(function () {
     Route::delete('{vendor_id}/media/individual/{media_id}', [VendorMediaController::class, 'deleteIndividualMedia']);
 
     // Business Media CRUD
-    Route::post('{vendor_id}/{business_id}/media/business/store',[VendorMediaController::class, 'storeBusinessMedia'])->name('vendors.media.business.store');
-    Route::get('{vendor_id}/{business_id}/media/business/List',[VendorMediaController::class, 'getBusinessMedias'])->name('vendors.media.business.index');
-    Route::get('{vendor_id}/{business_id}/media/business/{media_id}',[VendorMediaController::class, 'getBusinessMedia'])->name('vendors.media.business.show');
-    Route::match(['put', 'patch'],'{vendor_id}/{business_id}/media/business/{media_id}',[VendorMediaController::class, 'updateBusinessMedia'])->name('vendors.media.business.update');
+    Route::post('{vendor_id}/{business_id}/media/business/store', [VendorMediaController::class, 'storeBusinessMedia'])->name('vendors.media.business.store');
+    Route::get('{vendor_id}/{business_id}/media/business/List', [VendorMediaController::class, 'getBusinessMedias'])->name('vendors.media.business.index');
+    Route::get('{vendor_id}/{business_id}/media/business/{media_id}', [VendorMediaController::class, 'getBusinessMedia'])->name('vendors.media.business.show');
+    Route::match(['put', 'patch'], '{vendor_id}/{business_id}/media/business/{media_id}', [VendorMediaController::class, 'updateBusinessMedia'])->name('vendors.media.business.update');
 
-    Route::delete('{vendor_id}/{business_id}/media/business/{media_id}',[VendorMediaController::class, 'deleteBusinessMedia'])->name('vendors.media.business.destroy');
+    Route::delete('{vendor_id}/{business_id}/media/business/{media_id}', [VendorMediaController::class, 'deleteBusinessMedia'])->name('vendors.media.business.destroy');
 
 
-    // Vendor Online Profile
-    Route::get('{id}/OnlineProfile', [VendorOnlineProfileController::class, 'index'])->name('vendors.OnlineProfile');
-    Route::post('{id}/storeOnlineProfile', [VendorOnlineProfileController::class, 'store'])->name('vendors.onlineProfiles.store');
-    Route::get('{id}/{type}/OnlineProfile/Manage', [VendorOnlineProfileController::class, 'manage'])->name('vendors.onlineProfiles.manage');
-    Route::get('{id}/{type}/OnlineProfile/List', [VendorOnlineProfileController::class, 'list'])->name('vendors.onlineProfiles.list');
-    Route::post('{id}/{type}/OnlineProfile', [VendorOnlineProfileController::class, 'storeOne'])->name('vendors.onlineProfiles.storeOne');
-    Route::put('{id}/{type}/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'update'])->name('vendors.onlineProfiles.update');
-    Route::delete('{id}/{type}/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'destroy'])->name('vendors.onlineProfiles.destroy');
+    // Individual Online Profile
+    Route::get('{id}/individual/OnlineProfile', [VendorOnlineProfileController::class, 'individualIndex'])->name('individual.add');
+    Route::post('{id}/individual/storeOnlineProfile', [VendorOnlineProfileController::class, 'individualStore'])->name('individual.store');
+    Route::get('{id}/individual/OnlineProfile/Manage', [VendorOnlineProfileController::class, 'individualManage'])->name('individual.manage');
+    Route::get('{id}/individual/OnlineProfile/List', [VendorOnlineProfileController::class, 'individualList'])->name('individual.list');
+    Route::post('{id}/individual/OnlineProfile', [VendorOnlineProfileController::class, 'individualStoreOne'])->name('individual.storeOne');
+    Route::put('{id}/individual/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'individualUpdate'])->name('individual.update');
+    Route::delete('{id}/individual/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'individualDestroy'])->name('individual.destroy');
+    // Business Online Profile
+    Route::get('{id}/business/OnlineProfile/{business_id}', [VendorOnlineProfileController::class, 'businessIndex'])->name('business.add');
+    Route::post('{id}/business/storeOnlineProfile/{business_id}', [VendorOnlineProfileController::class, 'businessStore'])->name('business.store');
+    Route::get('{id}/business/OnlineProfile/Manage', [VendorOnlineProfileController::class, 'businessManage'])->name('business.manage');
+    Route::get('{id}/{business_id}/business/OnlineProfile/List', [VendorOnlineProfileController::class, 'businessList'])->name('business.list');
+    Route::post('{id}/business/OnlineProfile', [VendorOnlineProfileController::class, 'businessStoreOne'])->name('business.storeOne');
+    Route::put('{id}/business/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'businessUpdate'])->name('business.update');
+    Route::delete('{id}/business/OnlineProfile/{profile}', [VendorOnlineProfileController::class, 'businessDestroy'])->name('business.destroy');
 });
 
 Route::prefix('customers/')->group(function () {

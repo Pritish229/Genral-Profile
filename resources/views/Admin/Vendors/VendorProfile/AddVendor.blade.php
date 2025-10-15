@@ -1,12 +1,12 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Vendors | Add Vendor')
+@section('title', 'Home | Add Vendor')
 
 @section('content')
 <div class="page-content">
   <x-breadcrumb
     title="Add Vendor"
-    :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.vendorlist', 'Add Vendor' => 'vendors.create']" />
+    :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List', 'Add Vendor' => 'vendors.create']" />
 
   <div id="alert-box" class="mt-2"></div>
 

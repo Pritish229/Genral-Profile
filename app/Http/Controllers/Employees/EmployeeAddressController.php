@@ -31,7 +31,7 @@ class EmployeeAddressController extends Controller
     // Store new address
     public function storeAddress(Request $request, $employee_id)
     {
-        $validated = $request->validate([
+        $rules = [
             'state'      => 'required|string|max:120',
             'district'   => 'required|string|max:120',
             'city'       => 'required|string|max:120',
@@ -42,16 +42,29 @@ class EmployeeAddressController extends Controller
             'label'      => 'nullable|string|max:100',
             'longitude'  => 'nullable|string|max:50',
             'latitude'   => 'nullable|string|max:50',
-            'is_primary' => 'nullable|boolean',
-        ]);
+            'is_primary' => 'sometimes|in:1,0',
+        ];
+
+        $validated = $request->validate($rules);
 
         $employee = Employee::findOrFail($employee_id);
 
+        $existingCount = EmployeeAddress::where('employee_id', $employee_id)->count();
+        $isFirstRecord = ($existingCount === 0);
+
+        $is_primary = $isFirstRecord ? 1 : ($request->filled('is_primary') ? $validated['is_primary'] : 0);
+
         $address = EmployeeAddress::create(array_merge($validated, [
             'employee_id' => $employee->id,
-            'tenant_id'  => $employee->tenant_id,
-            'is_primary'  => '1',
+            'tenant_id'   => $employee->tenant_id,
+            'is_primary'  => $is_primary,
         ]));
+
+        if ($address->is_primary == 1) {
+            EmployeeAddress::where('employee_id', $employee_id)
+                ->where('id', '!=', $address->id)
+                ->update(['is_primary' => 0]);
+        }
 
         return response()->json([
             'success' => true,
@@ -117,6 +130,4 @@ class EmployeeAddressController extends Controller
             'message' => 'No primary address found'
         ], 404);
     }
-
-    
 }

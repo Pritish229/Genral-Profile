@@ -39,31 +39,45 @@ class EmployeeBankController extends Controller
             ];
         }
 
+        if ($request->account_id) {
+            $rules['account_id'] = 'required|exists:employee_payment_accounts,id,employee_id,' . $employee_id;
+        }
+
+        $rules['is_primary'] = 'sometimes|in:1,0';
+
         $validated = $request->validate($rules);
 
-        // Default primary logic
-        $is_primary = $request->is_primary ?? 0;
+        $is_primary = $request->filled('is_primary') ? $validated['is_primary'] : 0;
+
+        $existingCount = EmployeePaymentAccount::where('employee_id', $employee_id)->count();
+        $isFirstRecord = ($existingCount === 0);
 
         if ($request->account_id) {
-            // Update existing account
             $account = EmployeePaymentAccount::findOrFail($request->account_id);
+
+            $is_primary = $request->filled('is_primary') ? $validated['is_primary'] : $account->is_primary;
 
             $account->method         = $validated['method'];
             $account->account_holder = $validated['method'] === 'upi'
-                ? $validated['upi_holder_name']
-                : $validated['account_holder'];
-            $account->bank_name      = $validated['bank_name'] ?? null;
-            $account->branch_name    = $validated['branch_name'] ?? null;
-            $account->ifsc_code      = $validated['ifsc_code'] ?? null;
-            $account->swift_code     = $validated['swift_code'] ?? null;
-            $account->upi_vpa        = $validated['upi_vpa'] ?? null;
+                ? ($validated['upi_holder_name'] ?? $account->account_holder)
+                : ($validated['account_holder'] ?? $account->account_holder);
+            $account->bank_name      = $validated['bank_name'] ?? $account->bank_name;
+            $account->branch_name    = $validated['branch_name'] ?? $account->branch_name;
+            $account->ifsc_code      = $validated['ifsc_code'] ?? $account->ifsc_code;
+            $account->swift_code     = $validated['swift_code'] ?? $account->swift_code;
+            $account->upi_vpa        = $validated['upi_vpa'] ?? $account->upi_vpa;
             $account->is_primary     = $is_primary;
 
             $account->save();
 
             $message = 'Bank/UPI details updated successfully';
         } else {
-            // Create new account
+            if ($isFirstRecord) {
+                $is_primary = 1;
+            } elseif (!$request->filled('is_primary')) {
+                $is_primary = 0;
+            }
+
             $account = EmployeePaymentAccount::create([
                 'tenant_id'      => $employee->tenant_id,
                 'employee_id'    => $employee->id,
@@ -83,8 +97,7 @@ class EmployeeBankController extends Controller
             $message = 'Bank/UPI details added successfully';
         }
 
-        // Ensure only one primary per employee
-        if ($is_primary == 1) {
+        if ($account->is_primary == 1) {
             EmployeePaymentAccount::where('employee_id', $employee_id)
                 ->where('id', '!=', $account->id)
                 ->update(['is_primary' => 0]);

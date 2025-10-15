@@ -28,9 +28,9 @@
 
     <form id="vendorContactForm">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="contact_type" class="form-label">Contact Type</label>
-                <select id="contact_type" name="contact_type" class="form-select" >
+                <select id="contact_type" name="contact_type" class="form-select">
                     <option value="">-- Select Type --</option>
                     <option value="phone">Phone</option>
                     <option value="email">Email</option>
@@ -38,14 +38,19 @@
                     <option value="telegram">Telegram</option>
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <x-inputbox id="value" label="Value" type="text" placeholder="Enter Value" name="value"
                     value="{{ old('value') }}" :required="false" helpertxt="Enter phone, email, etc." />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <x-inputbox id="country_code" label="Country Code" type="text" placeholder="Enter country code" name="country_code"
+                    value="{{ old('country_code') }}" :required="false" helpertxt="Ex: +91, +1, IN" />
+            </div>
+            <div class="col-md-3">
                 <x-inputbox id="label" label="Label" type="text" placeholder="Enter Label" name="label"
                     value="{{ old('label') }}" :required="false" helpertxt="Optional label (e.g. Father's Phone)" />
             </div>
+            
             <div class="col-lg-12 mt-3">
                 <button type="submit" class="btn btn-primary">Save & Continue</button>
                 <button type="button" class="btn btn-secondary" id="skipBtn">Skip</button>
@@ -91,26 +96,8 @@
                         </div>
                     </div>
 
-                    <!-- Status badge on top-right -->
-                    <div>
-                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
-                            ${response.primary_details.status}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Footer with Documents & Media -->
-                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
-                    <a href="${manageBankUrl}" class="text-decoration-none">
-                        <i class="fas fa-university me-1"></i> Bank Details
-                    </a>
-                    <a href="${manageDocUrl}" class="text-decoration-none">
-                        <i class="fas fa-file-alt me-1"></i> Documents
-                    </a>
-                    <a href="${managemediaUrl}" class="text-decoration-none">
-                        <i class="fas fa-photo-video me-1"></i> Medias
-                    </a>
-                </div>
+                   
+               
             `);
 
                 } else {
@@ -147,7 +134,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${vendor_id}/storeContact`,
+                url: `${baseUrl}/${vendor_id}/Manage/Contacts/Add`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();

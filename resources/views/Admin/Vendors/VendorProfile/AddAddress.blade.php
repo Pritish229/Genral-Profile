@@ -27,6 +27,8 @@
     </div>
 
     <form id="studentAddressForm">
+        @csrf
+        <input type="hidden" name="address_type" value="permanent">
         <div class="row">
             <div class="col-md-3">
                 <x-inputbox id="state" label="State" type="text" placeholder="Enter State Name" name="state"
@@ -113,25 +115,10 @@
                     </div>
 
                     <!-- Status badge on top-right -->
-                    <div>
-                        <span class="badge ${response.primary_details.status === 'active' ? 'bg-success' : 'bg-danger'}">
-                            ${response.primary_details.status}
-                        </span>
-                    </div>
+                    
                 </div>
 
-                <!-- Footer with Documents & Media -->
-                <div class="d-flex justify-content-end gap-3 mt-3 border-top pt-2">
-                    <a href="${manageBankUrl}" class="text-decoration-none">
-                        <i class="fas fa-university me-1"></i> Bank Details
-                    </a>
-                    <a href="${manageDocUrl}" class="text-decoration-none">
-                        <i class="fas fa-file-alt me-1"></i> Documents
-                    </a>
-                    <a href="${managemediaUrl}" class="text-decoration-none">
-                        <i class="fas fa-photo-video me-1"></i> Medias
-                    </a>
-                </div>
+               
             `);
 
                 } else {

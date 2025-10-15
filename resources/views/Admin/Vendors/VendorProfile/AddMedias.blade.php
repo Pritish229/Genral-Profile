@@ -1,337 +1,229 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Manage Business Documents')
+@section('title', 'Home | Vendors | Media')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Business Documents"
-        :links="[
-            'Home' => 'Admin.Dashboard',
-            'Vendors' => 'vendors.List',
-            'Vendor Detail' => ['vendors.viewDetails', ['id' => $id]],
-            'Business Detail' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
-            'Business Documents' => ''
-        ]" />
+        title="Media"
+        :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List' ,'Media'=>'' ]" />
 
-    <!-- Page Header -->
-    <div class="mt-3">
-        <h4 class="mb-3">
-            <i class="fas fa-file-alt"></i>
-            Business Documents
-        </h4>
-    </div>
-
-    <!-- Cards container -->
-    <div class="row p-3" id="documentList"></div>
-</div>
-
-<!-- Document Modal -->
-<div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <form id="documentForm" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title" id="documentModalLabel">Add Business Document</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-
-                    <input type="hidden" name="id" id="doc_id">
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <x-inputbox id="document_type" label="Document Type" type="text" name="document_type"
-                                placeholder="e.g., Passport, Aadhar Card" value="" helpertxt="" :required="true" />
-                        </div>
-                        <div class="col-md-6">
-                            <x-inputbox id="document_number" label="Document Number" type="text" name="document_number"
-                                placeholder="Enter Document Number" value="" helpertxt="" :required="true" />
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="issue_date">Issue Date</label>
-                            <input type="text" id="issue_date" name="issue_date" class="form-control flatpickr"
-                                placeholder="Select issue date">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="expiry_date">Expiry Date</label>
-                            <input type="text" id="expiry_date" name="expiry_date" class="form-control flatpickr"
-                                placeholder="Select expiry date">
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <x-inputbox id="file_name" label="File Name" type="text" name="file_name"
-                                placeholder="e.g., Passport Scan" value="" helpertxt="" :required="false" />
-                        </div>
-                        <div class="col-md-6">
-                            <label for="file_url">Upload File</label>
-                            <input type="file" class="form-control" id="file_url" name="file_url">
-                            <small class="form-text text-muted">Upload scanned copy or PDF ( accepted formats: jpg, jpeg, png, pdf; max 5MB).</small>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <x-textareabox id="remarks" label="Remarks" name="remarks"
-                                placeholder="Enter additional remarks about this document" value="" helpertxt="" :required="false" />
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <x-inputbox id="issuing_authority" label="Issuing Authority" type="text" name="issuing_authority"
-                                placeholder="e.g., Government of India" value="" helpertxt="" :required="false" />
-                        </div>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
-                </div>
-            </form>
+    <!-- vendor Details -->
+    <div class="mt-2">
+        <div class="card">
+            <div class="p-3" id="vendor-details">
+                Loading details...
+            </div>
         </div>
     </div>
+
+    <h5>Upload Vendor Media</h5>
+    <hr style="color:#5156be">
+
+    <!-- Alert Box -->
+    <div id="alert-box" class="mt-2"></div>
+
+    <!-- Progress Bar -->
+    <div class="progress mb-3" style="height: 25px;" id="progressContainer">
+        <div class="progress-bar bg-success" role="progressbar" style="width:80%;" id="progressBar">80%</div>
+    </div>
+
+    <!-- Document Form -->
+    <form id="documentForm" enctype="multipart/form-data">
+        @csrf
+        <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="media_usage">Media Usage <span class="text-danger">*</span></label>
+                            <select class="form-select" id="media_usage" name="media_usage" required>
+                                <option value="" disabled selected>-- Select Usage --</option>
+                                <!-- <option value="logo">Logo</option> -->
+                                <option value="profile">Profile</option>
+                                <option value="banner">Banner</option>
+                                <option value="gallery">Gallery</option>
+                                <option value="kyc">KYC</option>
+                                <option value="doc_scan">Document Scan</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="subject_name">Subject Name</label>
+                            <input type="text" class="form-control" id="subject_name" name="subject_name" placeholder="Enter custom purpose">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="file_name_media">File Name</label>
+                            <input type="text" class="form-control" id="file_name_media" name="file_name" placeholder="Original file name">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="file_url_media">Upload File <span class="text-danger" id="file_required">*</span></label>
+                            <input type="file" class="form-control" id="file_url_media" name="file_url" accept="image/jpeg,image/png,application/pdf">
+                            <small class="text-muted">Max size: 5MB. Formats: JPG, PNG, PDF</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="caption">Caption</label>
+                            <input type="text" class="form-control" id="caption" name="caption" placeholder="Short description">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tags">Tags</label>
+                            <select id="tags" name="tags[]" class="form-select" multiple></select>
+                        </div>
+                    </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Save Document</button>
+            <button type="button" class="btn btn-secondary" id="skipBtn">Skip</button>
+        </div>
+    </form>
+
 </div>
 @endsection
 
 @section('script')
 <script>
-    // Initialize flatpickr
-    $(".flatpickr").flatpickr({
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j F vendorId F Y",
-        allowInput: true
-    });
-
-    let vendorId = "{{ $id }}";
-    let businessId = "{{ $business_id }}";
-    let apiSubpath = 'business';
     let baseUrl = "{{ url('/vendors') }}";
+    let vendor_id = "{{ $id }}";
 
-    // Fetch and render documents
-    function loadDocuments() {
-        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}`;
+    function fetchDetails() {
+        $.ajax({
+            type: "GET",
+            url: `${baseUrl}/${vendor_id}/Details`,
+            dataType: "json",
+            success: function(response) {
+                if (response.success) {
+                    let imgSrc = `storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/vendors/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/vendors/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/vendors/${response.data.id}/Media/manage`;
 
-        $.get(url, function(res) {
-            let html = '';
-
-            if (res.data.length === 0) {
-                html = `
-                <div class="col-12 text-center py-5">
-                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No business documents found</h5>
-                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#documentModal" onclick="openAddModal()">
-                        <i class="fas fa-plus"></i> Add Document
-                    </button>
-                </div>`;
-            } else {
-                html = `
-                <div class="col-12 d-flex justify-content-end mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#documentModal" onclick="openAddModal()">
-                        <i class="fas fa-plus"></i> Add Document
-                    </button>
-                </div>`;
-
-                res.data.forEach(doc => {
-                    let fileUrl = doc.file_url; // Full URL from backend
-                    let preview = '';
-                    if (doc.file_url) {
-                        let ext = doc.file_url.split('.').pop().toLowerCase().split('?')[0];
-                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-                            preview = `<img src="${fileUrl}" class="img-fluid rounded mb-2" style="max-height:120px;object-fit:cover;">`;
-                        } else if (ext === 'pdf') {
-                            preview = `<i class="fas fa-file-pdf fa-3x text-danger mb-2"></i><p class="small">PDF Document</p>`;
-                        } else {
-                            preview = `<i class="fas fa-file-alt fa-3x text-secondary mb-2"></i>`;
-                        }
-                    }
-
-                    let downloadName = (doc.file_name ? doc.file_name.replace(/\s+/g, '_') : `document_${doc.id}`);
-                    let issueDate = doc.issue_date || '-';
-                    let expiryDate = doc.expiry_date || '-';
-
-                    html += `
-                    <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                ${preview}
-                                <h5 class="card-title">${doc.document_type}</h5>
-                                <p class="mb-1"><strong>Number:</strong> ${doc.document_number}</p>
-                                <p class="mb-1"><strong>Issue:</strong> ${issueDate}</p>
-                                <p class="mb-1"><strong>Expiry:</strong> ${expiryDate}</p>
-                                <p class="mb-1"><strong>Authority:</strong> ${doc.issuing_authority || '-'}</p>
-                                <a href="${fileUrl}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
-                                <a href="${fileUrl}" download="${downloadName}" class="btn btn-sm btn-outline-success">Download</a>
-                                <div class="dropdown float-end">
-                                    <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#" class="dropdown-item editDoc" data-id="${doc.id}">Edit</a></li>
-                                        <li><a href="#" class="dropdown-item deleteDoc" data-id="${doc.id}">Delete</a></li>
-                                    </ul>
-                                </div>
+                    $("#vendor-details").html(`
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
+                        </div>
+                        <div class="flex-grow-1">
+                                <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${response.primary_details.vendor_uid}</p>
+                                <p><strong>Name:</strong> ${response.data.full_name}</p>
+                                <p><strong>Gender:</strong> ${response.data.gender}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
-                    </div>`;
-                });
-            }
+                    </div>
 
-            $('#documentList').html(html);
-        }).fail(function() {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to load documents.'
-            });
-        });
-    }
+                    
+            `);
 
-    // Open add modal
-    function openAddModal() {
-        $('#documentForm')[0].reset();
-        $('.flatpickr').each(function() {
-            this._flatpickr.clear();
-        });
-        $('#doc_id').val('');
-        $('#documentModalLabel').text('Add Business Document');
-        $('#save-btn').text('Save');
-    }
-
-    // Submit form (add/edit)
-    $('#documentForm').on('submit', function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
-        let docId = $('#doc_id').val();
-        let url = `${baseUrl}/${vendorId}/${businessId}/documents/${apiSubpath}/store`;
-        let method = 'POST';
-
-        if (docId) {
-            url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${docId}`;
-            formData.append('_method', 'PUT');
-            method = 'POST'; // Laravel uses POST with _method for PUT
-        }
-
-        $.ajax({
-            url,
-            method,
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(res) {
-                $('#documentModal').modal('hide');
-                loadDocuments();
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Saved!',
-                    text: res.message || 'Document saved successfully',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            },
-            error: function(err) {
-                let errorMsg = 'Error saving document';
-                if (err.responseJSON && err.responseJSON.message) {
-                    errorMsg = err.responseJSON.message;
+                } else {
+                    $("#vendor-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorMsg
-                });
+            },
+            error: function(xhr) {
+                $("#vendor-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                console.error(xhr.responseText);
             }
         });
-    });
+    }
 
-    // Edit document
-    $(document).on('click', '.editDoc', function() {
-        let id = $(this).data('id');
-        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
-        $.get(url, function(res) {
-            let d = res.data;
+    // Update Progress Bar
+    function updateProgress(value) {
+        $("#progressContainer").show();
+        $("#progressBar").css("width", value + "%").text(value + "%");
+    }
 
-            $('#doc_id').val(d.id);
-            $('#document_type').val(d.document_type);
-            $('#document_number').val(d.document_number);
-            $('#file_name').val(d.file_name);
-            $('#remarks').val(d.remarks);
-            $('#issuing_authority').val(d.issuing_authority);
+    $(document).ready(function() {
+        $(".flatpickr").flatpickr({
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",
+            allowInput: true
+        });
+        $("#tags").select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: "Add tags (comma separated)",
+            width: '100%'
+            // Removed dropdownParent since no #mediaModal exists on this page
+        });
 
-            if (d.issue_date_raw) {
-                document.querySelector('#issue_date')._flatpickr.setDate(d.issue_date_raw, true, 'Y-m-d');
-            } else {
-                document.querySelector('#issue_date')._flatpickr.clear();
-            }
+        fetchDetails();
 
-            if (d.expiry_date_raw) {
-                document.querySelector('#expiry_date')._flatpickr.setDate(d.expiry_date_raw, true, 'Y-m-d');
-            } else {
-                document.querySelector('#expiry_date')._flatpickr.clear();
-            }
+        // Show initial progress
+        updateProgress(80); // Set to 80% on load
 
-            $('#documentModalLabel').text('Edit Business Document');
-            $('#save-btn').text('Update');
-            $('#documentModal').modal('show');
-        }).fail(function() {
+        // Handle Save
+        $("#documentForm").on("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
             Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to load document details.'
+                title: 'Saving...',
+                text: 'Please wait while we save the document.',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
             });
-        });
-    });
 
-    // Delete document
-    $(document).on('click', '.deleteDoc', function() {
-        let id = $(this).data('id');
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'This document will be permanently deleted!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
-                $.ajax({
-                    url: url,
-                    type: 'DELETE',
-                    success: function(res) {
-                        loadDocuments();
+            $.ajax({
+                type: "POST",
+                url: `${baseUrl}/${vendor_id}/media/individual/store`,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    Swal.close();
+                    if (response.success) {
+                        // Update progress to 90% on success
+                        updateProgress(90);
                         Swal.fire({
                             icon: 'success',
-                            title: 'Deleted!',
-                            text: res.message || 'Document deleted.',
-                            timer: 2000,
+                            title: 'Saved!',
+                            text: 'Document saved successfully.',
+                            timer: 1500,
                             showConfirmButton: false
-                        });
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Delete failed'
+                        }).then(() => {
+                            window.location.href = `${baseUrl}/${vendor_id}/individual/OnlineProfile`;
                         });
                     }
-                });
-            }
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let html = '<div class="alert alert-danger"><ul>';
+                        $.each(errors, function(key, value) {
+                            html += '<li>' + value[0] + '</li>';
+                        });
+                        html += '</ul></div>';
+                        $("#alert-box").html(html);
+                    } else {
+                        Swal.fire("Error", "Something went wrong.", "error");
+                        console.error(xhr.responseText);
+                    }
+                }
+            });
         });
-    });
 
-    // Initial load
-    $(document).ready(function() {
-        loadDocuments();
+        // Handle Skip
+        $("#skipBtn").on("click", function() {
+
+            updateProgress(90);
+            Swal.fire({
+                icon: 'info',
+                title: 'Skipped',
+                text: 'You skipped this step.',
+                timer: 1200,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.href = `${baseUrl}/${vendor_id}/individual/OnlineProfile`;
+            });
+        });
     });
 </script>
 @endsection

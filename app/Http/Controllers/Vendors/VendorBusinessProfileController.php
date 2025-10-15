@@ -8,6 +8,7 @@ use App\Models\VendorAddress;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\VendorBusinessProfile;
+use Yajra\DataTables\Facades\DataTables;
 
 class VendorBusinessProfileController extends Controller
 {
@@ -85,6 +86,41 @@ class VendorBusinessProfileController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function allBusinessPage()
+    {
+        return view('Admin.Vendors.VendorProfile.AllBusiness');
+    }
+
+    public function totalBusiness(Request $request)
+    {
+        $query = Vendor::query()
+            ->where('type', 'business')
+            ->with('businessProfile');
+
+        // Apply filter if vendor_uid is provided
+        if ($request->has('vendor_id') && !empty($request->vendor_id)) {
+            $query->where('vendor_uid', $request->vendor_id);
+        }
+
+        $query->select('vendors.*');
+
+        return DataTables::of($query)
+            ->addColumn('vendor_name', function ($vendor) {
+                return $vendor->vendor_uid;
+            })
+            ->addColumn('legal_name', function ($vendor) {
+                return $vendor->businessProfile?->legal_name ?? '-';
+            })
+            ->addColumn('trade_name', function ($vendor) {
+                return $vendor->businessProfile?->trade_name ?? '-';
+            })
+            ->addColumn('action', function ($vendor) {
+                return '<a href="' . route('vendors.viewDetails', $vendor->id) . '" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->rawColumns(['action'])
+            ->make(true);
     }
 
 

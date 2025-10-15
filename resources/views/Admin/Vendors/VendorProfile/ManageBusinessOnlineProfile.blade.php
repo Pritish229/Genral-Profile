@@ -1,35 +1,38 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Vendors | Manage Online Profiles')
+@section('title', 'Home | Vendors | Manage Business Online Profiles')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Online Profiles"
-        :links="['Home' => 'Admin.Dashboard', 'Vendors' => 'vendors.List',
-                'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-                'Manage Online Profiles' => '']" />
+        title="Business Online Profiles"
+        :links="[
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Business List' => ['vendors.Businesslist', $id],
+        'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+            'Business Profiles' => ''
+        ]" />
 
     {{-- ==================== ADD FORM ==================== --}}
     <div class="card p-3 mb-3">
-        <form id="onlineProfileForm">
+        <form id="businessProfileForm">
             @csrf
-            <input type="hidden" name="_method" value="POST">
+            <input type="hidden" name="business_id" id="business_id" value="{{ $business_id ?? '' }}">
+
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Social Platform</label>
-                    <input type="text" name="social_platform" class="form-control"
-                           placeholder="LinkedIn" required>
+                    <input type="text" name="social_platform" class="form-control" placeholder="LinkedIn" required>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Icon</label>
-                    <input type="text" name="icon" class="form-control"
-                           placeholder="fab fa-linkedin">
+                    <input type="text" name="icon" class="form-control" placeholder="fab fa-linkedin">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Profile URL</label>
-                    <input type="url" name="profile_url" class="form-control"
-                           placeholder="https://..." required>
+                    <input type="url" name="profile_url" class="form-control" placeholder="https://..." required>
                 </div>
             </div>
 
@@ -41,10 +44,11 @@
 
     {{-- ==================== TABLE ==================== --}}
     <div class="card p-3">
-        <table class="table table-bordered" id="profilesTable">
+        <table class="table table-bordered" id="businessProfilesTable">
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Business</th>
                     <th>Platform</th>
                     <th>Icon</th>
                     <th>URL</th>
@@ -53,7 +57,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td colspan="5" class="text-center">Loading...</td>
+                    <td colspan="6" class="text-center">Loading...</td>
                 </tr>
             </tbody>
         </table>
@@ -61,14 +65,15 @@
 </div>
 
 {{-- ==================== EDIT MODAL ==================== --}}
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="editBusinessModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="onlineProfileEditForm">
+        <form id="businessProfileEditForm">
             @csrf
             <input type="hidden" name="_method" value="PUT">
+            <input type="hidden" name="business_id">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Online Profile</h5>
+                    <h5 class="modal-title">Edit Business Profile</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -97,24 +102,27 @@
 </div>
 @endsection
 
+
 @section('script')
 <script>
-    let baseUrl   = "{{ url('/vendors') }}";
+    let baseUrl = "{{ url('/vendors') }}";
     let vendor_id = "{{ $id }}";
-    let type      = "{{ $type }}"; 
-    let editId    = null;
+    let business_id = "{{ $business_id ?? '' }}";
+    let editId = null;
 
-    function getApiUrl(path) {
-        return `${baseUrl}/${vendor_id}/individual/OnlineProfile${path}`;
+    function getApiUrl(path = '') {
+        return `${baseUrl}/${vendor_id}/business/OnlineProfile${path}`;
     }
 
-    function loadProfiles() {
-        $.get(getApiUrl('/List'), function(res) {
+    // ======== LOAD BUSINESS PROFILES ========
+    function loadBusinessProfiles() {
+        $.get((`${baseUrl}/${vendor_id}/${business_id}/business/OnlineProfile/List/`), function(res) {
             let rows = '';
             if (res.success && res.data.length > 0) {
                 res.data.forEach((p, i) => {
                     rows += `<tr>
                         <td>${i + 1}</td>
+                        <td>${p.business_name || '-'}</td>
                         <td>${p.social_platform || '-'}</td>
                         <td>${p.icon || '-'}</td>
                         <td><a href="${p.profile_url}" target="_blank">${p.profile_url}</a></td>
@@ -122,53 +130,53 @@
                             <button 
                                 class="btn btn-sm btn-primary edit-btn"
                                 data-id="${p.id}"
-                                data-platform="${p.social_platform || ''}"
+                                data-business="${p.business_id}"
+                                data-platform="${p.social_platform}"
                                 data-icon="${p.icon || ''}"
-                                data-url="${p.profile_url || ''}">
+                                data-url="${p.profile_url}">
                                 Edit
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteProfile(${p.id})">Delete</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteBusinessProfile(${p.id})">Delete</button>
                         </td>
                     </tr>`;
                 });
             } else {
-                rows = `<tr><td colspan="5" class="text-center">No profiles found</td></tr>`;
+                rows = `<tr><td colspan="6" class="text-center">No profiles found</td></tr>`;
             }
-            $('#profilesTable tbody').html(rows);
+            $('#businessProfilesTable tbody').html(rows);
         }).fail(function() {
-            $('#profilesTable tbody').html(`<tr><td colspan="5" class="text-center">Error loading</td></tr>`);
+            $('#businessProfilesTable tbody').html(`<tr><td colspan="6" class="text-center text-danger">Error loading profiles</td></tr>`);
         });
     }
 
-    // Use delegated event listener instead of inline onclick
+    // ======== OPEN EDIT MODAL ========
     $(document).on('click', '.edit-btn', function() {
         let p = {
             id: $(this).data('id'),
+            business_id: $(this).data('business'),
             social_platform: $(this).data('platform'),
             icon: $(this).data('icon'),
             profile_url: $(this).data('url')
         };
-        openEditModal(p);
+        editId = p.id;
+        $('#businessProfileEditForm [name="business_id"]').val(p.business_id);
+        $('#businessProfileEditForm [name="social_platform"]').val(p.social_platform);
+        $('#businessProfileEditForm [name="icon"]').val(p.icon);
+        $('#businessProfileEditForm [name="profile_url"]').val(p.profile_url);
+        $('#editBusinessModal').modal('show');
     });
 
-    function openEditModal(p) {
-        editId = p.id;
-        $('#onlineProfileEditForm [name="social_platform"]').val(p.social_platform || '');
-        $('#onlineProfileEditForm [name="icon"]').val(p.icon || '');
-        $('#onlineProfileEditForm [name="profile_url"]').val(p.profile_url || '');
-        $('#editModal').modal('show');
-    }
-
-    function closeEditModal() {
-        $('#editModal').modal('hide');
-        $('#onlineProfileEditForm')[0].reset();
+    function closeBusinessEditModal() {
+        $('#editBusinessModal').modal('hide');
+        $('#businessProfileEditForm')[0].reset();
         editId = null;
     }
 
-    function deleteProfile(id) {
+    // ======== DELETE PROFILE ========
+    function deleteBusinessProfile(id) {
         Swal.fire({
             title: 'Are you sure?',
-            text: "You won't be able to revert this!",
+            text: "This will permanently delete the record!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Yes, delete it!'
@@ -183,7 +191,7 @@
                     },
                     success: function(res) {
                         Swal.fire('Deleted!', res.message, 'success');
-                        loadProfiles();
+                        loadBusinessProfiles();
                     },
                     error: function(xhr) {
                         const msg = xhr.responseJSON?.message || 'Failed to delete';
@@ -194,21 +202,22 @@
         });
     }
 
-    $('#onlineProfileForm').submit(function(e) {
+    // ======== ADD PROFILE ========
+    $('#businessProfileForm').submit(function(e) {
         e.preventDefault();
-
         let url = getApiUrl('');
         let data = $(this).serialize();
-
         $.ajax({
             url: url,
             type: 'POST',
             data: data,
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             success: function(res) {
                 Swal.fire('Success!', res.message, 'success');
-                $('#onlineProfileForm')[0].reset();
-                loadProfiles();
+                $('#businessProfileForm')[0].reset();
+                loadBusinessProfiles();
             },
             error: function(xhr) {
                 const msg = xhr.responseJSON?.message || 'Error occurred';
@@ -217,23 +226,23 @@
         });
     });
 
-    $('#onlineProfileEditForm').submit(function(e) {
+    // ======== EDIT PROFILE ========
+    $('#businessProfileEditForm').submit(function(e) {
         e.preventDefault();
-
         if (!editId) return;
-
         let url = getApiUrl('/' + editId);
         let data = $(this).serialize();
-
         $.ajax({
             url: url,
             type: 'POST',
             data: data,
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
             success: function(res) {
-                Swal.fire('Success!', res.message, 'success');
-                closeEditModal();
-                loadProfiles();
+                Swal.fire('Updated!', res.message, 'success');
+                closeBusinessEditModal();
+                loadBusinessProfiles();
             },
             error: function(xhr) {
                 const msg = xhr.responseJSON?.message || 'Error occurred';
@@ -242,12 +251,10 @@
         });
     });
 
+    // ======== INIT ========
     $(document).ready(function() {
-        loadProfiles();
-
-        $('#editModal').on('hidden.bs.modal', function () {
-            closeEditModal();
-        });
+        loadBusinessProfiles();
+        $('#editBusinessModal').on('hidden.bs.modal', closeBusinessEditModal);
     });
 </script>
 @endsection

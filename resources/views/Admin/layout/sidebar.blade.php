@@ -60,6 +60,9 @@
                         <li class="{{ in_array(Route::currentRouteName(), ['vendors.List']) ? 'active' : '' }}">
                             <a href="{{ route('vendors.List') }}"><span>Vendors</span></a>
                         </li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['vendors.allBusinessPage']) ? 'active' : '' }}">
+                            <a href="{{ route('vendors.allBusinessPage') }}"><span>All Business</span></a>
+                        </li>
                     </ul>
                 </li>
 

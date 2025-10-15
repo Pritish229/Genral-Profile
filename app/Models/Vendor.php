@@ -32,10 +32,16 @@ class Vendor extends Model
         'total_payout' => 'decimal:2',
     ];
 
-    // ✅ Only individualProfile
+    // ✅ Existing individualProfile relationship
     public function individualProfile()
     {
         return $this->hasOne(VendorIndividualProfile::class);
+    }
+
+    // ✅ Add this new businessProfile relationship
+    public function businessProfile()
+    {
+        return $this->hasOne(VendorBusinessProfile::class, 'vendor_id');
     }
 
     protected static function booted()

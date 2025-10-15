@@ -13,12 +13,16 @@ class VendorContactController extends Controller
 {
     public function index($id)
     {
-        return view('Admin.Vendors.VendorProfile.ManageContact', ['id' => $id]);
+        return view('Admin.Vendors.VendorProfile.AddContact', ['id' => $id]);
     }
 
     public function businessContact($id, $business_id)
     {
         return view('Admin.Vendors.VendorProfile.BusinessContact', ['id' => $id, 'business_id' => $business_id]);
+    }
+
+    public function stepContact($id){
+        return view('Admin.Vendors.VendorProfile.AddContact', ['id' => $id]);
     }
 
     public function manageContact($id)
