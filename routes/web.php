@@ -24,6 +24,7 @@ use App\Http\Controllers\Students\StudentAddressController;
 use App\Http\Controllers\Students\StudentContactController;
 use App\Http\Controllers\Customers\CustomerAddressController;
 use App\Http\Controllers\Customers\CustomerContactController;
+use App\Http\Controllers\Customers\CustomerProfileController;
 use App\Http\Controllers\Employees\EmployeeAddressController;
 use App\Http\Controllers\Employees\EmployeeContactController;
 use App\Http\Controllers\Employees\EmployeePrimaryController;
@@ -42,7 +43,6 @@ Route::get('/storage-link', function () {
 });
 
 // Students Module 
-
 Route::prefix('students/')->group(function () {
 
     Route::get('create', [StudentController::class, 'create'])->name('students.create');
@@ -80,7 +80,6 @@ Route::prefix('students/')->group(function () {
     Route::delete('{student}/contacts/{contact}', [StudentContactController::class, 'deleteContact'])
         ->name('students.contacts.delete');
 
-
     // Student Bank
     Route::get('{id}/Bank', [StudentBankController::class, 'index'])->name('students.Bank');
     Route::post('{id}/saveBank', [StudentBankController::class, 'saveBank'])->name('students.Bank.saveBank');
@@ -88,7 +87,6 @@ Route::prefix('students/')->group(function () {
     Route::get('{id}/manageBank', [StudentBankController::class, 'manageBankForm'])->name('students.bank.manage');
     Route::get('{id}/manageBank/{account_id}', [StudentBankController::class, 'editBank'])->name('students.bank.manage.edit');
     Route::delete('{id}/deleteBank/{account_id}', [StudentBankController::class, 'deleteBank'])->name('students.bank.delete');
-
 
     // Student Document
     Route::get('{id}/Document', [StudentDocumentsController::class, 'index'])->name('students.Document');
@@ -99,8 +97,6 @@ Route::prefix('students/')->group(function () {
     Route::get('{student_id}/documents/{doc_id}', [StudentDocumentsController::class, 'getDocument']);
     Route::delete('{student_id}/documents/{doc_id}', [StudentDocumentsController::class, 'deleteDocument']);
     Route::put('{student_id}/documents/{doc_id}', [StudentDocumentsController::class, 'updateDocument']);
-
-
 
     // Student Media
     Route::get('{id}/Media', [StudentMediaController::class, 'index'])->name('students.Media');
@@ -178,22 +174,22 @@ Route::prefix('vendors/')->group(function () {
 
     Route::get('create', [VendorController::class, 'create'])->name('vendors.create');
     Route::post('store', [VendorController::class, 'store'])->name('vendors.store');
-    
+
     // Route Profile Details
     Route::get('list', [VendorProfileController::class, 'vendorlist'])->name('vendors.List');
     Route::get('List/All', [VendorProfileController::class, 'listAll'])->name('vendors.paginate');
     Route::get('{id}/Details', [VendorProfileController::class, 'Details'])->name('vendors.Details');
     Route::get('{id}/view/Details', [VendorProfileController::class, 'viewDetails'])->name('vendors.viewDetails');
-    Route::get('{id}/Business', [VendorBusinessProfileController::class, 'Business'])->name('vendors.BusinessProfile');
-
+    
     // Vendor Management
     Route::get('{id}/manage', [VendorController::class, 'manage'])->name('vendors.manage');
     Route::get('{id}/edit', [VendorController::class, 'edit'])->name('vendors.edit');
     Route::post('{id}/update', [VendorController::class, 'update'])->name('vendors.update');
-
+    
     // Vendor Business Info
     
     // Business Profile Management
+    Route::get('{id}/Business', [VendorBusinessProfileController::class, 'Business'])->name('vendors.BusinessProfile');
     Route::get('{id}/BusinessInfo', [VendorBusinessProfileController::class, 'index'])->name('vendors.BusinessInfo');
     Route::get('/AllBusiness', [VendorBusinessProfileController::class, 'allBusinessPage'])->name('vendors.allBusinessPage');
     Route::post('/{id}/business/create', [VendorBusinessProfileController::class, 'addBusinessInfo']);
@@ -267,7 +263,6 @@ Route::prefix('vendors/')->group(function () {
 
     Route::get('{vendor_id}/documents/add', [VendorDocumentController::class, 'index'])
         ->name('vendors.documents.add');
-
     Route::get('{vendor_id}/documents/business/{business_id}/add', [VendorDocumentController::class, 'BusinessDocs'])
         ->name('vendors.documents.business.add');
 
@@ -280,7 +275,6 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{vendor_id}/documents/individual/{doc_id}', [VendorDocumentController::class, 'getIndividualDocument']);
     Route::match(['put', 'patch'], '{vendor_id}/documents/individual/{doc_id}', [VendorDocumentController::class, 'updateIndividualDocument']);
     Route::delete('{vendor_id}/documents/individual/{doc_id}', [VendorDocumentController::class, 'deleteIndividualDocument']);
-
 
     /* (Business Documents)  */
     Route::post('{vendor_id}/{business_id}/documents/business/store', [VendorDocumentController::class, 'storeBusinessDocument']);
@@ -296,7 +290,6 @@ Route::prefix('vendors/')->group(function () {
         ->name('vendors.documents.business.update');
     Route::delete('{vendor_id}/documents/business/{business_id}/{doc_id}', [VendorDocumentController::class, 'deleteBusinessDocument'])
         ->name('vendors.documents.business.destroy');
-
 
     // Vendor Media
     Route::get('{id}/Media', [VendorMediaController::class, 'index']);
@@ -315,9 +308,7 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{vendor_id}/{business_id}/media/business/List', [VendorMediaController::class, 'getBusinessMedias'])->name('vendors.media.business.index');
     Route::get('{vendor_id}/{business_id}/media/business/{media_id}', [VendorMediaController::class, 'getBusinessMedia'])->name('vendors.media.business.show');
     Route::match(['put', 'patch'], '{vendor_id}/{business_id}/media/business/{media_id}', [VendorMediaController::class, 'updateBusinessMedia'])->name('vendors.media.business.update');
-
     Route::delete('{vendor_id}/{business_id}/media/business/{media_id}', [VendorMediaController::class, 'deleteBusinessMedia'])->name('vendors.media.business.destroy');
-
 
     // Individual Online Profile
     Route::get('{id}/individual/OnlineProfile', [VendorOnlineProfileController::class, 'individualIndex'])->name('individual.add');
@@ -341,24 +332,12 @@ Route::prefix('customers/')->group(function () {
 
     Route::get('create', [CustomerController::class, 'create'])->name('customers.create');
     Route::post('store', [CustomerController::class, 'store'])->name('customers.store');
-    Route::get('list', [CustomerController::class, 'customerlist'])->name('customers.List');
 
-    // Vendor Business Info
-    Route::get('{id}/BusinessInfo', [CustomerBusinessProfileController::class, 'index'])->name('customers.BusinessInfo');
+    // Route Profile Details
+    Route::get('list', [CustomerProfileController::class, 'customerlist'])->name('customers.List');
+    Route::get('List/All', [CustomerProfileController::class, 'listAll'])->name('customers.paginate');
+    Route::get('{id}/Details', [CustomerProfileController::class, 'Details'])->name('customers.Details');
+    Route::get('{id}/view/Details', [CustomerProfileController::class, 'viewDetails'])->name('customers.viewDetails');
 
-    // Customer Address 
-    Route::get('{id}/Address', [CustomerAddressController::class, 'index'])->name('customers.Address');
-
-
-    // Customer Contact 
-    Route::get('{id}/Contact', [CustomerContactController::class, 'index'])->name('customers.Contact');
-
-    // Customer Bank
-    Route::get('{id}/Bank', [CustomerBankController::class, 'index'])->name('customers.Bank');
-
-    // Customer Document
-    Route::get('{id}/Document', [CustomerDocumentController::class, 'index'])->name('customers.Document');
-
-    // Customer Media
-    Route::get('{id}/Media', [CustomerMediaController::class, 'index'])->name('customers.Document');
+   
 });
