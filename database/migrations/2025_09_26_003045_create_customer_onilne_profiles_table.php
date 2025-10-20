@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_onile_profiles', function (Blueprint $table) {
+        Schema::create('customer_onilne_profiles', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('tenant_id');
             $table->unsignedBigInteger('customer_id');

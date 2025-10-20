@@ -1,12 +1,12 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Customers | Add Customer')
+@section('title', 'Home | Add Customers')
 
 @section('content')
 <div class="page-content">
   <x-breadcrumb
     title="Add customer"
-    :links="['Home' => 'Admin.Dashboard', 'Customers' => 'customers.Customerlist', 'Add Customer' => 'customers.create']" />
+    :links="['Home' => 'Admin.Dashboard', 'Customers' => 'customers.List', 'Add Customers' => 'customers.create']" />
 
   <div id="alert-box" class="mt-2"></div>
 
@@ -53,15 +53,14 @@
           </div>
           <div class="col-md-4">
             <div class="mb-2">
-              <label for="marital_status" class="mb-2 labeltxt">Maritial Status</label>
+              <label for="marital_status" class="form-label">Marital Status</label>
               <select name="marital_status" class="form-select" id="marital_status">
-                <option value="male">Single</option>
+                <option value="single">Single</option>
                 <option value="married">Married</option>
-                <option value="divorsed">Divorsed</option>
+                <option value="divorced">Divorced</option>
                 <option value="widowed">Widowed</option>
                 <option value="other">Other</option>
               </select>
-              <small class="mb-3 pt-1 helpertxt">Select Gender Type</small>
             </div>
           </div>
 
@@ -75,14 +74,14 @@
               value="{{ old('primary_phone') }}" :required="false" helpertxt="customer number" />
           </div>
           <div class="col-md-6">
-            <x-inputbox id="occupation" label="Occupation" type="text" placeholder="Enter occupation" name="occupation"
+            <x-inputbox id="occupation" label="Occupation" type="text" placeholder="Enter Occupation" name="occupation"
               value="{{ old('occupation') }}" :required="false" helpertxt="Enter Occupation" />
           </div>
           <div class="col-md-6">
             <x-inputbox id="Nationality" label="Nationality" type="text" placeholder="Enter Nationality" name="nationality"
               value="{{ old('nationality') }}" :required="false" helpertxt="Enter Nationality" />
           </div>
-          
+
 
         </div>
 
@@ -93,50 +92,54 @@
         <div class="input-images"></div>
       </div>
 
+
+
       <h5>Adminstration info </h5>
       <hr style="color:#5156be">
       <div class="col-md-4">
-        <x-inputbox id="customer_uid" label="Customer UID" type="text" placeholder="Enter unique customer code" name="customer_uid"
-          value="{{ old('customer_uid') }}" :required="false" helpertxt="Unique code per tenant" />
+        <x-inputbox id="customer_uid" label="customer UID" type="text" placeholder="Enter unique customer code" name="customer_uid"
+          value="{{ old('customer_uid') }}" :required="false" helpertxt="Unique code don't use spaces" />
       </div>
-      <div class="col-md-4">
-        <x-inputbox id="loyalty_id" label="Loyalty ID" type="text" placeholder="Enter Loyalty ID code" name="loyalty_id"
-          value="{{ old('loyalty_id') }}" :required="false" helpertxt="Loyalty ID Max 50 Character" />
-      </div>
+
       <div class="col-md-4">
         <div class="mb-2">
-          <label for="registration_channel" class="mb-2 labeltxt">Registration channel</label>
-          <select name="registration_channel" class="form-select" id="registration_channel">
+          <label for="onboarding_channel" class="mb-2 labeltxt">On Boarding</label>
+          <select name="onboarding_channel" class="form-select" id="onboarding_channel">
             <option value="web">Web</option>
             <option value="mobile">Mobile</option>
             <option value="partner">Partner</option>
             <option value="import">import</option>
             <option value="other">Other</option>
           </select>
-          <small class="mb-3 pt-1 helpertxt">Select On Registration Channel</small>
+          <small class="mb-3 pt-1 helpertxt">Select On Boarding Type</small>
         </div>
       </div>
-      <div class="col-md-3">
-            <x-inputbox id="referred_by" label="Referred By" type="text" placeholder="Enter Referred By" name="referred_by"
-              value="{{ old('referred_by') }}" :required="false" helpertxt="Max 50 Character" />
-          </div>
-      <div class="col-md-3">
-            <x-inputbox id="referral_code" label="Referral Code" type="text" placeholder="Enter Referral Code" name="referral_code"
-              value="{{ old('referral_code') }}" :required="false" helpertxt="Max 50 Character" />
-          </div>
-      <div class="col-md-3">
-            <x-inputbox id="registration_channel" label="Preferred Language" type="text" placeholder="Enter Preferred Language" name="preferred_language"
-              value="{{ old('preferred_language') }}" :required="false" helpertxt="Max 10 Character" />
-          </div>
-          <div class="col-md-3">
-            <x-inputbox id="preferred_currency" label="Preferred Currency" type="text" placeholder="Enter Preferred Currency" name="preferred_currency"
-              value="{{ old('preferred_currency') }}" :required="false" helpertxt="Enter Preferred Currency" />
-          </div>
+
+      <div class="col-md-4">
+        <div class="mb-2">
+          <label for="type" class="mb-2 labeltxt">customer Type</label>
+          <select name="type" class="form-select" id="type">
+            <option value="individual">individual</option>
+            <!-- <option value="business">Business</option> -->
+          </select>
+          <small class="mb-3 pt-1 helpertxt">Select On customer Type</small>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <x-inputbox id="preferred_language" label="Preferred Language" type="text" placeholder="Enter Preferred Language" name="preferred_language"
+          value="{{ old('preferred_language') }}" :required="false" helpertxt="Max 10 Character" />
+      </div>
+
+      <div class="col-md-6">
+        <x-inputbox id="preferred_currency" label="Preferred Currency" type="text" placeholder="Enter Preferred Currency" name="preferred_currency"
+          value="{{ old('preferred_currency') }}" :required="false" helpertxt="Enter Preferred Currency" />
+      </div>
 
 
 
       <div class="col-md-12">
-        <x-textareabox id="notes" label="Notes" placeholder="Enter internal notes" name="notes" value="{{ old('notes') }}" helpertxt="For internal remarks" />
+        <x-textareabox id="notes" label="Notes" placeholder="Enter internal notes" name="notes" value="{{ old('notes') }}" helpertxt="For Remarks" />
       </div>
     </div>
 
@@ -222,6 +225,7 @@
 
               // Reset form & uploader
               document.getElementById('customerForm').reset();
+              $btn.prop('disabled', true);
               const $box = $('.input-images').empty();
               $box.imageUploader({
                 multiple: false,
@@ -231,8 +235,13 @@
                 preloaded: []
               });
 
-              // Redirect to Step 2 (Basic Info)
-              window.location.href = `${baseUrl}/${response.data.id}/Basicinfo`;
+              // ✅ Redirect based on customer Type
+              let customerType = response.data.type || $('#type').val(); // fallback to form input
+              if (customerType.toLowerCase() === "individual") {
+                window.location.href = `${baseUrl}/${response.data.id}/Address`;
+              } else {
+                window.location.href = `${baseUrl}/${response.data.id}/BusinessInfo`;
+              }
             });
           } else {
             Swal.fire({

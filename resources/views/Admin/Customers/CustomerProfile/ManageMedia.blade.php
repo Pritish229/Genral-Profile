@@ -1,17 +1,25 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Manage Medias')
+@section('title', 'Manage Individual Medias')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Medias"
+        title="Manage Individual Medias"
         :links="[
             'Home' => 'Admin.Dashboard',
-            'Students' => 'students.StudentList',
-            'Student Detail' => ['students.StudentList.studentDetailsPage', $id],
-            'Manage Media' => ''
+            'Customers' => 'customers.List',
+            'Customer Details' => ['customers.viewDetails', $id],
+            'Manage Individual Media' => ''
         ]" />
+
+    <!-- Page Header -->
+    <div class="mt-3">
+        <h4 class="mb-3">
+            <i class="fas fa-photo-video"></i>
+            Individual Media
+        </h4>
+    </div>
 
     <!-- Media List -->
     <div class="row" id="mediaList"></div>
@@ -22,18 +30,20 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="mediaForm" enctype="multipart/form-data">
+                @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="mediaModalLabel">Add Media</h5>
+                    <h5 class="modal-title" id="mediaModalLabel">Add Individual Media</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="id" id="media_id">
+                    <input type="hidden" id="media_id" name="id">
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="media_usage">Media Usage</label>
+                            <label for="media_usage">Media Usage <span class="text-danger">*</span></label>
                             <select class="form-select" id="media_usage" name="media_usage" required>
                                 <option value="" disabled selected>-- Select Usage --</option>
+                                <!-- <option value="logo">Logo</option> -->
                                 <option value="profile">Profile</option>
                                 <option value="banner">Banner</option>
                                 <option value="gallery">Gallery</option>
@@ -43,27 +53,31 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="subject_name" label="Subject Name" type="text" name="subject_name" placeholder="Enter custom purpose" />
+                            <label for="subject_name">Subject Name</label>
+                            <input type="text" class="form-control" id="subject_name" name="subject_name" placeholder="Enter custom purpose">
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="file_name_media" label="File Name" type="text" name="file_name" placeholder="Original file name" />
+                            <label for="file_name_media">File Name</label>
+                            <input type="text" class="form-control" id="file_name_media" name="file_name" placeholder="Original file name">
                         </div>
                         <div class="col-md-6">
-                            <label for="file_url_media">Upload File</label>
-                            <input type="file" class="form-control" id="file_url_media" name="file_url">
+                            <label for="file_url_media">Upload File <span class="text-danger" id="file_required">*</span></label>
+                            <input type="file" class="form-control" id="file_url_media" name="file_url" accept="image/jpeg,image/png,application/pdf">
+                            <small class="text-muted">Max size: 5MB. Formats: JPG, PNG, PDF</small>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="caption" label="Caption" type="text" name="caption" placeholder="Short description" />
+                            <label for="caption">Caption</label>
+                            <input type="text" class="form-control" id="caption" name="caption" placeholder="Short description">
                         </div>
                         <div class="col-md-6">
                             <label for="tags">Tags</label>
-                            <select id="tags" name="tags[]" class="form-control" multiple></select>
+                            <select id="tags" name="tags[]" class="form-select" multiple></select>
                         </div>
                     </div>
 
@@ -81,131 +95,166 @@
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let studentId = "{{ $id }}";
+    const customerId = "{{ $id }}";
+    const apiBase = "{{ url('/customers') }}/" + customerId + "/media/individual";
 
     $(document).ready(function() {
-        // Initialize Select2
+        // Initialize Select2 for tags
         $("#tags").select2({
             tags: true,
             tokenSeparators: [',', ' '],
-            placeholder: "Add tags",
-            width: '100%'
+            placeholder: "Add tags (comma separated)",
+            width: '100%',
+            dropdownParent: $('#mediaModal')
         });
 
-        loadMedias();
+        loadMedias(); // Load individual medias
 
         // Reset modal on close
         $('#mediaModal').on('hidden.bs.modal', function() {
             $("#mediaForm")[0].reset();
             $("#media_id").val("");
             $("#tags").val(null).trigger('change');
-            $("#mediaModalLabel").text("Add Media");
+            $("#file_required").show(); // Show required for file on add
+            $("#mediaModalLabel").text("Add Individual Media");
         });
     });
 
-    // Load all media files
+    // Load medias for individual
     function loadMedias() {
-        $.get("{{ url('/students') }}/" + studentId + "/medias/list", function(res) {
+        $.get(apiBase, function(res) {
             let html = '';
 
-            // Always show Add Media button
+            // Add Media button (individuals only)
             html += `<div class="col-12 d-flex justify-content-end mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mediaModal" id="addMediaBtn">
-                        <i class="fas fa-plus"></i> Add Media
-                    </button>
-                 </div>`;
-
-            if (!res.data || res.data.length === 0) {
-                html += `<div class="col-12 text-center py-5">
-                        <i class="fas fa-photo-video fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No media available</h5>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mediaModal" onclick="openAddModal()">
+                            <i class="fas fa-plus"></i> Add Individual Media
+                        </button>
                      </div>`;
+
+            if (!res.success || !res.data || res.data.length === 0) {
+                html += `<div class="col-12 text-center py-5">
+                            <i class="fas fa-photo-video fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No individual media available</h5>
+                         </div>`;
             } else {
                 res.data.forEach(media => {
+                    const isImage = media.file_url.match(/\.(jpg|jpeg|png|gif)$/i);
+                    const preview = isImage ? `<img src="${media.file_url}" class="card-img-top media-thumbnail" alt="${media.file_name ?? ''}">` : 
+                                      `<div class="card-img-top media-thumbnail bg-light d-flex align-items-center justify-content-center">
+                                           <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                                       </div>`;
                     html += `
-                <div class="col-md-4 mb-3">
-                    <div class="card shadow-sm">
-                        <img src="${media.file_url}" class="card-img-top media-thumbnail"  alt="${media.file_name ?? ''}">
-                        <div class="card-body">
-                            <h5 class="card-title">${media.media_usage ?? '-'}</h5>
-                            <p><strong>Caption:</strong> ${media.caption ?? '-'}</p>
-                            <p><strong>Tags:</strong> ${(media.tags || []).join(', ')}</p>
-                            <a href="${media.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
-                            <a href="${media.file_url}" download class="btn btn-sm btn-outline-success">Download</a>
-                            <div class="dropdown float-end">
-                                <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#" class="dropdown-item editMedia" data-id="${media.id}">Edit</a></li>
-                                    <li><a href="#" class="dropdown-item deleteMedia" data-id="${media.id}">Delete</a></li>
-                                </ul>
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow-sm">
+                            ${preview}
+                            <div class="card-body">
+                                <h5 class="card-title text-capitalize">${media.media_usage ?? '-'}</h5>
+                                <p class="small"><strong>Subject:</strong> ${media.subject_name ?? '-'}</p>
+                                <p class="small"><strong>Caption:</strong> ${media.caption ?? '-'}</p>
+                                <p class="small"><strong>Tags:</strong> ${(media.tags || []).join(', ')}</p>
+                                <div class="btn-group w-100" role="group">
+                                    <a href="${media.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                                    <a href="${media.file_url}" download class="btn btn-sm btn-outline-success">Download</a>
+                                </div>
+                                <div class="dropdown float-end position-absolute top-0 end-0 mt-2 me-2">
+                                    <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#" class="dropdown-item editMedia" data-id="${media.id}">Edit</a></li>
+                                        <li><a href="#" class="dropdown-item text-danger deleteMedia" data-id="${media.id}">Delete</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>`;
+                    </div>`;
                 });
             }
 
             $("#mediaList").html(html);
+        }).fail(function(xhr) {
+            Swal.fire("Error", "Failed to load medias.", "error");
         });
     }
 
-    // Add / Update Media
+    // Open add modal
+    function openAddModal() {
+        $("#mediaModalLabel").text("Add Individual Media");
+        $("#media_id").val("");
+        $("#file_required").show(); // File required for add
+    }
+
+    // Submit form
     $("#mediaForm").on("submit", function(e) {
         e.preventDefault();
-        let formData = new FormData(this);
-        let mediaId = $("#media_id").val();
-        let url, method;
+        const formData = new FormData(this);
+        const mediaId = $("#media_id").val();
+        let url = apiBase;
 
         if (mediaId) {
-            url = `{{ url('/students') }}/${studentId}/${mediaId}/update`;
-            method = "POST";
+            url += "/" + mediaId;
             formData.append("_method", "PUT");
         } else {
-            url = `{{ url('/students') }}/${studentId}/storeMedia`;
-            method = "POST";
+            url += "/store";
+        }
+
+        // If update, file is optional
+        if (mediaId && $('#file_url_media')[0].files.length === 0) {
+            formData.delete('file_url');
         }
 
         $.ajax({
             url: url,
-            method: method,
+            method: "POST",
             data: formData,
             contentType: false,
             processData: false,
-            success: function() {
-                $("#mediaModal").modal('hide');
+            success: function(res) {
+                $('#mediaModal').modal('hide');
                 loadMedias();
-                Swal.fire("Success", "Media saved successfully!", "success");
+                Swal.fire("Success", res.message || "Media saved successfully!", "success");
             },
-            error: function(err) {
-                Swal.fire("Error", "Error saving media. Please check your inputs.", "error");
+            error: function(xhr) {
+                let errorMsg = "Error saving media.";
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                    errorMsg = Object.values(xhr.responseJSON.errors).flat().join(', ');
+                }
+                Swal.fire("Error", errorMsg, "error");
             }
         });
     });
 
     // Edit media
-    $(document).on("click", ".editMedia", function() {
-        let mediaId = $(this).data("id");
-        $.get(`/students/${studentId}/${mediaId}/medias/details`, function(res) {
-            console.log(res);
-
-            let m = res.data;
+    $(document).on("click", ".editMedia", function(e) {
+        e.preventDefault();
+        const mediaId = $(this).data("id");
+        $.get(apiBase + "/" + mediaId, function(res) {
+            if (!res.success) {
+                Swal.fire("Error", res.message || "Failed to fetch media.", "error");
+                return;
+            }
+            const m = res.data;
             $("#media_id").val(m.id);
             $("#media_usage").val(m.media_usage);
             $("#subject_name").val(m.subject_name);
             $("#file_name_media").val(m.file_name);
             $("#caption").val(m.caption);
-            $("#tags").val(m.tags || []).trigger("change");
-            $("#mediaModalLabel").text("Edit Media");
+            $("#tags").val(m.tags || []).trigger('change');
+            $("#file_required").hide(); // File optional on edit
+            $("#mediaModalLabel").text("Edit Individual Media");
             $("#mediaModal").modal("show");
+        }).fail(function(xhr) {
+            Swal.fire("Error", "Failed to load media details.", "error");
         });
     });
 
     // Delete media
-    $(document).on("click", ".deleteMedia", function() {
-        let mediaId = $(this).data("id");
-
+    $(document).on("click", ".deleteMedia", function(e) {
+        e.preventDefault();
+        const mediaId = $(this).data("id");
         Swal.fire({
             title: "Are you sure?",
             text: "This media will be permanently deleted.",
@@ -216,14 +265,17 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `{{ url('/students') }}/${studentId}/${mediaId}/delete`,
+                    url: apiBase + "/" + mediaId,
                     type: "DELETE",
-                    success: function() {
-                        loadMedias();
-                        Swal.fire("Deleted!", "Media has been deleted.", "success");
+                    data: {
+                        _token: "{{ csrf_token() }}"
                     },
-                    error: function() {
-                        Swal.fire("Error", "Unable to delete media.", "error");
+                    success: function(res) {
+                        loadMedias();
+                        Swal.fire("Deleted!", res.message || "Media has been deleted.", "success");
+                    },
+                    error: function(xhr) {
+                        Swal.fire("Error", xhr.responseJSON?.message || "Unable to delete media.", "error");
                     }
                 });
             }
@@ -236,13 +288,21 @@
 <style>
     .media-thumbnail {
         height: 220px;
-        /* fixed height for all previews */
         width: 100%;
-        /* take full card width */
         object-fit: cover;
-        /* crop instead of stretch */
         border-top-left-radius: 0.25rem;
         border-top-right-radius: 0.25rem;
+        background-color: #f8f9fa;
+    }
+    .dropdown-menu {
+        min-width: 120px;
+    }
+    .card {
+        position: relative;
+    }
+    .card-body p {
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
     }
 </style>
 @endsection

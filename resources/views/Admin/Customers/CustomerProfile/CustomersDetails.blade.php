@@ -1,37 +1,37 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Vendors | Vendor Details')
+@section('title', 'Home | Customers | Customer Details')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Vendor Details"
+        title="Customer Details"
         :links="[
             'Home' => 'Admin.Dashboard',
-            'Vendors' => 'vendors.List',
-            'Vendor Details' => '',
+            'Customers' => 'customers.List',
+            'Customer Details' => '',
         ]" />
 
-    <div id="vendor-details" class="p-2 card mb-3">Loading Profile...</div>
+    <div id="customer-details" class="p-2 card mb-3">Loading Profile...</div>
 
     <div class="mt-2">
         <div class="p-3">
             <!-- Tabs -->
-            <ul class="nav nav-tabs nav-tabs-custom mb-4" id="vendorTab" role="tablist">
+            <ul class="nav nav-tabs nav-tabs-custom mb-4" id="customerTab" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab">
                         Individual Profile
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a href="{{ url('vendors/' . $id . '/Businesslist') }}" class="nav-link text-primary">
+                    <a href="{{ url('customers/' . $id . '/Businesslist') }}" class="nav-link text-primary">
                         Business Link
                     </a>
                 </li>
             </ul>
 
             <!-- Tab contents -->
-            <div class="tab-content" id="vendorTabContent">
+            <div class="tab-content" id="customerTabContent">
                 <div class="tab-pane fade show active" id="profile" role="tabpanel">
                     <div class="row align-items-stretch" id="primary-info-cards">
                         Loading Profile Information...
@@ -45,9 +45,9 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/vendors') }}";
-    let vendor_id = "{{ $id }}";
-    let vendorType = "individual";
+    let baseUrl = "{{ url('/customers') }}";
+    let customer_id = "{{ $id }}";
+    let customerType = "individual";
 
     function safe(val) {
         return val ? val : 'Not Provided';
@@ -59,7 +59,7 @@
             <div class="card p-3 flex-fill">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5><i class="fas fa-user"></i> Personal Details</h5>
-                    <a href="${baseUrl}/${vendor_id}/manage" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                    <a href="${baseUrl}/${customer_id}/manage" class="text-decoration-none"><i class="fas fa-edit"></i></a>
                 </div>
                 <div class="row">
                     <div class="col-md-3"><p><i class="fas fa-id-card"></i> <strong>Full Name:</strong> ${safe(info.full_name)}</p></div>
@@ -81,21 +81,21 @@
                 <div class="row text-center">
                        
                         <div class="col-md-4 col-6 mb-2">
-                            <a href="${baseUrl}/${vendor_id}/individual/OnlineProfile/Manage" class="text-decoration-none">
+                            <a href="${baseUrl}/${customer_id}/individual/OnlineProfile/Manage" class="text-decoration-none">
                                 <div class="p-2 border rounded">
                                     <i class="fas fa-globe fa-lg"></i><br>Online Profile
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-4 col-6 mb-2">
-                            <a href="${baseUrl}/${vendor_id}/documents/individual/manage" class="text-decoration-none">
+                            <a href="${baseUrl}/${customer_id}/documents/individual/manage" class="text-decoration-none">
                                 <div class="p-2 border rounded">
                                     <i class="fas fa-file-alt fa-lg"></i><br>Documents
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-4 col-6 mb-2">
-                            <a href="${baseUrl}/${vendor_id}/media/manage" class="text-decoration-none">
+                            <a href="${baseUrl}/${customer_id}/media/manage" class="text-decoration-none">
                                 <div class="p-2 border rounded">
                                     <i class="fas fa-photo-video fa-lg"></i><br>Medias
                                 </div>
@@ -110,7 +110,7 @@
             <div class="card p-3 flex-fill equal-height" id="contact-info">
             <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                        <a href="${baseUrl}/${vendor_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                        <a href="${baseUrl}/${customer_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
                     </div>
                 <div class="card-body"><p>Loading Contact Information...</p></div>
             </div>
@@ -133,7 +133,7 @@
         $("#primary-info-cards").html(profileCard + contactCard + addressCard + bankCard);
 
         permanentContact();
-        permanentAddress(vendorType);
+        permanentAddress(customerType);
         permanentBank();
     }
 
@@ -141,7 +141,7 @@
         const contactInfoId = '#contact-info';
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/Contact/Permanent`,
+            url: `${baseUrl}/${customer_id}/Contact/Permanent`,
             dataType: "json",
             success: function(res) {
                 console.log(res);
@@ -149,7 +149,7 @@
                 let contactHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                    <a href="${baseUrl}/${customer_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
                 </div>
             `;
 
@@ -171,7 +171,7 @@
                 let contactHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
+                    <a href="${baseUrl}/${customer_id}/Manage/Contacts" class="text-decoration-none"><i class="fas fa-edit"></i></a>
                 </div>
                 <p class='text-muted mb-0'>No contact information provided.</p>`;
                 $(contactInfoId).html(contactHtml);
@@ -183,13 +183,13 @@
         const addressInfoId = '#address-info';
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/Address/Permanent`,
+            url: `${baseUrl}/${customer_id}/Address/Permanent`,
             dataType: "json",
             success: function(res) {
                 let addressHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-map-marker-alt"></i> Address Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/Manage/Address" class="text-decoration-none">
+                    <a href="${baseUrl}/${customer_id}/Manage/Address" class="text-decoration-none">
                         <i class="fas fa-edit"></i>
                     </a>
                 </div>
@@ -213,7 +213,7 @@
                 let fallbackHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-map-marker-alt"></i> Address Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/Manage/Address" class="text-decoration-none">
+                    <a href="${baseUrl}/${customer_id}/Manage/Address" class="text-decoration-none">
                         <i class="fas fa-edit"></i>
                     </a>
                 </div>
@@ -227,7 +227,7 @@
         const bankInfoId = '#bank-info';
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/Permanent/BankDetails`,
+            url: `${baseUrl}/${customer_id}/Permanent/BankDetails`,
             dataType: "json",
             success: function(res) {
                 console.log(res);
@@ -235,7 +235,7 @@
                 let bankHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-university"></i> Bank Details</h5>
-                <a href="${baseUrl}/${vendor_id}/Manage/Bank" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/Manage/Bank" class="text-decoration-none">
                 <i class="fas fa-edit"></i>
                 </a>
                 </div>
@@ -263,7 +263,7 @@
                 let fallbackHtml = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-university"></i> Bank Details</h5>
-                    <a href="${baseUrl}/${vendor_id}/Manage/Bank" class="text-decoration-none">
+                    <a href="${baseUrl}/${customer_id}/Manage/Bank" class="text-decoration-none">
                         <i class="fas fa-edit"></i>
                     </a>
                 </div>
@@ -274,15 +274,15 @@
     }
 
     function fetchDetails() {
-        $.get(`${baseUrl}/${vendor_id}/Details`, function(res) {
+        $.get(`${baseUrl}/${customer_id}/Details`, function(res) {
             if (res.success) {
                 let img = res.data.avatar_url ? `{{ asset('storage') }}/${res.data.avatar_url}` : "{{ asset('images/default.png') }}";
-                $("#vendor-details").html(`
+                $("#customer-details").html(`
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="d-flex align-items-start gap-3">
                         <img src="${img}" class="img-thumbnail" style="width:160px;">
                         <div>
-                            <p><strong>UID:</strong> ${safe(res.primary_details.vendor_uid)}</p>
+                            <p><strong>UID:</strong> ${safe(res.primary_details.customer_uid)}</p>
                             <p><strong>Name:</strong> ${safe(res.data.full_name)}</p>
                             <p><strong>Type:</strong> ${safe(res.primary_details.type).toUpperCase()}</p>
                             <p><strong>Email:</strong> ${safe(res.primary_details.primary_email)}</p>
@@ -294,7 +294,7 @@
                 </div>`);
                 primaryinfo(res.primary_details, res.data);
             } else {
-                $("#vendor-details").html("<p class='text-danger'>Unable to load details.</p>");
+                $("#customer-details").html("<p class='text-danger'>Unable to load details.</p>");
             }
         });
     }

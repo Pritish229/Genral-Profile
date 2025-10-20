@@ -1,124 +1,107 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Dashboard')
+@section('title', 'Home | Manage Business Info')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Update Basic info"
+        title="Business Address"
         :links="[
-            'Home' => 'Admin.Dashboard',
-            'Students' => 'students.Studentlist',
-            'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
-            'Update Basic info' => ''
-        ]" 
-    />
+        'Home' => 'Admin.Dashboard',
+        'Customers' => 'customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
+        'Business Details' => ['customers.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+            'Manage Business Info' => ''
+        ]" />
 
-    <form id="studentForm" enctype="multipart/form-data">
-        <div class="row align-items-center">
-            <!-- Profile Picture on the left-middle -->
-            <div class="col-md-3 mb-3 text-center">
-                <label for="avatar" class="form-label">Profile Picture</label>
-                <div class="input-images"></div>
-                <small class="helpertxt d-block mt-1">Upload a profile picture (jpg, png)</small>
+    <form id="businessForm" enctype="multipart/form-data">
+        @csrf
+        <input type="hidden" id="customer_id" name="customer_id" value="{{ $id }}">
+        <input type="hidden" id="business_id" name="business_id" value="{{ $business_id }}">
+
+        <div class="row g-3">
+            <h5>Business Information</h5>
+            <hr style="color:#5156be">
+
+            <div class="col-md-4">
+                <x-inputbox id="legal_name" label="Legal Name" type="text" placeholder="Enter Legal Name" name="legal_name"
+                    value="" :required="true" helpertxt="Legal Name Maximum 180 Characters" />
+            </div>
+            <div class="col-md-4">
+                <x-inputbox id="trade_name" label="Trade Name" type="text" placeholder="Enter Trade Name" name="trade_name"
+                    value="" :required="false" helpertxt="Trade Name Maximum 180 Characters" />
+            </div>
+            <div class="col-md-4">
+                <x-inputbox id="industry" label="Industry" type="text" placeholder="Enter Industry" name="industry"
+                    value="" :required="false" helpertxt="Industry Maximum 120 Characters" />
             </div>
 
-            <!-- Name Fields -->
-            <div class="col-md-9">
-                <div class="row">
-                    <div class="col-md-4">
-                        <x-inputbox id="first_name" label="First Name" type="text" placeholder="Enter First Name" name="first_name"
-                            value="{{ old('first_name') }}" :required="true" helpertxt="First Name Maximum 70 Character" />
-                    </div>
-                    <div class="col-md-4">
-                        <x-inputbox id="middle_name" label="Middle Name" type="text" placeholder="Enter Middle Name" name="middle_name"
-                            value="{{ old('middle_name') }}" :required="false" helpertxt="Middle Name Maximum 70 Character" />
-                    </div>
-                    <div class="col-md-4">
-                        <x-inputbox id="last_name" label="Last Name" type="text" placeholder="Enter Last Name" name="last_name"
-                            value="{{ old('last_name') }}" :required="false" helpertxt="Last Name Maximum 70 Character" />
-                    </div>
-                </div>
-
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="dob" class="mb-1">DOB</label>
-                            <input type="text" id="dob" name="dob" class="form-control flatpickr"
-                                placeholder="Select date of birth" value="{{ old('dob') }}">
-                            <small class="helpertxt">Date of Birth</small>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="gender" class="mb-1">Gender</label>
-                            <select name="gender" class="form-select" id="gender">
-                                <option value="male" {{ old('gender')=='male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ old('gender')=='female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ old('gender')=='other' ? 'selected' : '' }}>Other</option>
-                                <option value="unspecified" {{ old('gender')=='unspecified' ? 'selected' : '' }}>Unspecified</option>
-                            </select>
-                            <small class="helpertxt">Select Gender Type</small>
-                        </div>
-                    </div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="business_size" class="mb-2 labeltxt">Business Size</label>
+                    <select name="business_size" class="form-select" id="business_size">
+                        <option value="micro">Micro</option>
+                        <option value="sme">SME</option>
+                        <option value="enterprise">Enterprise</option>
+                    </select>
+                    <small class="mb-3 pt-1 helpertxt">Select Business Size</small>
                 </div>
             </div>
-        </div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="incorporation_date" class="mb-2 labeltxt">Incorporation Date</label>
+                    <input type="text" id="incorporation_date" name="incorporation_date" class="form-control flatpickr"
+                        placeholder="Select Incorporation Date" value="">
+                    <small class="mb-3 pt-1 helpertxt">Date of Incorporation</small>
+                </div>
+            </div>
 
-        <!-- Guardian Info -->
-        <div class="row mt-3">
-            <div class="col-md-6">
-                <x-inputbox id="guardian_name" label="Guardian Name" type="text" placeholder="Enter Guardian Name" name="guardian_name"
-                    value="{{ old('guardian_name') }}" :required="false" helpertxt="Guardian Name" />
+            <div class="col-md-12">
+                <x-inputbox id="website" label="Website URL" type="url" placeholder="Enter Website URL" name="website"
+                    value="" :required="false" helpertxt="Website URL Maximum 200 Characters" />
             </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_relation" label="Guardian Relation" type="text" placeholder="Enter Guardian Relation" name="guardian_relation"
-                    value="{{ old('guardian_relation') }}" :required="false" helpertxt="Guardian Relation" />
-            </div>
-            <div class="col-md-3">
-                <x-inputbox id="guardian_occupation" label="Guardian Occupation" type="text" placeholder="Enter Guardian Occupation" name="guardian_occupation"
-                    value="{{ old('guardian_occupation') }}" :required="false" helpertxt="Guardian Occupation" />
-            </div>
-            <div class="col-md-6">
-                <x-inputbox id="guardian_phone" label="Guardian Phone no" type="text" placeholder="Enter Guardian Phone no" name="guardian_phone"
-                    value="{{ old('guardian_phone') }}" :required="false" helpertxt="Phone number must be 10 Digits" />
-            </div>
-            <div class="col-md-6">
-                <x-inputbox id="guardian_email" label="Guardian Email" type="email" placeholder="Enter Guardian Email" name="guardian_email"
-                    value="{{ old('guardian_email') }}" :required="false" helpertxt="Guardian email must be valid email" />
-            </div>
-        </div>
 
-        <!-- Other Info -->
-        <div class="row mt-3">
+            <h5>Contact Information</h5>
+            <hr style="color:#5156be">
+
+           
+
             <div class="col-md-6">
-                <x-inputbox id="parent_income" label="Annual Income" type="text" placeholder="Enter Annual Income" name="parent_income"
-                    value="{{ old('parent_income') }}" :required="false" helpertxt="Annual income Must Be Number" />
+                <x-inputbox id="billing_email" label="Billing Email" type="email" placeholder="Enter Billing Email" name="billing_email"
+                    value="" :required="false" helpertxt="Billing Email Maximum 150 Characters" />
             </div>
-            <div class="col-md-3">
-                <x-inputbox id="nationality" label="Nationality" type="text" placeholder="Enter Nationality" name="nationality"
-                    value="{{ old('nationality') }}" :required="false" helpertxt="Maximum 70 Character" />
+            <div class="col-md-6">
+                <x-inputbox id="billing_phone" label="Billing Phone" type="text" placeholder="Enter Billing Phone" name="billing_phone"
+                    value="" :required="false" helpertxt="Billing Phone Maximum 30 Characters" />
             </div>
-            <div class="col-md-3">
-                <x-inputbox id="mother_tongue" label="Mother Tongue" type="text" placeholder="Enter Mother Tongue" name="mother_tongue"
-                    value="{{ old('mother_tongue') }}" :required="false" helpertxt="Maximum 70 Character" />
+
+            <h5>Legal & Financial Information</h5>
+            <hr style="color:#5156be">
+
+            <div class="col-md-4">
+                <x-inputbox id="gst_number" label="GST Number" type="text" placeholder="Enter GST Number" name="gst_number"
+                    value="" :required="false" helpertxt="GST Number Maximum 15 Characters" />
             </div>
-            <div class="col-md-3">
-                <x-inputbox id="blood_group" label="Blood Group" type="text" placeholder="Enter Blood Group" name="blood_group"
-                    value="{{ old('blood_group') }}" :required="false" helpertxt="Maximum 5 Character" />
+            <div class="col-md-4">
+                <x-inputbox id="pan_number" label="PAN Number" type="text" placeholder="Enter PAN Number" name="pan_number"
+                    value="" :required="false" helpertxt="PAN Number Maximum 15 Characters" />
             </div>
-            <div class="col-md-3">
-                <x-inputbox id="current_class" label="Current Class" type="text" placeholder="Enter Current Class" name="current_class"
-                    value="{{ old('current_class') }}" :required="false" helpertxt="Maximum 40 Character" />
+            <div class="col-md-4">
+                <x-inputbox id="cin_number" label="CIN Number" type="text" placeholder="Enter CIN Number" name="cin_number"
+                    value="" :required="false" helpertxt="CIN Number Maximum 25 Characters" />
             </div>
-            <div class="col-md-3">
-                <x-inputbox id="section" label="Section" type="text" placeholder="Enter Section" name="section"
-                    value="{{ old('section') }}" :required="false" helpertxt="Maximum 10 Character" />
+
+            <div class="col-md-4">
+                <x-inputbox id="credit_limit" label="Credit Limit" type="number" placeholder="Enter Credit Limit" name="credit_limit"
+                    value="" :required="false" helpertxt="Credit Limit (Numeric)" />
             </div>
-            <div class="col-md-3">
-                <x-inputbox id="rollno" label="Roll No" type="text" placeholder="Enter Roll No" name="rollno"
-                    value="{{ old('rollno') }}" :required="false" helpertxt="Maximum 30 Character" />
+            <div class="col-md-4">
+                <x-inputbox id="payment_terms_days" label="Payment Terms (Days)" type="number" placeholder="Enter Payment Terms" name="payment_terms_days"
+                    value="" :required="false" helpertxt="Payment Terms in Days (Numeric)" />
+            </div>
+            <div class="col-md-4">
+                <x-inputbox id="account_manager" label="Account Manager" type="text" placeholder="Enter Account Manager" name="account_manager"
+                    value="" :required="false" helpertxt="Account Manager Maximum 120 Characters" />
             </div>
         </div>
 
@@ -129,119 +112,170 @@
 </div>
 @endsection
 
-
 @section('script')
 <script>
-$(function(){
+    jQuery(function($) {
+        let baseUrl = "{{ url('/customers') }}";
+        let customerId = "{{ $id }}";
+        let businessId = "{{ $business_id ?? '' }}"; // Use null coalescing operator for safety
 
-    const studentId = "{{ $id }}";
+        // Initialize date picker
+        $(".flatpickr").flatpickr({
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",
+            allowInput: true
+        });
 
-    // Initialize image uploader
-    let avatarUploader = $('.input-images').imageUploader({
-        multiple: false,
-        imagesInputName: 'avatar_url',
-        preloadedInputName: 'preloaded',
-        label: 'Click to upload profile picture',
-        preloaded: []
-    });
+        // Initialize Select2 for business size
+        $('#business_size').select2({
+            minimumResultsForSearch: Infinity,
+            width: '100%'
+        });
 
-    // Initialize date picker
-    $(".flatpickr").flatpickr({
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j F Y",
-        allowInput: true
-    });
-
-    // Fetch existing details
-     $.get("{{ url('students') }}/" + studentId + "/Basicinfo/Details", function(response){
-        if(response.success){
-            let data = response.data;
-            let primary = response.primary_details;
-
-            $('#first_name').val(data.first_name || primary.first_name);
-            $('#middle_name').val(data.middle_name || primary.middle_name);
-            $('#last_name').val(data.last_name || primary.last_name);
-            
-            // ✅ Use Flatpickr API instead of .val()
-            if (data.dob) {
-                let dobPicker = document.querySelector("#dob")._flatpickr;
-                if (dobPicker) {
-                    dobPicker.setDate(data.dob, true);
-                }
-            }
-
-            $('#gender').val(data.gender || primary.gender);
-            $('#blood_group').val(data.blood_group);
-            $('#religion').val(data.religion);
-            $('#caste').val(data.caste);
-            $('#nationality').val(data.nationality);
-            $('#mother_tongue').val(data.mother_tongue);
-            $('#guardian_name').val(data.guardian_name);
-            $('#guardian_relation').val(data.guardian_relation);
-            $('#guardian_phone').val(data.guardian_phone);
-            $('#guardian_email').val(data.guardian_email);
-            $('#guardian_occupation').val(data.guardian_occupation);
-            $('#parent_income').val(data.parent_income);
-            $('#current_class').val(data.current_class);
-            $('#section').val(data.section);
-            $('#rollno').val(data.roll_no);
-
-            if(data.avatar_url){
-                avatarUploader[0].imageUploader.setPreloaded([{
-                    id: 1,
-                    src: data.avatar_url
-                }]);
-            }
-        }
-    });
-
-    // Submit form via AJAX
-    $('#studentForm').submit(function(e){
-        e.preventDefault();
-        let formData = new FormData(this);
-
-        $.ajax({
-            url: "{{ url('students') }}/" + studentId + "/Basicinfo/Update",
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(res){
+        // Load business data
+        function loadBusinessData() {
+            if (!businessId) {
+                console.error('Business ID is not defined');
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: res.message,
-                    confirmButtonText: 'OK'
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Business ID is missing. Please ensure a valid business profile is selected.'
                 });
-            },
-            error: function(xhr){
-                if(xhr.status === 422){
-                    let errors = xhr.responseJSON.errors;
-                    let errorList = '';
-                    $.each(errors, function(key, messages){
-                        messages.forEach(function(msg){
-                            errorList += msg + '\n';
+                return;
+            }
+
+            $.ajax({
+                url: `${baseUrl}/${customerId}/${businessId}/Business/Details`, // Corrected URL
+                type: 'GET',
+                success: function(response) {
+                    console.log('Business data loaded:', response);
+
+                    if (response.success && response.data) {
+                        const business = response.data;
+
+                        // Fill business data
+                        $('#legal_name').val(business.legal_name || '');
+                        $('#trade_name').val(business.trade_name || '');
+                        $('#industry').val(business.industry || '');
+                        $('#business_size').val(business.business_size || 'micro').trigger('change');
+                        $('#website').val(business.website || '');
+
+                        // Handle incorporation date
+                        if (business.incorporation_date) {
+                            document.querySelector("#incorporation_date")._flatpickr.setDate(business.incorporation_date, true, "Y-m-d");
+                        }
+
+                        // Contact information
+                        $('#primary_contact_name').val(business.primary_contact_name || '');
+                        $('#primary_contact_email').val(business.primary_contact_email || '');
+                        $('#primary_contact_phone').val(business.primary_contact_phone || '');
+                        $('#billing_email').val(business.billing_email || '');
+                        $('#billing_phone').val(business.billing_phone || '');
+
+                        // Legal & Financial information
+                        $('#gst_number').val(business.gst_number || '');
+                        $('#pan_number').val(business.pan_number || '');
+                        $('#cin_number').val(business.cin_number || '');
+                        $('#credit_limit').val(business.credit_limit || '');
+                        $('#payment_terms_days').val(business.payment_terms_days || '');
+                        $('#account_manager').val(business.account_manager || '');
+                    } else {
+                        console.log('No business profile found or failed to load');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'No Data',
+                            text: response.message || 'No business profile found.'
                         });
-                    });
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error loading business data:', xhr);
                     Swal.fire({
                         icon: 'error',
-                        title: 'Validation Error',
-                        text: errorList
+                        title: 'Error',
+                        text: 'Failed to load business data: ' + (xhr.responseJSON?.message || xhr.statusText)
+                    });
+                }
+            });
+        }
+
+        // Form Submit
+        $('#businessForm').on('submit', function(e) {
+            e.preventDefault();
+            const $btn = $('#save_btn').prop('disabled', true);
+            const formData = new FormData(this);
+
+            Swal.fire({
+                title: 'Updating business information...',
+                html: 'Please wait',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            $.ajax({
+                url: `${baseUrl}/${customerId}/Business/Update`, // Corrected URL
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false
+            })
+            .done(function(response) {
+                Swal.close();
+
+                if (response && response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message || 'Business information updated successfully.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = `${baseUrl}/${customerId}/view/Details`;
                     });
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Something went wrong!'
+                        text: (response && response.message) ? response.message : 'Update failed.'
                     });
                 }
-            }
-        });
-    });
+            })
+            .fail(function(xhr) {
+                Swal.close();
+                $btn.prop('disabled', false);
 
-});
+                if (xhr.status === 422) {
+                    const errors = (xhr.responseJSON && xhr.responseJSON.errors) ? xhr.responseJSON.errors : {};
+                    let html = '<div class="alert alert-danger"><ul>';
+                    Object.keys(errors).forEach(k => {
+                        const v = errors[k];
+                        html += '<li><strong>' + k + ':</strong> ' + (Array.isArray(v) ? v[0] : v) + '</li>';
+                    });
+                    html += '</ul></div>';
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: html
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong, please try again. Status: ' + xhr.status
+                    });
+                }
+            })
+            .always(function() {
+                $btn.prop('disabled', false);
+            });
+        });
+
+        // Load data on page load
+        loadBusinessData();
+    });
 </script>
 @endsection
-
-

@@ -1,23 +1,25 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Manage Individual Documents')
+@section('title', 'Manage Business Documents')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Documents"
+        title="Business Documents"
         :links="[
-            'Home' => 'Admin.Dashboard',
-            'Customers' => 'customers.List',
-            'Customer Details' => ['customers.viewDetails', $id],
-            'Manage Personal Documents' => ''
+        'Home' => 'Admin.Dashboard',
+        'Vendors' => 'vendors.List',
+        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Business List' => ['vendors.Businesslist', $id],
+            'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+            'Business Documents' => ''
         ]" />
 
     <!-- Page Header -->
     <div class="mt-3">
         <h4 class="mb-3">
             <i class="fas fa-file-alt"></i>
-            Personal Documents
+            Business Documents
         </h4>
     </div>
 
@@ -32,7 +34,7 @@
             <form id="documentForm" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
-                    <h5 class="modal-title" id="documentModalLabel">Add Personal Document</h5>
+                    <h5 class="modal-title" id="documentModalLabel">Add Business Document</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -102,20 +104,24 @@
 
 @section('script')
 <script>
-    // Initialize flatpickr on all inputs with class
-    $(".flatpickr").flatpickr({
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j F Y",
-        allowInput: true
-    });
+    let vendorId = "{{ $id }}";
+    let businessId = "{{ $business_id }}";
+    let apiSubpath = 'business';
+    let baseUrl = "{{ url('/vendors') }}";
 
-    const customerId = "{{ $id }}";
-    const apiSubpath = 'individual'; 
+    // Function to init Flatpickr (call on page load and modal show for safety)
+    function initFlatpickr() {
+        $(".flatpickr").flatpickr({
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",  // Fixed typo (removed 'vendorId')
+            allowInput: true
+        });
+    }
 
     // Fetch and render documents
     function loadDocuments() {
-        const url = "{{ url('customers') }}/" + customerId + "/documents/individual" ;
+        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}`;
 
         $.get(url, function(res) {
             let html = '';
@@ -124,7 +130,7 @@
                 html = `
                 <div class="col-12 text-center py-5">
                     <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No personal documents found</h5>
+                    <h5 class="text-muted">No business documents found</h5>
                     <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#documentModal" onclick="openAddModal()">
                         <i class="fas fa-plus"></i> Add Document
                     </button>
@@ -138,10 +144,10 @@
                 </div>`;
 
                 res.data.forEach(doc => {
-                    const fileUrl = doc.file_url;
+                    let fileUrl = doc.file_url;
                     let preview = '';
                     if (doc.file_url) {
-                        const ext = doc.file_url.split('.').pop().toLowerCase().split('?')[0];
+                        let ext = doc.file_url.split('.').pop().toLowerCase().split('?')[0];
                         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
                             preview = `<img src="${fileUrl}" class="img-fluid rounded mb-2" style="max-height:120px;object-fit:cover;">`;
                         } else if (ext === 'pdf') {
@@ -151,9 +157,9 @@
                         }
                     }
 
-                    const downloadName = (doc.file_name ? doc.file_name.replace(/\s+/g, '_') : `document_${doc.id}`);
-                    const issueDate = doc.issue_date || '-';
-                    const expiryDate = doc.expiry_date || '-';
+                    let downloadName = (doc.file_name ? doc.file_name.replace(/\s+/g, '_') : `document_${doc.id}`);
+                    let issueDate = doc.issue_date || '-';
+                    let expiryDate = doc.expiry_date || '-';
 
                     html += `
                     <div class="col-md-4 mb-3">
@@ -195,26 +201,28 @@
     // Open add modal
     function openAddModal() {
         $('#documentForm')[0].reset();
+        $('#file_url').val('');  // Safely clear file input (only empty allowed)
         $('.flatpickr').each(function() {
-            this._flatpickr.clear();
+            this._flatpickr?.clear();  // Safe optional chaining
         });
         $('#doc_id').val('');
-        $('#documentModalLabel').text('Add Personal Document');
+        $('#documentModalLabel').text('Add Business Document');
         $('#save-btn').text('Save');
+        initFlatpickr();  // Re-init in case modal reset broke it
     }
 
     // Submit form (add/edit)
     $('#documentForm').on('submit', function(e) {
         e.preventDefault();
-        const formData = new FormData(this);
-        const docId = $('#doc_id').val();
-        let url = "{{ url('customers') }}/" + customerId + "/documents/individual/store";
+        let formData = new FormData(this);
+        let docId = $('#doc_id').val();
+        let url = `${baseUrl}/${vendorId}/${businessId}/documents/${apiSubpath}/store`;
         let method = 'POST';
 
         if (docId) {
-            url = "{{ url('customers') }}/" + customerId + "/documents/individual/" + docId;
+            url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${docId}`;
             formData.append('_method', 'PUT');
-            method = 'POST'; // Laravel uses POST with _method for PUT
+            method = 'POST';
         }
 
         $.ajax({
@@ -250,10 +258,10 @@
 
     // Edit document
     $(document).on('click', '.editDoc', function() {
-        const id = $(this).data('id');
-        const url = "{{ url('customers') }}/" + customerId + "/documents/individual/" + id;
+        let id = $(this).data('id');
+        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
         $.get(url, function(res) {
-            const d = res.data;
+            let d = res.data;
 
             $('#doc_id').val(d.id);
             $('#document_type').val(d.document_type);
@@ -261,22 +269,24 @@
             $('#file_name').val(d.file_name);
             $('#remarks').val(d.remarks);
             $('#issuing_authority').val(d.issuing_authority);
+            $('#file_url').val('');  // Clear file input (can't preload existing file for security)
 
             if (d.issue_date_raw) {
-                document.querySelector('#issue_date')._flatpickr.setDate(d.issue_date_raw, true, 'Y-m-d');
+                document.querySelector('#issue_date')._flatpickr?.setDate(d.issue_date_raw, true, 'Y-m-d');
             } else {
-                document.querySelector('#issue_date')._flatpickr.clear();
+                document.querySelector('#issue_date')._flatpickr?.clear();
             }
 
             if (d.expiry_date_raw) {
-                document.querySelector('#expiry_date')._flatpickr.setDate(d.expiry_date_raw, true, 'Y-m-d');
+                document.querySelector('#expiry_date')._flatpickr?.setDate(d.expiry_date_raw, true, 'Y-m-d');
             } else {
-                document.querySelector('#expiry_date')._flatpickr.clear();
+                document.querySelector('#expiry_date')._flatpickr?.clear();
             }
 
-            $('#documentModalLabel').text('Edit Personal Document');
+            $('#documentModalLabel').text('Edit Business Document');
             $('#save-btn').text('Update');
             $('#documentModal').modal('show');
+            initFlatpickr();  // Re-init on edit
         }).fail(function() {
             Swal.fire({
                 icon: 'error',
@@ -288,7 +298,7 @@
 
     // Delete document
     $(document).on('click', '.deleteDoc', function() {
-        const id = $(this).data('id');
+        let id = $(this).data('id');
 
         Swal.fire({
             title: 'Are you sure?',
@@ -300,7 +310,7 @@
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                const url = "{{ url('customers') }}/" + customerId + "/documents/individual/" + id;
+                let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
                 $.ajax({
                     url: url,
                     type: 'DELETE',
@@ -328,6 +338,7 @@
 
     // Initial load
     $(document).ready(function() {
+        initFlatpickr();
         loadDocuments();
     });
 </script>

@@ -33,6 +33,7 @@ use App\Http\Controllers\Customers\CustomerDocumentController;
 use App\Http\Controllers\Employees\EmployeeDocumentsController;
 use App\Http\Controllers\Vendors\VendorOnlineProfileController;
 use App\Http\Controllers\Vendors\VendorBusinessProfileController;
+use App\Http\Controllers\Customers\CustomerOnlineProfileController;
 use App\Http\Controllers\Customers\CustomerBusinessProfileController;
 
 Route::get('/', [DashboardController::class, 'dashBoardPage'])->name('Admin.Dashboard');
@@ -186,7 +187,6 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{id}/edit', [VendorController::class, 'edit'])->name('vendors.edit');
     Route::post('{id}/update', [VendorController::class, 'update'])->name('vendors.update');
     
-    // Vendor Business Info
     
     // Business Profile Management
     Route::get('{id}/Business', [VendorBusinessProfileController::class, 'Business'])->name('vendors.BusinessProfile');
@@ -339,5 +339,143 @@ Route::prefix('customers/')->group(function () {
     Route::get('{id}/Details', [CustomerProfileController::class, 'Details'])->name('customers.Details');
     Route::get('{id}/view/Details', [CustomerProfileController::class, 'viewDetails'])->name('customers.viewDetails');
 
+
+     // Customer Management
+    Route::get('{id}/manage', [CustomerController::class, 'manage'])->name('customers.manage');
+    Route::get('{id}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
+    Route::post('{id}/update', [CustomerController::class, 'update'])->name('customers.update');
+
+    // Business Profile Management
+    Route::get('{id}/Business', [CustomerBusinessProfileController::class, 'Business'])->name('customers.BusinessProfile');
+    Route::get('{id}/BusinessInfo', [CustomerBusinessProfileController::class, 'index'])->name('customers.BusinessInfo');
+    Route::get('/AllBusiness', [CustomerBusinessProfileController::class, 'allBusinessPage'])->name('customers.allBusinessPage');
+    Route::post('/{id}/business/create', [CustomerBusinessProfileController::class, 'addBusinessInfo']);
+    Route::get('{id}/{business_id}/BusinessDetails', [CustomerBusinessProfileController::class, 'BusinessDetails'])->name('customers.BusinessDetails');
+    Route::get('{id}/Businesslist', [CustomerBusinessProfileController::class, 'Businesslist'])->name('customers.Businesslist');
+    Route::get('{id}/all/Business', [CustomerBusinessProfileController::class, 'allBusiness'])->name('customers.AllBusiness');
+    Route::get('/customer-businesses/data', [CustomerBusinessProfileController::class, 'totalBusiness'])->name('customers.totalBusiness');
+    Route::get('{id}/{business_id}/ManageBusinessinfo', [CustomerBusinessProfileController::class, 'manage'])->name('customers.manageBusinessinfo');
+    Route::get('{id}/{business_id}/Business/Details', [CustomerBusinessProfileController::class, 'fetchBusinessDetails'])->name('customers.fetchBusinessDetails');
+    Route::get('{id}/business/manage', [CustomerBusinessProfileController::class, 'manageBusiness'])->name('customers.ManageBusiness');
+    Route::post('{id}/Business/Update', [CustomerBusinessProfileController::class, 'updateBusiness'])->name('customers.updateBusiness');
+
+     // Individual Address Routes
+    Route::get('{id}/Address', [CustomerAddressController::class, 'index'])->name('customers.Address');
+    Route::get('{id}/Manage/Address', [CustomerAddressController::class, 'manageAddress'])->name('customers.addresses.manage');
+    Route::get('{id}/Get/Address/List', [CustomerAddressController::class, 'getAddresses'])->name('customers.addresses.list');
+    Route::get('{id}/addresses/{address_id}', [CustomerAddressController::class, 'getAddress'])->name('customers.addresses.get');
+    Route::post('{id}/Manage/Addresses', [CustomerAddressController::class, 'storeAddress'])->name('customers.addresses.store');
+    Route::post('{id}/{type}/addresses/{address_id}', [CustomerAddressController::class, 'updateAddress'])->name('customers.addresses.update');
+    Route::delete('{id}/{type}/addresses/{address_id}', [CustomerAddressController::class, 'deleteAddress'])->name('customers.addresses.delete');
+    Route::get('{id}/Address/Permanent', [CustomerAddressController::class, 'permanentAddress'])->name('customers.Address.Permanent');
+
+    // Business Address Routes
+    Route::get('{id}/{business_id}/Business/Address', [CustomerAddressController::class, 'businessAddress'])->name('customers.businessAddress');
+    Route::get('{id}/{business_id}/Business/Address/list', [CustomerAddressController::class, 'getBusinessAddresses'])->name('customers.businessAddress.list');
+    Route::get('{id}/{business_id}/Business/Address/{address_id}', [CustomerAddressController::class, 'getBusinessAddress'])->name('customers.businessAddress.get');
+    Route::post('{id}/{business_id}/Business/Address/Add', [CustomerAddressController::class, 'storeBusinessAddress'])->name('customers.businessAddress.store');
+    Route::put('{id}/{business_id}/Business/Address/{address_id}/Update', [CustomerAddressController::class, 'updateBusinessAddress'])->name('customers.businessAddress.update');
+    Route::delete('{id}/{business_id}/Business/Address/{address_id}/Delete', [CustomerAddressController::class, 'deleteBusinessAddress'])->name('customers.businessAddress.delete');
+    Route::get('{id}/{business_id}/Permanat/Business/Address/', [CustomerAddressController::class, 'permanentBusinessAddress'])
+        ->name('customers.BusinessAddress.Permanent');
+
+
+    // Customer Business Contact 
+    Route::get('{id}/{business_id}/BusinessContact/Permanent', [CustomerContactController::class, 'permanentBusinessContact'])->name('customers.BusinessContact');
+    Route::get('{id}/{business_id}/Business/Contact', [CustomerContactController::class, 'BusinessContact'])->name('customers.BusinessContact');
+    Route::get('{id}/{business_id}/Business/Contacts/List', [CustomerContactController::class, 'getBusinessContacts'])->name('customers.BusinessContacts.list');
+    Route::get('{id}/{business_id}/Business/Contact/{contact_id}', [CustomerContactController::class, 'getBusinessContact']);
+    Route::post('{id}/{business_id}/Business/Contacts', [CustomerContactController::class, 'addBusinessContact'])->name('customers.BusinessContacts.store');
+    Route::put('{id}/{business_id}/Business/Contacts/{contact_id}', [CustomerContactController::class, 'updateBusinessContact'])->name('customers.BusinessContacts.update');
+    
+    // Customer individual Contact
+    Route::get('{id}/Contact', [CustomerContactController::class, 'index'])->name('customers.Contact');
+    Route::get('{id}/Manage/Contacts', [CustomerContactController::class, 'manageContact'])->name('customers.contacts.manageContact');
+    Route::get('{id}/Get/Contacts', [CustomerContactController::class, 'getContacts'])->name('customers.contacts.list');
+    Route::get('{customer_id}/{type}/contacts/{contact_id}', [CustomerContactController::class, 'getContact'])->name('customers.contacts.get');
+    Route::post('{customer_id}/Manage/Contacts/Add', [CustomerContactController::class, 'storeContact'])->name('customers.contacts.store');
+    Route::put('{customer_id}/{type}/contacts/{contact_id}', [CustomerContactController::class, 'updateContact'])->name('customers.contacts.update');
+    Route::delete('{customer_id}/{type}/contacts/{contact_id}', [CustomerContactController::class, 'deleteContact'])->name('customers.contacts.delete');
+    Route::get('{id}/Contact/Permanent', [CustomerContactController::class, 'permanentContact'])->name('customers.Contact.Permanent');
+
+
+    // Individual Bank Routes
+    Route::get('{id}/Bank', [CustomerBankController::class, 'index'])->name('customers.Bank');
+    Route::post('{id}/saveBank', [CustomerBankController::class, 'saveBank'])->name('customers.Bank.saveBank');
+    Route::get('{id}/BankList', [CustomerBankController::class, 'customerBanks'])->name('customers.CustomerBanks');
+    Route::get('{id}/bank/{account_id}', [CustomerBankController::class, 'fetchBank'])->name('customers.bank.fetch');
+    Route::put('{id}/updateBank/{account_id}', [CustomerBankController::class, 'updateBank'])->name('customers.bank.update');
+    Route::delete('{id}/deleteBank/{account_id}', [CustomerBankController::class, 'deleteBank'])->name('customers.bank.delete');
+    Route::get('{id}/Manage/Bank', [CustomerBankController::class, 'ManageBank'])->name('customers.ManageBank');
+    Route::get('{id}/Permanent/BankDetails', [CustomerBankController::class, 'permanentBank'])->name('customers.permanentBank');
+
+    // Business Bank Routes
+    Route::get('{id}/{business_id}/Business/Bank', [CustomerBankController::class, 'businessBank'])->name('customers.businessBank');
+    Route::get('{id}/{business_id}/business/BankList', [CustomerBankController::class, 'customerBusinessBank'])->name('customers.CustomerBusinessBank');
+    Route::get('{id}/{business_id}/BusinessBank', [CustomerBankController::class, 'permanentBusinessBank'])->name('customers.BusinessBank');
+    Route::post('{id}/{business_id}/business/saveBank', [CustomerBankController::class, 'saveBank'])->name('customers.business.saveBank'); // New
+    Route::get('{id}/{business_id}/business/bank/{account_id}', [CustomerBankController::class, 'fetchBank'])->name('customers.business.bank.fetch'); // New
+    Route::put('{id}/{business_id}/business/updateBank/{account_id}', [CustomerBankController::class, 'updateBank'])->name('customers.business.bank.update'); // New
+    Route::delete('{id}/{business_id}/business/deleteBank/{account_id}', [CustomerBankController::class, 'deleteBank'])->name('customers.business.bank.delete'); // New Removed {type}
+
+    
+    /*  (Individual Documents )  */
+    Route::get('{customer_id}/documents/add', [CustomerDocumentController::class, 'index'])->name('customers.documents.add');
+    Route::get('{customer_id}/Document', [CustomerDocumentController::class, 'index'])->name('customers.documents.index');
+    Route::get('{customer_id}/documents/individual/manage', [CustomerDocumentController::class, 'manageIndividual'])->name('customers.documents.individual.manage');
+    Route::post('{customer_id}/documents/individual/store',  [CustomerDocumentController::class, 'storeIndividualDocument']);
+    Route::get('{customer_id}/documents/individual',        [CustomerDocumentController::class, 'getIndividualDocuments']);
+    Route::get('{customer_id}/documents/individual/{doc_id}', [CustomerDocumentController::class, 'getIndividualDocument']);
+    Route::match(['put', 'patch'], '{customer_id}/documents/individual/{doc_id}', [CustomerDocumentController::class, 'updateIndividualDocument']);
+    Route::delete('{customer_id}/documents/individual/{doc_id}', [CustomerDocumentController::class, 'deleteIndividualDocument']);
+    
+    /* (Business Documents)  */
+    Route::get('{customer_id}/documents/business/{business_id}/add', [CustomerDocumentController::class, 'BusinessDocs'])->name('customers.documents.business.add');
+    Route::post('{customer_id}/{business_id}/documents/business/store', [CustomerDocumentController::class, 'storeBusinessDocument']);
+    Route::get('{customer_id}/documents/business/{business_id}/manage', [CustomerDocumentController::class, 'manageBusiness'])->name('customers.documents.business.manage');
+    Route::get('{customer_id}/documents/business/profile/{business_id}', [CustomerDocumentController::class, 'businessDocuments'])->name('customers.documents.business.profile');
+    Route::get('{customer_id}/documents/business/{business_id}', [CustomerDocumentController::class, 'getBusinessDocuments'])->name('customers.documents.business.index');
+    Route::get('{customer_id}/documents/business/{business_id}/{doc_id}', [CustomerDocumentController::class, 'getBusinessDocument'])->name('customers.documents.business.show');
+    Route::match(['put', 'patch'], '{customer_id}/documents/business/{business_id}/{doc_id}', [CustomerDocumentController::class, 'updateBusinessDocument'])->name('customers.documents.business.update');
+    Route::delete('{customer_id}/documents/business/{business_id}/{doc_id}', [CustomerDocumentController::class, 'deleteBusinessDocument'])->name('customers.documents.business.destroy');
+
+    // Customer Media
+    // Vendor Media
+    Route::get('{id}/Media', [CustomerMediaController::class, 'index']);
+    Route::get('{id}/media/manage', [CustomerMediaController::class, 'manage']);
+    Route::get('{id}/{business_id}/media/business', [CustomerMediaController::class, 'businessMedia']);
+
+    // Individual Media CRUD
+    Route::post('{customer_id}/media/individual/store', [CustomerMediaController::class, 'storeIndividualMedia']);
+    Route::get('{customer_id}/media/individual', [CustomerMediaController::class, 'getIndividualMedias']);
+    Route::get('{customer_id}/media/individual/{media_id}', [CustomerMediaController::class, 'getIndividualMedia']);
+    Route::match(['put', 'patch'], '{customer_id}/media/individual/{media_id}', [CustomerMediaController::class, 'updateIndividualMedia']);
+    Route::delete('{customer_id}/media/individual/{media_id}', [CustomerMediaController::class, 'deleteIndividualMedia']);
+
+    // Business Media CRUD
+    Route::post('{customer_id}/{business_id}/media/business/store', [CustomerMediaController::class, 'storeBusinessMedia'])->name('customers.media.business.store');
+    Route::get('{customer_id}/{business_id}/media/business/List', [CustomerMediaController::class, 'getBusinessMedias'])->name('customers.media.business.index');
+    Route::get('{customer_id}/{business_id}/media/business/{media_id}', [CustomerMediaController::class, 'getBusinessMedia'])->name('customers.media.business.show');
+    Route::match(['put', 'patch'], '{customer_id}/{business_id}/media/business/{media_id}', [CustomerMediaController::class, 'updateBusinessMedia'])->name('customers.media.business.update');
+    Route::delete('{customer_id}/{business_id}/media/business/{media_id}', [CustomerMediaController::class, 'deleteBusinessMedia'])->name('customers.media.business.destroy');
    
+
+    // Individual Online Profile
+    Route::get('{id}/individual/OnlineProfile', [CustomerOnlineProfileController::class, 'individualIndex'])->name('individual.add');
+    Route::post('{id}/individual/storeOnlineProfile', [CustomerOnlineProfileController::class, 'individualStore'])->name('individual.store');
+    Route::get('{id}/individual/OnlineProfile/Manage', [CustomerOnlineProfileController::class, 'individualManage'])->name('individual.manage');
+    Route::get('{id}/individual/OnlineProfile/List', [CustomerOnlineProfileController::class, 'individualList'])->name('individual.list');
+    Route::post('{id}/individual/OnlineProfile', [CustomerOnlineProfileController::class, 'individualStoreOne'])->name('individual.storeOne');
+    Route::put('{id}/individual/OnlineProfile/{profile}', [CustomerOnlineProfileController::class, 'individualUpdate'])->name('individual.update');
+    Route::delete('{id}/individual/OnlineProfile/{profile}', [CustomerOnlineProfileController::class, 'individualDestroy'])->name('individual.destroy');
+    // Business Online Profile
+    Route::get('{id}/business/OnlineProfile/{business_id}', [CustomerOnlineProfileController::class, 'businessIndex'])->name('business.add');
+    Route::post('{id}/business/storeOnlineProfile/{business_id}', [CustomerOnlineProfileController::class, 'businessStore'])->name('business.store');
+    Route::get('{id}/business/OnlineProfile/Manage', [CustomerOnlineProfileController::class, 'businessManage'])->name('business.manage');
+    Route::get('{id}/{business_id}/business/OnlineProfile/List', [CustomerOnlineProfileController::class, 'businessList'])->name('business.list');
+    Route::post('{id}/business/OnlineProfile', [CustomerOnlineProfileController::class, 'businessStoreOne'])->name('business.storeOne');
+    Route::put('{id}/business/OnlineProfile/{profile}', [CustomerOnlineProfileController::class, 'businessUpdate'])->name('business.update');
+    Route::delete('{id}/business/OnlineProfile/{profile}', [CustomerOnlineProfileController::class, 'businessDestroy'])->name('business.destroy');
+
+
 });

@@ -54,6 +54,7 @@ class VendorAddressController extends Controller
     public function storeAddress(Request $request, $vendor_id, $type = 'individual')
     {
         $vendor = Vendor::findOrFail($vendor_id);
+
         $validated = $request->validate([
             'state' => 'required|string|max:120',
             'district' => 'required|string|max:120',
@@ -69,6 +70,7 @@ class VendorAddressController extends Controller
             'is_primary' => 'nullable|boolean',
         ]);
 
+        // ✅ Check for business profile (if type is business)
         if ($type === 'business') {
             $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->first();
             if (!$business) {
@@ -79,12 +81,22 @@ class VendorAddressController extends Controller
             }
         }
 
-        if ($validated['is_primary'] ?? false) {
+        // ✅ Count existing addresses for this vendor and type
+        $existingCount = VendorAddress::where('vendor_id', $vendor_id)
+            ->where('profile_type', $type)
+            ->count();
+
+        // ✅ If this is the first address, automatically make it primary
+        if ($existingCount === 0) {
+            $validated['is_primary'] = true;
+        } elseif ($validated['is_primary'] ?? false) {
+            // If explicitly marked as primary, unset others
             VendorAddress::where('vendor_id', $vendor_id)
                 ->where('profile_type', $type)
                 ->update(['is_primary' => false]);
         }
 
+        // ✅ Create the address
         $address = VendorAddress::create([
             'tenant_id' => $vendor->tenant_id,
             'vendor_id' => $vendor_id,
@@ -93,12 +105,12 @@ class VendorAddressController extends Controller
             'district' => $validated['district'],
             'city' => $validated['city'],
             'pincode' => $validated['pincode'],
-            'line1' => $validated['line1'],
-            'line2' => $validated['line2'],
-            'landmark' => $validated['landmark'],
-            'label' => $validated['label'],
-            'longitude' => $validated['longitude'],
-            'latitude' => $validated['latitude'],
+            'line1' => $validated['line1'] ?? null,
+            'line2' => $validated['line2'] ?? null,
+            'landmark' => $validated['landmark'] ?? null,
+            'label' => $validated['label'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
             'address_type' => $validated['address_type'],
             'is_primary' => $validated['is_primary'] ?? false,
         ]);
@@ -109,6 +121,7 @@ class VendorAddressController extends Controller
             'data' => $address
         ]);
     }
+
 
     public function updateAddress(Request $request, $vendor_id, $type, $address_id)
     {

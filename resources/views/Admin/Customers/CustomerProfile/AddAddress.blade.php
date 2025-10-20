@@ -1,16 +1,16 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Address')
+@section('title', 'Home | Customers | Address')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
         title="Address"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist', 'Address' => '']" />
+        :links="['Home' => 'Admin.Dashboard', 'Customers' => 'customers.List', 'Address' => '']" />
 
-    <div class="mt-2">
+     <div class="mt-2">
         <div class="card">
-            <div class="p-1" id="student-details">
+            <div class="p-1" id="customer-details">
                 Loading details...
             </div>
         </div>
@@ -27,6 +27,8 @@
     </div>
 
     <form id="studentAddressForm">
+        @csrf
+        <input type="hidden" name="address_type" value="permanent">
         <div class="row">
             <div class="col-md-3">
                 <x-inputbox id="state" label="State" type="text" placeholder="Enter State Name" name="state"
@@ -45,11 +47,11 @@
                     value="{{ old('pincode') }}" :required="false" helpertxt="Pincode must be 6 digits" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="line_1" label="Line 1" type="text" placeholder="Enter Line 1" name="line_1"
-                    value="{{ old('line_1') }}" :required="false" helpertxt="Line 1 Name Max 120 character" />
+                <x-inputbox id="line1" label="Line 1" type="text" placeholder="Enter Line 1" name="line1"
+                    value="{{ old('line1') }}" :required="false" helpertxt="Line 1 Name Max 120 character" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="line_2" label="Line 2" type="text" placeholder="Enter Line 2" name="line_2"
+                <x-inputbox id="line_2" label="Line 2" type="text" placeholder="Enter Line 2" name="line2"
                     value="{{ old('line_2') }}" :required="false" helpertxt="Line 2 Name Max 120 character" />
             </div>
             <div class="col-md-4">
@@ -79,37 +81,52 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/customers') }}";
+    let customer_id = "{{ $id }}";
 
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${customer_id}/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 150px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                    let imgSrc = `storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/customers/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/customers/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/customers/${response.data.id}/Media/manage`;
+
+                    $("#customer-details").html(`
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
+                        </div>
+                        <div class="flex-grow-1">
+                                <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${response.primary_details.customer_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
-                    `);
+                    </div>
+
+                    <!-- Status badge on top-right -->
+                    
+                </div>
+
+               
+            `);
+
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#customer-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#customer-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -138,7 +155,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/Manage/Addresses`,
+                url: `${baseUrl}/${customer_id}/Manage/Addresses`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -151,7 +168,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = `${baseUrl}/${student_id}/Contact`;
+                            window.location.href = `${baseUrl}/${customer_id}/Contact`;
                         });
                     }
                 },
@@ -182,7 +199,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Contact`;
+                window.location.href = `${baseUrl}/${customer_id}/Contact`;
             });
         });
     });

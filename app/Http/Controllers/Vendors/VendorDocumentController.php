@@ -12,13 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 class VendorDocumentController extends Controller
 {
-    /* -----------------------------------------------------------------
-     *  View Routes (no JSON)
-     * ----------------------------------------------------------------- */
-
-    /**
-     * Add-document page (shared for both profiles – the form itself decides the profile).
-     */
+    
     public function index($id)
     {
         return view('Admin.Vendors.VendorProfile.AddDocument', ['id' => $id]);

@@ -1,11 +1,11 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Vendors | Bank Details')
+@section('title', 'Home | Vendors | Manage Bank')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Vendor Detail"
+        title="Manage Bank"
         :links="[
         'Home' => 'Admin.Dashboard',
         'Vendors' => 'vendors.List',

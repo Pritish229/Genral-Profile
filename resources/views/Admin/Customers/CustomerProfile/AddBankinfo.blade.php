@@ -1,17 +1,17 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Students | Bank Details')
+@section('title', 'Home | customers | Bank Details')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
         title="Bank Details"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist' ,'Bank Details'=>'' ]" />
+        :links="['Home' => 'Admin.Dashboard', 'Customers' => 'customers.List' ,'Bank Details'=>'' ]" />
 
     <!-- Student details -->
     <div class="mt-2">
         <div class="card">
-            <div class="p-3" id="student-details">
+            <div class="p-3" id="customer-details">
                 Loading details...
             </div>
         </div>
@@ -26,7 +26,8 @@
     <div class="mt-4">
         <form id="bankDetailsForm">
             <div class="row mb-3">
-                <div class="col-md-12">
+                <div class="col-md-6">
+                    <label for="is_default_payout">Payment Method</label>
                     <select class="form-select" id="method" name="method">
                         <option value="">-- Select Method --</option>
                         <option value="bank" selected>Bank</option>
@@ -34,28 +35,30 @@
                     </select>
                     <small class="form-text text-muted">Choose whether you want to add Bank details or UPI details.</small>
                 </div>
+                <div class="col-md-6">
+                    <label for="is_default_payout">Default Payout</label>
+                    <select class="form-select" id="is_default_payout" name="is_default_payout">
+                        <option value="1" selected>Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                    <small class="form-text text-muted">Choose the Default Payout.</small>
+                </div>
             </div>
 
             <!-- UPI fields -->
             <div id="upi-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_id"
-                            label="UPI ID"
-                            type="text"
-                            placeholder="example@upi"
-                            name="upi_id"
-                            :required="false" />
+                        <x-inputbox id="upi_id" label="UPI ID" type="text"
+                            placeholder="example@upi" name="upi_id"
+                            :required="false" value="{{ old('upi_id') }}"
+                            helpertxt="Enter your valid UPI ID (e.g., mobile@upi)." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_name"
-                            label="UPI Holder Name"
-                            type="text"
-                            placeholder="Full Name"
-                            name="upi_name"
-                            :required="false" />
+                        <x-inputbox id="upi_name" label="UPI Holder Name" type="text"
+                            placeholder="Full Name" name="upi_name"
+                            :required="false" value="{{ old('upi_name') }}"
+                            helpertxt="Enter the name as registered with UPI." />
                     </div>
                 </div>
             </div>
@@ -64,53 +67,44 @@
             <div id="bank-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="account_holder"
-                            label="Account Holder"
-                            type="text"
-                            placeholder="John Doe"
-                            name="account_holder"
-                            :required="false" />
+                        <x-inputbox id="account_holder" label="Account Holder" type="text"
+                            placeholder="John Doe" name="account_holder"
+                            :required="false" value="{{ old('account_holder') }}"
+                            helpertxt="Enter the account holder’s full name as per bank records." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="bank_name"
-                            label="Bank Name"
-                            type="text"
-                            placeholder="State Bank of India"
-                            name="bank_name"
-                            :required="false" />
+                        <x-inputbox id="bank_name" label="Bank Name" type="text"
+                            placeholder="State Bank of India" name="bank_name"
+                            :required="false" value="{{ old('bank_name') }}"
+                            helpertxt="Mention the official name of the bank." />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="branch_name"
-                            label="Branch Name"
-                            type="text"
-                            placeholder="MG Road Branch"
-                            name="branch_name"
-                            :required="false" />
+                        <x-inputbox id="branch_name" label="Branch Name" type="text"
+                            placeholder="MG Road Branch" name="branch_name"
+                            :required="false" value="{{ old('branch_name') }}"
+                            helpertxt="Provide the branch name where the account is opened." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="ifsc_code"
-                            label="IFSC Code"
-                            type="text"
-                            placeholder="SBIN0001234"
-                            name="ifsc_code"
-                            :required="false" />
+                        <x-inputbox id="account_number" label="Account Number" type="text"
+                            placeholder="Enter Account Number" name="account_number"
+                            :required="true" value="{{ old('account_number') }}"
+                            helpertxt="Double-check your account number before submitting." />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="swift_code"
-                            label="SWIFT Code"
-                            type="text"
-                            placeholder="SBININBBXXX"
-                            name="swift_code"
-                            :required="false" />
+                        <x-inputbox id="ifsc_code" label="IFSC Code" type="text"
+                            placeholder="SBIN0001234" name="ifsc_code"
+                            :required="false" value="{{ old('ifsc_code') }}"
+                            helpertxt="Enter the 11-digit IFSC code (for Indian banks)." />
+                    </div>
+                    <div class="col-md-6">
+                        <x-inputbox id="swift_code" label="SWIFT Code" type="text"
+                            placeholder="SBININBBXXX" name="swift_code"
+                            :required="false" value="{{ old('swift_code') }}"
+                            helpertxt="Enter SWIFT code (for international transactions)." />
                     </div>
                 </div>
             </div>
@@ -129,37 +123,48 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    let baseUrl = "{{ url('/customers') }}";
+    let customer_id = "{{ $id }}";
 
     function fetchDetails() {
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+            url: `${baseUrl}/${customer_id}/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
-                        <div class="d-flex align-items-start gap-3">
-                            <div style="flex: 0 0 150px;">
-                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
-                            </div>
-                            <div class="flex-grow-1">
-                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                    let imgSrc = `storage/${response.data.avatar_url}`;
+                    let manageBankUrl = `/customers/${response.data.id}/manageBank`;
+                    let manageDocUrl = `/customers/${response.data.id}/manageDocument`;
+                    let managemediaUrl = `/customers/${response.data.id}/Media/manage`;
+
+                    $("#customer-details").html(`
+                <div class="d-flex align-items-start justify-content-between">
+                    <!-- Profile + Info -->
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="flex: 0 0 160px;">
+                            <img src="{{asset('${imgSrc}')}}" class="img-thumbnail w-100" alt="Profile picture">
+                        </div>
+                        <div class="flex-grow-1">
+                                <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${response.primary_details.customer_uid}</p>
                                 <p><strong>Name:</strong> ${response.data.full_name}</p>
                                 <p><strong>Gender:</strong> ${response.data.gender}</p>
-                                <p><strong>Caste:</strong> ${response.data.caste}</p>
-                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                                <p><strong>Occupation:</strong> ${response.data.occupation}</p>
+                                <p><strong>Email:</strong> ${response.primary_details.primary_email}</p>
                             </div>
                         </div>
-                    `);
+                    </div>
+
+                    
+            `);
+
                 } else {
-                    $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
+                    $("#customer-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }
             },
             error: function(xhr) {
-                $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                $("#customer-details").html(`<p class="text-danger">Something went wrong.</p>`);
                 console.error(xhr.responseText);
             }
         });
@@ -174,28 +179,23 @@
         if (method === "upi") {
             $("#upi-fields").removeClass("d-none");
             $("#bank-fields").addClass("d-none");
-
-            $("#upi_id, #upi_name").attr("required", true);
-            $("#account_holder, #bank_name, #branch_name, #ifsc_code, #swift_code").removeAttr("required");
-
+            $("#upi-fields :input").prop("disabled", false);
+            $("#bank-fields :input").prop("disabled", true);
         } else if (method === "bank") {
             $("#bank-fields").removeClass("d-none");
             $("#upi-fields").addClass("d-none");
-
-            $("#account_holder, #bank_name, #branch_name, #ifsc_code").attr("required", true);
-            $("#upi_id, #upi_name, #swift_code").removeAttr("required");
-
+            $("#bank-fields :input").prop("disabled", false);
+            $("#upi-fields :input").prop("disabled", true);
         } else {
             $("#upi-fields, #bank-fields").addClass("d-none");
-            $("#upi_id, #upi_name, #account_holder, #bank_name, #branch_name, #ifsc_code, #swift_code").removeAttr("required");
+            $("#upi-fields :input, #bank-fields :input").prop("disabled", true);
         }
     }
 
     $(document).ready(function() {
         fetchDetails();
-        updateProgress(50); // Bank step = 40%
+        updateProgress(50); // Bank step = 50%
 
-        // Default show bank
         toggleFields("bank");
 
         $("#method").on("change", function() {
@@ -210,7 +210,7 @@
                 timer: 1200,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = `${baseUrl}/${student_id}/Document`; // change NextStep to your next route
+                window.location.href = `${baseUrl}/${customer_id}/Document`;
             });
         });
 
@@ -226,7 +226,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/storeBank`,
+                url: `${baseUrl}/${customer_id}/saveBank`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();
@@ -239,7 +239,7 @@
                             timer: 1500,
                             showConfirmButton: false
                         }).then(() => {
-                            window.location.href = `${baseUrl}/${student_id}/Document`; 
+                            window.location.href = `${baseUrl}/${customer_id}/Document`;
                         });
                     }
                 },
