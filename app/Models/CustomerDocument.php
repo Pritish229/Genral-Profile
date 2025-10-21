@@ -13,6 +13,9 @@ class CustomerDocument extends Model
     protected $fillable = [
         'tenant_id',
         'customer_id',
+        'business_id',
+        'profile_type',
+        'business_name',
         'document_type',
         'document_number',
         'document_number_hash',

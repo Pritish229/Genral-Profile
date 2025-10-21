@@ -14,14 +14,12 @@ class CustomerOnlineProfileController extends Controller
 
     public function individualIndex($id)
     {
-        $customer = Customer::findOrFail($id);
         return view('Admin.Customers.CustomerProfile.AddOnlineProfiles', ['id' => $id, 'type' => 'individual']);
     }
 
     public function individualManage($id)
     {
-        $customer = Customer::findOrFail($id);
-        return view('Admin.Customers.CustomersProfile.ManageOnlineProfile', ['id' => $id, 'type' => 'individual']);
+        return view('Admin.Customers.CustomerProfile.ManageOnlineProfile', ['id' => $id, 'type' => 'individual']);
     }
 
     public function individualStore(Request $request, $customer_id)
@@ -62,7 +60,6 @@ class CustomerOnlineProfileController extends Controller
 
     public function individualList($id)
     {
-        $customer = customer::findOrFail($id);
         // Removed type check
         $profiles = CustomerOnilneProfile::where('customer_id', $id)->where('profile_type', 'individual')->get();
 
@@ -136,7 +133,6 @@ class CustomerOnlineProfileController extends Controller
 
     public function businessManage($id)
     {
-        $customer = customer::findOrFail($id);
         return view('Admin.customers.customerProfile.ManageBusinessOnlineProfile', ['id' => $id, 'type' => 'business']);
     }
 

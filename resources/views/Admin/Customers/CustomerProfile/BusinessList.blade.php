@@ -8,8 +8,8 @@
         title="Business List"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
+        'Customers' => 'customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
             'Business List' => ''
         ]" />
 
@@ -51,7 +51,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" name="vendor_id" value="{{ $id }}">
+                    <input type="hidden" name="customer_id" value="{{ $id }}">
 
                     <div class="row">
                         <div class="col-md-4">
@@ -145,13 +145,13 @@
 @section('script')
 <script>
     $(document).ready(function() {
-        const vendorId = "{{ $id }}";
-        let baseUrl = "{{ url('/vendors') }}";
+        const customerId = "{{ $id }}";
+        let baseUrl = "{{ url('/customers') }}";
 
         // Load business list
         function loadBusinesses() {
             $.ajax({
-                url: `${baseUrl}/${vendorId}/all/Business`,
+                url: `${baseUrl}/${customerId}/all/Business`,
                 method: "GET",
                 success: function(res) {
                     let rows = '';
@@ -166,7 +166,7 @@
                                 <td>${business.business_size || ''}</td>
                                 <td>${business.gst_number || ''}</td>
                                 <td>
-                                    <a href="${baseUrl}/${vendorId}/${business.id}/BusinessDetails" class="btn btn-sm btn-primary">
+                                    <a href="${baseUrl}/${customerId}/${business.id}/BusinessDetails" class="btn btn-sm btn-primary">
                                         <i class="fas fa-eye me-2"></i> Details
                                     </a>
                                 </td>
@@ -195,7 +195,7 @@
             $saveBtn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
 
             $.ajax({
-                url: `/vendors/${vendorId}/business/create`,
+                url: `/customers/${customerId}/business/create`,
                 method: "POST",
                 data: formData,
                 success: function(res) {

@@ -21,7 +21,8 @@ class CustomerContactController extends Controller
         return view('Admin.Customers.CustomerProfile.BusinessContact', ['id' => $id, 'business_id' => $business_id]);
     }
 
-    public function stepContact($id){
+    public function stepContact($id)
+    {
         return view('Admin.Customers.CustomerProfile.AddContact', ['id' => $id]);
     }
 
@@ -74,7 +75,7 @@ class CustomerContactController extends Controller
             'is_emergency' => 'nullable|boolean',
         ]);
 
-        $customer = Customer::find($customer_id);
+        $customer = customer::find($customer_id);
         if (!$customer) {
             return response()->json([
                 'success' => false,
@@ -102,7 +103,7 @@ class CustomerContactController extends Controller
             'is_emergency' => $validated['is_emergency'] ?? false,
         ]);
 
-        // Sync primary_email or primary_phone in Customer model
+        // Sync primary_email or primary_phone in customer model
         if ($contact->is_primary && in_array($contact->contact_type, ['phone', 'email'])) {
             $updateData = [];
             if ($contact->contact_type === 'email') {
@@ -142,11 +143,11 @@ class CustomerContactController extends Controller
             ], 404);
         }
 
-        $customer = Customer::find($customer_id);
+        $customer = customer::find($customer_id);
         if (!$customer) {
             return response()->json([
                 'success' => false,
-                'message' => 'Customer not found'
+                'message' => 'customer not found'
             ], 404);
         }
 
@@ -172,7 +173,7 @@ class CustomerContactController extends Controller
             'is_emergency' => $validated['is_emergency'] ?? false,
         ]);
 
-        // Sync primary_email or primary_phone in Customer model
+        // Sync primary_email or primary_phone in customer model
         if (in_array($validated['contact_type'], ['phone', 'email'])) {
             $updateData = [];
             if ($isPrimaryNow) {
@@ -325,15 +326,15 @@ class CustomerContactController extends Controller
             'is_emergency' => 'nullable|boolean',
         ]);
 
-        $customer = Customer::find($customer_id);
+        $customer = customer::find($customer_id);
         if (!$customer) {
             return response()->json([
                 'success' => false,
-                'message' => 'Customer not found'
+                'message' => 'customer not found'
             ], 404);
         }
 
-        $business = CustomerBusinessProfile::where('customer_id', $customer_id)
+        $business = customerBusinessProfile::where('customer_id', $customer_id)
             ->where('id', $business_id)
             ->first();
         if (!$business) {
@@ -364,7 +365,7 @@ class CustomerContactController extends Controller
             'is_emergency' => $validated['is_emergency'] ?? false,
         ]);
 
-        // Sync primary_email or primary_phone in Customer model
+        // Sync primary_email or primary_phone in customer model
         if ($contact->is_primary && in_array($contact->contact_type, ['phone', 'email'])) {
             $updateData = [];
             if ($contact->contact_type === 'email') {
@@ -404,7 +405,7 @@ class CustomerContactController extends Controller
             ], 404);
         }
 
-        $business = CustomerBusinessProfile::where('customer_id', $customer_id)
+        $business = customerBusinessProfile::where('customer_id', $customer_id)
             ->where('id', $business_id)
             ->first();
         if (!$business) {
@@ -436,7 +437,7 @@ class CustomerContactController extends Controller
             'is_emergency' => $validated['is_emergency'] ?? false,
         ]);
 
-        // Sync primary_contact_email or primary_contact_phone in CustomerBusinessProfile model
+        // Sync primary_contact_email or primary_contact_phone in customerBusinessProfile model
         if (in_array($validated['contact_type'], ['phone', 'email'])) {
             $updateData = [];
             if ($isPrimaryNow) {
@@ -468,7 +469,7 @@ class CustomerContactController extends Controller
             }
             if (!empty($updateData)) {
                 $business->update($updateData);
-                Log::info('Updated CustomerBusinessProfile with: ', $updateData);
+                Log::info('Updated customer BusinessProfile with: ', $updateData);
             }
         }
 

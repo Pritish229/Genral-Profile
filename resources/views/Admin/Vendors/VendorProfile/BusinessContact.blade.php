@@ -5,7 +5,7 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Business Address"
+        title="Business Contact"
         :links="[
         'Home' => 'Admin.Dashboard',
         'Vendors' => 'vendors.List',

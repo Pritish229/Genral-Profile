@@ -1,35 +1,29 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Manage Vendor')
+@section('title', 'Manage customer')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Vendor"
+        title="Manage customer"
         :links="[
             'Home' => 'Admin.Dashboard',
-            'Vendors' => 'vendors.List',
-            'Vendor Details' => ['vendors.viewDetails', $id],
-            'Manage Vendor' => ''
+            'Customers' => 'customers.List',
+            'Customer Details' => ['customers.viewDetails', $id],
+            'Manage customer' => ''
         ]" />
 
-    <!-- Page Header -->
-    <div class="mt-3">
-        <h4 class="mb-3">
-            <i class="fas fa-user-edit"></i>
-            <span id="vendorTypeTitle">Personal Vendor Management</span>
-        </h4>
-    </div>
+
 
     <div id="alert-box" class="mt-2"></div>
 
-    <form id="vendorUpdateForm" autocomplete="on" enctype="multipart/form-data">
+    <form id="customerUpdateForm" autocomplete="on" enctype="multipart/form-data">
         @csrf
-        <input type="hidden" id="vendor_id" name="vendor_id" value="{{ $id }}">
-        <input type="hidden" id="vendor_type" name="vendor_type" value="individual">
+        <input type="hidden" id="customer_id" name="customer_id" value="{{ $id }}">
+        <input type="hidden" id="customer_type" name="customer_type" value="individual">
 
         <div class="row g-3">
-            <h5>Vendor Information</h5>
+            <h5>Customer Information</h5>
             <hr style="color:#5156be">
 
             <div class="col-md-4">
@@ -99,12 +93,12 @@
 
             <h5>Administration Info</h5>
             <hr style="color:#5156be">
-            <div class="col-md-4">
-                <x-inputbox id="vendor_uid" label="Vendor UID" type="text" placeholder="Enter unique vendor code" name="vendor_uid"
+            <!-- <div class="col-md-4">
+                 <x-inputbox id="customer_uid" label="customer UID" type="text" placeholder="Enter unique customer code" name="customer_uid"
                     value="" :required="false" helpertxt="Unique code don't use spaces" />
-            </div>
+            </div> -->
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="mb-2">
                     <label for="onboarding_channel" class="mb-2 labeltxt">On Boarding</label>
                     <select name="onboarding_channel" class="form-select" id="onboarding_channel">
@@ -118,7 +112,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="mb-2">
                     <label for="status" class="mb-2 labeltxt">Status</label>
                     <select name="status" class="form-select" id="status" required>
@@ -126,16 +120,16 @@
                         <option value="inactive">Inactive</option>
                         <option value="suspended">Suspended</option>
                     </select>
-                    <small class="mb-3 pt-1 helpertxt">Select Vendor Status</small>
+                    <small class="mb-3 pt-1 helpertxt">Select customer Status</small>
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <x-inputbox id="preferred_language" label="Preferred Language" type="text" placeholder="Enter Preferred Language" name="preferred_language"
                     value="" :required="false" helpertxt="Max 10 Character" />
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <x-inputbox id="preferred_currency" label="Preferred Currency" type="text" placeholder="Enter Preferred Currency" name="preferred_currency"
                     value="" :required="false" helpertxt="Enter Preferred Currency" />
             </div>
@@ -146,8 +140,8 @@
         </div>
 
         <div class="mt-3">
-            <button id="updateBtn" type="submit" class="btn btn-primary">Update Vendor</button>
-            <a href="{{ url('/vendors/' . $id . '/view/Details') }}" class="btn btn-secondary">Cancel</a>
+            <button id="updateBtn" type="submit" class="btn btn-primary">Update customer</button>
+            <a href="{{ url('/customers/' . $id . '/view/Details') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
@@ -156,9 +150,9 @@
 @section('script')
 <script>
     jQuery(function($) {
-        let baseUrl = "{{ url('/vendors') }}";
-        let vendorId = "{{ $id }}";
-        let vendorType = "individual";
+        let baseUrl = "{{ url('/customers') }}";
+        let customerId = "{{ $id }}";
+        let customerType = "individual";
 
         // Avatar uploader
         $('.input-images').imageUploader({
@@ -198,30 +192,30 @@
             width: '100%'
         });
 
-        // Load vendor data
-        function loadVendorData() {
+        // Load customer data
+        function loadcustomerData() {
             $.ajax({
-                url: `${baseUrl}/${vendorId}/edit`,
+                url: `${baseUrl}/${customerId}/edit`,
                 type: 'GET',
                 success: function(response) {
-                    console.log('Vendor data loaded:', response); // Debug log
+                    console.log('customer data loaded:', response); // Debug log
 
                     if (response.success) {
-                        const vendor = response.data.vendor;
+                        const customer = response.data.customer;
                         const profile = response.data.profile;
 
-                        // Fill vendor data
-                        $('#vendor_uid').val(vendor.vendor_uid || '');
-                        $('#primary_email').val(vendor.primary_email || '');
-                        $('#primary_phone').val(vendor.primary_phone || '');
-                        $('#onboarding_channel').val(vendor.onboarding_channel || 'web').trigger('change');
+                        // Fill customer data
+                        $('#customer_uid').val(customer.customer_uid || '');
+                        $('#primary_email').val(customer.primary_email || '');
+                        $('#primary_phone').val(customer.primary_phone || '');
+                        $('#onboarding_channel').val(customer.onboarding_channel || 'web').trigger('change');
 
                         // Debug status loading
-                        console.log('Loading status from vendor:', vendor.status);
-                        $('#status').val(vendor.status || 'active').trigger('change');
+                        console.log('Loading status from customer:', customer.status);
+                        $('#status').val(customer.status || 'active').trigger('change');
                         console.log('Status field value after setting:', $('#status').val());
 
-                        $('#notes').val(vendor.notes || '');
+                        $('#notes').val(customer.notes || '');
 
                         // Fill profile data
                         if (profile) {
@@ -259,23 +253,23 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: response.message || 'Failed to load vendor data'
+                            text: response.message || 'Failed to load customer data'
                         });
                     }
                 },
                 error: function(xhr) {
-                    console.error('Error loading vendor data:', xhr);
+                    console.error('Error loading customer data:', xhr);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Failed to load vendor data: ' + (xhr.responseJSON?.message || xhr.statusText)
+                        text: 'Failed to load customer data: ' + (xhr.responseJSON?.message || xhr.statusText)
                     });
                 }
             });
         }
 
         // Form Submit
-        $('#vendorUpdateForm').on('submit', function(e) {
+        $('#customerUpdateForm').on('submit', function(e) {
             e.preventDefault();
             const $btn = $('#updateBtn').prop('disabled', true);
             const formData = new FormData(this);
@@ -288,7 +282,7 @@
             }
 
             Swal.fire({
-                title: 'Updating vendor...',
+                title: 'Updating customer...',
                 html: 'Please wait',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
@@ -297,7 +291,7 @@
             });
 
             $.ajax({
-                    url: `${baseUrl}/${vendorId}/update`,
+                    url: `${baseUrl}/${customerId}/update`,
                     type: "POST",
                     data: formData,
                     contentType: false,
@@ -310,12 +304,12 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'Success!',
-                            text: response.message || 'Vendor updated successfully.',
+                            text: response.message || 'Customer Updated Successfully.',
                             timer: 2000,
                             showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = `${baseUrl}/${vendorId}/view/Details`;
-                        });
+                        })
+                    
+                        
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -354,7 +348,7 @@
         });
 
         // Load data on page load
-        loadVendorData();
+        loadcustomerData();
     });
 </script>
 @endsection

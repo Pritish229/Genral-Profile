@@ -14,6 +14,9 @@ class CustomerMedia extends Model
     protected $fillable = [
         'tenant_id',
         'customer_id',
+        'business_id',
+        'profile_type',
+        'business_name',
         'media_usage',
         'subject_role',
         'subject_name',

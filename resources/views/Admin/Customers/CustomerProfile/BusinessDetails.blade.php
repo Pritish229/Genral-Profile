@@ -8,10 +8,10 @@
         title="Business Details"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-        'Business List' => ['vendors.Businesslist', $id],
-            'Vendor Details' => ['vendors.viewDetails', $id],
+        'Customers' => 'customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
+        'Business List' => ['customers.Businesslist', $id],
+            'Customer Details' => ['customers.viewDetails', $id],
             'Business Details' => ''
         ]" />
 
@@ -25,8 +25,8 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('/vendors') }}";
-    let vendor_id = "{{ $id }}";
+    let baseUrl = "{{ url('/customers') }}";
+    let customer_id = "{{ $id }}";
     let business_id = "{{ $business_id }}";
 
     function safe(val) {
@@ -39,7 +39,7 @@
         <div class="card p-3 flex-fill">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5><i class="fas fa-building"></i> Basic Details</h5>
-                <a href="${baseUrl}/${vendor_id}/${business_id}/ManageBusinessinfo" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/${business_id}/ManageBusinessinfo" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>
@@ -70,7 +70,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Contact" class="text-decoration-none">
+                    <a href="${baseUrl}/${customer_id}/${business_id}/Business/Contact" class="text-decoration-none">
                         <i class="fas fa-edit"></i>
                     </a>
                 </div>
@@ -85,7 +85,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-map-marker-alt"></i> Address Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Address" class="text-decoration-none">
+                    <a href="${baseUrl}/${customer_id}/${business_id}/Business/Address" class="text-decoration-none">
                         <i class="fas fa-edit"></i>
                     </a>
                 </div>
@@ -100,7 +100,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5><i class="fas fa-university"></i> Bank Info</h5>
-                    <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Bank" class="text-decoration-none">
+                    <a href="${baseUrl}/${customer_id}/${business_id}/Business/Bank" class="text-decoration-none">
                         <i class="fas fa-edit"></i>
                     </a>
                 </div>
@@ -115,7 +115,7 @@
                 <div class="row text-center">
                    
                     <div class="col-md-6 col-6 mb-3">
-                        <a href="${baseUrl}/${vendor_id}/business/OnlineProfile/${business_id}" class="text-decoration-none ">
+                        <a href="${baseUrl}/${customer_id}/business/OnlineProfile/${business_id}" class="text-decoration-none ">
                             <div class="p-2 border rounded">
                                 <i class="fas fa-globe fa-lg"></i><br>
                                 Online Profile
@@ -123,7 +123,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-6 ">
-                        <a href="${baseUrl}/${vendor_id}/documents/business/${business_id}/manage" class="text-decoration-none">
+                        <a href="${baseUrl}/${customer_id}/documents/business/${business_id}/manage" class="text-decoration-none">
                             <div class="p-2 border rounded">
                                 <i class="fas fa-file-alt fa-lg"></i><br>
                                 Documents
@@ -131,7 +131,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 col-6">
-                        <a href="${baseUrl}/${vendor_id}/${business_id}/media/business" class="text-decoration-none">
+                        <a href="${baseUrl}/${customer_id}/${business_id}/media/business" class="text-decoration-none">
                             <div class="p-2 border rounded">
                                 <i class="fas fa-photo-video fa-lg"></i><br>
                                 Medias
@@ -155,13 +155,13 @@
         let business_id = "{{ $business_id }}";
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/${business_id}/BusinessContact/Permanent`,
+            url: `${baseUrl}/${customer_id}/${business_id}/BusinessContact/Permanent`,
             dataType: "json",
             success: function(response) {
                 let html = `
             <div class="d-flex justify-content-between align-items-center my-2">
                 <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Contact" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/${business_id}/Business/Contact" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>`;
@@ -182,7 +182,7 @@
                 $("#business-contact-info .card-body").html(`
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-address-book"></i> Contact Info</h5>
-                <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Contact" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/${business_id}/Business/Contact" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>
@@ -195,7 +195,7 @@
         let business_id = "{{ $business_id }}";
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/${business_id}/Permanat/Business/Address`,
+            url: `${baseUrl}/${customer_id}/${business_id}/Permanat/Business/Address`,
             dataType: "json",
             success: function(response) {
                 console.log(response);
@@ -203,7 +203,7 @@
                 let html = `
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-map-marker-alt"></i> Address Info</h5>
-                <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Address" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/${business_id}/Business/Address" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>`;
@@ -225,7 +225,7 @@
                 $("#business-address-info .card-body").html(`
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-map-marker-alt"></i> Address Info</h5>
-                <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Address" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/${business_id}/Business/Address" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>
@@ -238,7 +238,7 @@
         let business_id = "{{ $business_id }}";
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/${business_id}/BusinessBank`,
+            url: `${baseUrl}/${customer_id}/${business_id}/BusinessBank`,
             dataType: "json",
             success: function(response) {
 
@@ -246,7 +246,7 @@
                 let html = `
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-university"></i> Bank Info</h5>
-                <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Bank" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/${business_id}/Business/Bank" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>`;
@@ -270,7 +270,7 @@
                 $("#business-bank-info .card-body").html(`
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h5><i class="fas fa-university"></i> Bank Info</h5>
-                <a href="${baseUrl}/${vendor_id}/${business_id}/Business/Bank" class="text-decoration-none">
+                <a href="${baseUrl}/${customer_id}/${business_id}/Business/Bank" class="text-decoration-none">
                     <i class="fas fa-edit"></i>
                 </a>
             </div>
@@ -283,7 +283,7 @@
         let business_id = "{{ $business_id }}";
         $.ajax({
             type: "GET",
-            url: `${baseUrl}/${vendor_id}/${business_id}/Business/Details`,
+            url: `${baseUrl}/${customer_id}/${business_id}/Business/Details`,
             dataType: "json",
             success: function(response) {
                 if (response.success && response.data) {

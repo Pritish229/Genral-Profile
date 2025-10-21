@@ -264,8 +264,6 @@ class VendorAddressController extends Controller
 
     public function businessAddress($id, $business_id)
     {
-        $vendor = Vendor::findOrFail($id);
-        $business = VendorBusinessProfile::where('vendor_id', $id)->findOrFail($business_id);
         return view('Admin.Vendors.VendorProfile.BusinessAddress', ['id' => $id, 'business_id' => $business_id]);
     }
 

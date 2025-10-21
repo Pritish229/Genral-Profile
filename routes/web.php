@@ -229,8 +229,8 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{id}/{business_id}/Business/Contact/{contact_id}', [VendorContactController::class, 'getBusinessContact']);
     Route::post('{id}/{business_id}/Business/Contacts', [VendorContactController::class, 'addBusinessContact'])->name('vendors.BusinessContacts.store');
     Route::put('{id}/{business_id}/Business/Contacts/{contact_id}', [VendorContactController::class, 'updateBusinessContact'])->name('vendors.BusinessContacts.update');
+    
     // Vendor individual Contact
-
     Route::get('{id}/Contact', [VendorContactController::class, 'index'])->name('vendors.Contact');
     Route::get('{id}/Manage/Contacts', [VendorContactController::class, 'manageContact'])->name('vendors.contacts.manageContact');
     Route::get('{id}/Get/Contacts', [VendorContactController::class, 'getContacts'])->name('vendors.contacts.list');

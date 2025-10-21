@@ -84,11 +84,11 @@ class CustomerBankController extends Controller
 
         // Determine profile_type based on business_id
         if ($business_id) {
-            $business = CustomerBusinessProfile::where('customer_id', $customer->id)->where('id', $business_id)->first();
+            $business = customerBusinessProfile::where('customer_id', $customer->id)->where('id', $business_id)->first();
             if (!$business) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Business profile not found for this Customer.'
+                    'message' => 'Business profile not found for this customer.'
                 ], 422);
             }
             $data['profile_type'] = 'business';
@@ -226,11 +226,11 @@ class CustomerBankController extends Controller
 
         // Determine profile_type based on business_id
         if ($business_id) {
-            $business = CustomerBusinessProfile::where('customer_id', $customer->id)->where('id', $business_id)->first();
+            $business = customerBusinessProfile::where('customer_id', $customer->id)->where('id', $business_id)->first();
             if (!$business) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Business profile not found for this Customer.'
+                    'message' => 'Business profile not found for this customer.'
                 ], 422);
             }
             $data['profile_type'] = 'business';
@@ -306,7 +306,7 @@ class CustomerBankController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Customer bank/UPI account not found',
+                'message' => 'customer bank/UPI account not found',
             ], 404);
         }
     }
@@ -323,7 +323,7 @@ class CustomerBankController extends Controller
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Customer bank/UPI account not found',
+                'message' => 'customer bank/UPI account not found',
             ], 404);
         }
     }

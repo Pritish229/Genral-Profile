@@ -104,7 +104,7 @@ class CustomerController extends Controller
 
     public function manage($id)
     {
-        return view('Admin.customers.customerProfile.Managecustomer', [
+        return view('Admin.Customers.CustomerProfile.Managecustomer', [
             'id' => $id
         ]);
     }
@@ -146,6 +146,7 @@ class CustomerController extends Controller
             'preferred_currency' => 'nullable|string|max:3',
             'status'             => 'nullable|in:active,inactive,suspended',
             'notes'              => 'nullable|string',
+            'onboarding_channel' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -176,6 +177,7 @@ class CustomerController extends Controller
                 'nationality'        => $validated['nationality'],
                 'preferred_language' => $validated['preferred_language'],
                 'preferred_currency' => $validated['preferred_currency'],
+                'onboarding_channel' => $validated['onboarding_channel'],
             ]);
 
             // Handle avatar upload

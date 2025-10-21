@@ -5,17 +5,17 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Business Address"
+        title="Business Contact"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-        'Business List' => ['vendors.Businesslist', $id],
-        'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Customers' => 'Customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
+        'Business List' => ['customers.Businesslist', $id],
+        'Business Details' => ['customers.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
         'Business Contact' => '']" />
 
     <div class="mt-4">
-        <form id="vendorContactForm">
+        <form id="customerContactForm">
             @csrf
             <div class="row">
                 <div class="col-md-3">
@@ -97,14 +97,14 @@
 
 @section('script')
 <script>
-    let baseUrl = "{{ url('vendors') }}";
-    let vendor_id = "{{ $id }}";
+    let baseUrl = "{{ url('customers') }}";
+    let customer_id = "{{ $id }}";
     let business_id = "{{ $business_id }}";
     let editingContactId = null;
 
     // Load contacts list
     function loadContacts() {
-        $.get(`${baseUrl}/${vendor_id}/${business_id}/Business/Contacts/List`, function(response) {
+        $.get(`${baseUrl}/${customer_id}/${business_id}/Business/Contacts/List`, function(response) {
             if (response.success) {
                 let rows = "";
                 let index = 1;
@@ -134,7 +134,7 @@
     }
 
     // Save contact (add/update)
-    $("#vendorContactForm").submit(function(e) {
+    $("#customerContactForm").submit(function(e) {
         e.preventDefault();
         let formData = $(this).serializeArray();
         formData.push({
@@ -143,8 +143,8 @@
         });
 
         let url = editingContactId ?
-            `${baseUrl}/${vendor_id}/${business_id}/Business/Contacts/${editingContactId}` :
-            `${baseUrl}/${vendor_id}/${business_id}/Business/Contacts`;
+            `${baseUrl}/${customer_id}/${business_id}/Business/Contacts/${editingContactId}` :
+            `${baseUrl}/${customer_id}/${business_id}/Business/Contacts`;
 
         let type = editingContactId ? "PUT" : "POST";
 
@@ -165,7 +165,7 @@
                 $("#save-btn").attr("disabled", false);
                 Swal.fire('Success', response.message || "Operation successful", 'success');
                 editingContactId = null;
-                $("#vendorContactForm")[0].reset();
+                $("#customerContactForm")[0].reset();
                 $("#cancel-btn").hide();
                 loadContacts();
             },
@@ -182,7 +182,7 @@
         editingContactId = $(this).closest("tr").data("id");
         $("#cancel-btn").show();
 
-        $.get(`${baseUrl}/${vendor_id}/${business_id}/Business/Contact/${editingContactId}`, function(response) {
+        $.get(`${baseUrl}/${customer_id}/${business_id}/Business/Contact/${editingContactId}`, function(response) {
             if (response.success) {
                 let contact = response.data;
                 $("#contact_type").val(contact.contact_type);
@@ -202,7 +202,7 @@
     // Cancel editing
     $("#cancel-btn").click(function() {
         editingContactId = null;
-        $("#vendorContactForm")[0].reset();
+        $("#customerContactForm")[0].reset();
         $(this).hide();
     });
 
@@ -224,7 +224,7 @@
                     didOpen: () => Swal.showLoading()
                 });
                 $.ajax({
-                    url: `${baseUrl}/${vendor_id}/${business_id}/Business/Contacts/${contactId}`,
+                    url: `${baseUrl}/${customer_id}/${business_id}/Business/Contacts/${contactId}`,
                     type: "DELETE",
                     data: {
                         _token: "{{ csrf_token() }}"

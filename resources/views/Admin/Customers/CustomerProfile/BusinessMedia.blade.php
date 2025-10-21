@@ -8,10 +8,10 @@
         title="Business Media"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-        'Business List' => ['vendors.Businesslist', $id],
-            'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Customers' => 'customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
+        'Business List' => ['customers.Businesslist', $id],
+            'Business Details' => ['customers.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
             'Business Media' => ''
         ]" />
 
@@ -95,9 +95,9 @@
     // -----------------------------------------------------------------
     // Global IDs – passed from the controller that renders the view
     // -----------------------------------------------------------------
-    const vendorId = "{{ $id }}";
+    const customerId = "{{ $id }}";
     const businessId = "{{ $business_id }}";
-    const baseUrl = "{{ url('/vendors') }}";
+    const baseUrl = "{{ url('/customers') }}";
 
     // -----------------------------------------------------------------
     // Select2 helper (re-initialised each time the modal opens)
@@ -117,7 +117,7 @@
     // Load medias (GET)
     // -----------------------------------------------------------------
     const loadMedias = () => {
-        const url = `${baseUrl}/${vendorId}/${businessId}/media/business/List`;
+        const url = `${baseUrl}/${customerId}/${businessId}/media/business/List`;
         $.get(url, res => {
             let html = `<div class="col-12 d-flex justify-content-end mb-3">
                             <button class="btn btn-primary" data-bs-toggle="modal"
@@ -199,7 +199,7 @@
         // always send the business context
         fd.append('business_id', businessId);
 
-        let url = `${baseUrl}/${vendorId}/${businessId}/media/business`;
+        let url = `${baseUrl}/${customerId}/${businessId}/media/business`;
         if (mediaId) {
             url += `/${mediaId}`;
             fd.append('_method', 'PUT');
@@ -236,7 +236,7 @@
     $(document).on('click', '.editMedia', function(e) {
         e.preventDefault();
         const mediaId = $(this).data('id');
-        const url = `${baseUrl}/${vendorId}/${businessId}/media/business/${mediaId}`;
+        const url = `${baseUrl}/${customerId}/${businessId}/media/business/${mediaId}`;
 
         $.get(url, res => {
             if (!res.success) return Swal.fire('Error', res.message || 'Not found', 'error');
@@ -273,7 +273,7 @@
         }).then(result => {
             if (!result.isConfirmed) return;
 
-            const url = `${baseUrl}/${vendorId}/${businessId}/media/business/${mediaId}`;
+            const url = `${baseUrl}/${customerId}/${businessId}/media/business/${mediaId}`;
             $.ajax({
                 url,
                 method: 'DELETE',

@@ -8,10 +8,10 @@
         title="Business Documents"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-        'Business List' => ['vendors.Businesslist', $id],
-            'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Customers' => 'customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
+        'Business List' => ['customers.Businesslist', $id],
+            'Business Details' => ['customers.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
             'Business Documents' => ''
         ]" />
 
@@ -104,24 +104,24 @@
 
 @section('script')
 <script>
-    let vendorId = "{{ $id }}";
+    let customerId = "{{ $id }}";
     let businessId = "{{ $business_id }}";
     let apiSubpath = 'business';
-    let baseUrl = "{{ url('/vendors') }}";
+    let baseUrl = "{{ url('/customers') }}";
 
     // Function to init Flatpickr (call on page load and modal show for safety)
     function initFlatpickr() {
         $(".flatpickr").flatpickr({
             dateFormat: "Y-m-d",
             altInput: true,
-            altFormat: "j F Y",  // Fixed typo (removed 'vendorId')
+            altFormat: "j F Y",  // Fixed typo (removed 'customerId')
             allowInput: true
         });
     }
 
     // Fetch and render documents
     function loadDocuments() {
-        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}`;
+        let url = `${baseUrl}/${customerId}/documents/${apiSubpath}/${businessId}`;
 
         $.get(url, function(res) {
             let html = '';
@@ -216,11 +216,11 @@
         e.preventDefault();
         let formData = new FormData(this);
         let docId = $('#doc_id').val();
-        let url = `${baseUrl}/${vendorId}/${businessId}/documents/${apiSubpath}/store`;
+        let url = `${baseUrl}/${customerId}/${businessId}/documents/${apiSubpath}/store`;
         let method = 'POST';
 
         if (docId) {
-            url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${docId}`;
+            url = `${baseUrl}/${customerId}/documents/${apiSubpath}/${businessId}/${docId}`;
             formData.append('_method', 'PUT');
             method = 'POST';
         }
@@ -259,7 +259,7 @@
     // Edit document
     $(document).on('click', '.editDoc', function() {
         let id = $(this).data('id');
-        let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
+        let url = `${baseUrl}/${customerId}/documents/${apiSubpath}/${businessId}/${id}`;
         $.get(url, function(res) {
             let d = res.data;
 
@@ -310,7 +310,7 @@
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                let url = `${baseUrl}/${vendorId}/documents/${apiSubpath}/${businessId}/${id}`;
+                let url = `${baseUrl}/${customerId}/documents/${apiSubpath}/${businessId}/${id}`;
                 $.ajax({
                     url: url,
                     type: 'DELETE',

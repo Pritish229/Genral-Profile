@@ -12,27 +12,24 @@ class CustomerPaymentAccount extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id',
+        'tenant_id',        
         'customer_id',
-        'method',
-        'status',
-        'is_primary',
+        'profile_type',
+        'business_id',
+        'business_name',
         'is_default_payout',
+        'method',
         'account_holder',
         'bank_name',
+        'account_number',
+        'account_number_mask',
+        'account_number_hash',
         'branch_name',
         'ifsc_code',
         'swift_code',
-        'account_number_mask',
-        'account_number_hash',
         'upi_vpa',
-        'upi_verified',
-        'verified',
-        'verified_at',
-        'verification_method',
-        'source',
-        'meta',
-        'row_version',
+        'is_primary',
+        'status',
     ];
 
     protected $casts = [

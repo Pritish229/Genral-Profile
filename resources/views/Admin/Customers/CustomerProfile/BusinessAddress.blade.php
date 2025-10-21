@@ -8,10 +8,10 @@
         title="Business Address"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-        'Business List' => ['vendors.Businesslist', $id],
-        'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Customers' => 'Customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
+        'Business List' => ['customers.Businesslist', $id],
+        'Business Details' => ['customers.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
         'Business Address' => ''
     ]" />
     <div class="mt-4">
@@ -99,11 +99,11 @@
 @section('script')
 <script>
     $(function() {
-        const vendorId = "{{ $id }}";
+        const customerId = "{{ $id }}";
         const businessId = "{{ $business_id }}";
 
         function loadAddresses() {
-            $.get(`/vendors/${vendorId}/${businessId}/Business/Address/list`, {
+            $.get(`/customers/${customerId}/${businessId}/Business/Address/list`, {
                 _token: '{{ csrf_token() }}'
             }, function(data) {
                 if (data.success) {
@@ -132,10 +132,10 @@
         $('#businessAddressForm').on('submit', function(e) {
             e.preventDefault();
             let addressId = $('#address_id').val();
-            let url = `/vendors/${vendorId}/${businessId}/Business/Address/Add`;
+            let url = `/customers/${customerId}/${businessId}/Business/Address/Add`;
             let method = 'POST';
             if (addressId) {
-                url = `/vendors/${vendorId}/${businessId}/Business/Address/${addressId}/Update`;
+                url = `/customers/${customerId}/${businessId}/Business/Address/${addressId}/Update`;
                 method = 'PUT';
             }
 
@@ -169,7 +169,7 @@
         // EDIT ADDRESS
         $(document).on('click', '.edit-btn', function() {
             let id = $(this).data('id');
-            $.get(`/vendors/${vendorId}/${businessId}/Business/Address/${id}`, function(data) {
+            $.get(`/customers/${customerId}/${businessId}/Business/Address/${id}`, function(data) {
                 if (data.success) {
                     let a = data.data;
                     $('#address_id').val(a.id);
@@ -202,7 +202,7 @@
             if (!confirm("Are you sure?")) return;
             let id = $(this).data('id');
             $.ajax({
-                url: `/vendors/${vendorId}/${businessId}/Business/Address/${id}/Delete`,
+                url: `/customers/${customerId}/${businessId}/Business/Address/${id}/Delete`,
                 method: 'DELETE',
                 data: {
                     _token: '{{ csrf_token() }}'

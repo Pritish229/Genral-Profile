@@ -1,17 +1,17 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Home | Vendors | Bank Details')
+@section('title', 'Home | customers | Bank Details')
 
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Business Address"
+        title="Manage Bank"
         :links="[
         'Home' => 'Admin.Dashboard',
-        'Vendors' => 'vendors.List',
-        'Vendor Details' => ['vendors.viewDetails', ['id' => $id]],
-        'Business List' => ['vendors.Businesslist', $id],
-        'Business Details' => ['vendors.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
+        'Customers' => 'customers.List',
+        'Customer Details' => ['customers.viewDetails', ['id' => $id]],
+        'Business List' => ['customers.Businesslist', $id],
+        'Business Details' => ['customers.BusinessDetails', ['id' => $id, 'business_id' => $business_id]],
         'Manage Bank' => ''
     ]" />
 
@@ -113,9 +113,9 @@
 
 @section('script')
 <script>
-    let vendor_id = "{{ $id }}";
+    let customer_id = "{{ $id }}";
     let business_id = "{{ $business_id }}";
-    let baseUrl = "{{ url('/vendors') }}";
+    let baseUrl = "{{ url('/customers') }}";
 
     function toggleFields(method) {
         const isEdit = $('#account_id').val() !== '';
@@ -155,7 +155,7 @@
         $('#bankModalLabel').text('Edit Bank / UPI');
         $('#modalSaveText').text('Update');
         $.ajax({
-            url: `${baseUrl}/${vendor_id}/${business_id}/business/bank/${account.id}`, // Matches vendors.business.bank.fetch
+            url: `${baseUrl}/${customer_id}/${business_id}/business/bank/${account.id}`, // Matches customers.business.bank.fetch
             type: 'GET',
             success: function(res) {
                 const acc = res.data || account;
@@ -187,9 +187,9 @@
         });
     }
 
-    function vendorbanklist() {
+    function customerbanklist() {
         $.ajax({
-            url: `${baseUrl}/${vendor_id}/${business_id}/business/BankList`, // Matches vendors.vendorBusinessBank
+            url: `${baseUrl}/${customer_id}/${business_id}/business/BankList`, // Matches customers.customerBusinessBank
             type: 'GET',
             success: function(res) {
                 let data = Array.isArray(res) ? res : res.data;
@@ -244,14 +244,14 @@
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: `${baseUrl}/${vendor_id}/${business_id}/business/deleteBank/${account_id}`, // Matches vendors.business.bank.delete
+                    url: `${baseUrl}/${customer_id}/${business_id}/business/deleteBank/${account_id}`, // Matches customers.business.bank.delete
                     type: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(res) {
                         Swal.fire('Deleted!', res.message, 'success');
-                        vendorbanklist();
+                        customerbanklist();
                     },
                     error: function(xhr) {
                         console.error('Error deleting bank:', xhr.responseText);
@@ -272,8 +272,8 @@
         const isEdit = accountId && accountId !== '';
         const method = isEdit ? 'PUT' : 'POST';
         const url = isEdit
-            ? `${baseUrl}/${vendor_id}/${business_id}/business/updateBank/${accountId}` // Matches vendors.business.bank.update
-            : `${baseUrl}/${vendor_id}/${business_id}/business/saveBank`; // Matches vendors.business.saveBank
+            ? `${baseUrl}/${customer_id}/${business_id}/business/updateBank/${accountId}` // Matches customers.business.bank.update
+            : `${baseUrl}/${customer_id}/${business_id}/business/saveBank`; // Matches customers.business.saveBank
 
         $.ajax({
             url: url,
@@ -291,7 +291,7 @@
                     showConfirmButton: false
                 });
                 $('#bankModal').modal('hide');
-                vendorbanklist();
+                customerbanklist();
             },
             error: function(xhr) {
                 console.error('Error saving bank:', xhr.responseText);
@@ -317,7 +317,7 @@
     });
 
     $(document).ready(function() {
-        vendorbanklist();
+        customerbanklist();
         $('#method').change(function() {
             toggleFields($(this).val());
         });

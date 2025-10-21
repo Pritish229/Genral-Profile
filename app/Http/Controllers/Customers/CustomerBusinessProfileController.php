@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\CustomerBusinessProfile;
 
@@ -33,7 +34,6 @@ class CustomerBusinessProfileController extends Controller
 
     public function addBusinessInfo(Request $request, $id)
     {
-        // Get customer and tenant_id
         $customer = Customer::find($id);
 
         if (!$customer) {
@@ -43,7 +43,6 @@ class CustomerBusinessProfileController extends Controller
             ], 404);
         }
 
-        // Validation rules
         $rules = [
             'legal_name'          => 'required|string|max:180',
             'trade_name'          => 'nullable|string|max:180',
@@ -63,21 +62,30 @@ class CustomerBusinessProfileController extends Controller
 
         $validatedData = $request->validate($rules);
 
+        DB::beginTransaction();
+
         try {
             $profile = CustomerBusinessProfile::create(array_merge($validatedData, [
                 'customer_id' => $id,
                 'tenant_id' => $customer->tenant_id
             ]));
 
-            $customer->type = 'business';
-            $customer->save();
+            if ($customer->type !== 'business') {
+                $customer->type = 'business';
+                $customer->save();
+            }
 
+            DB::commit();
             return response()->json([
                 'success' => true,
                 'message' => 'Business profile added successfully.',
-                'data' => $profile
+                'data' => [
+                    'profile' => $profile,
+                    'customer' => $customer
+                ]
             ], 201);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to add business profile.',

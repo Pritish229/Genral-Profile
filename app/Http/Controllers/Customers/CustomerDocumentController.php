@@ -205,9 +205,6 @@ class CustomerDocumentController extends Controller
         ]);
     }
 
-    /* -----------------------------------------------------------------
-     *  Business Document CRUD (profile_type = 'business')
-     * ----------------------------------------------------------------- */
 
     /** Store – Business */
     public function storeBusinessDocument(Request $request, $customer_id, $business_id)

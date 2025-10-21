@@ -261,9 +261,7 @@ class CustomerAddressController extends Controller
 
     public function businessAddress($id, $business_id)
     {
-        $customer = Customer::findOrFail($id);
-        $business = CustomerBusinessProfile::where('customer_id', $id)->findOrFail($business_id);
-        return view('Admin.Customers.CustomeProfile.BusinessAddress', ['id' => $id, 'business_id' => $business_id]);
+        return view('Admin.Customers.CustomerProfile.BusinessAddress', ['id' => $id, 'business_id' => $business_id]);
     }
 
     public function getBusinessAddresses($customer_id, $business_id)
