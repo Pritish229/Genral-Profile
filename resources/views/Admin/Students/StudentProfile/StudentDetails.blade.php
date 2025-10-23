@@ -117,18 +117,18 @@
 
             <!-- Card 2 -->
             <div class="card p-2">
-                
-                    <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                        Address information
-                        <a href="{{ url('/students/' . $id . '/Manage/Addresses') }}"
-                            class="text-primary"
-                            data-toggle="tooltip"
-                            title="Manage Addresses">
-                            <i class="fas fa-plus-circle"></i>
-                        </a>
-                    </h6>
-                    
-                
+
+                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
+                    Address information
+                    <a href="{{ url('/students/' . $id . '/Manage/Addresses') }}"
+                        class="text-primary"
+                        data-toggle="tooltip"
+                        title="Manage Addresses">
+                        <i class="fas fa-plus-circle"></i>
+                    </a>
+                </h6>
+
+
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
                     <div class="mb-3 d-flex"><strong class="me-2">Country:</strong>
@@ -160,16 +160,16 @@
 
             <!-- Card 3 -->
             <div class="card p-2">
-                
-                    <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
-                        Address information
-                        <a href="{{ url('/students/' . $id . '/Manage/Contacts') }}"
-                            class="text-primary"
-                            data-toggle="tooltip"
-                            title="Manage Contact">
-                            <i class="fas fa-plus-circle"></i>
-                        </a>
-                    </h6>
+
+                <h6 class=" d-flex justify-content-between align-items-center mx-2 mt-2 mb-0">
+                    Contact information
+                    <a href="{{ url('/students/' . $id . '/Manage/Contacts') }}"
+                        class="text-primary"
+                        data-toggle="tooltip"
+                        title="Manage Contact">
+                        <i class="fas fa-plus-circle"></i>
+                    </a>
+                </h6>
                 <hr style="color:#5156be">
                 <div class="mx-2 mb-0">
                     <div class="mb-3 d-flex"><strong class="me-2">Contact Type:</strong>

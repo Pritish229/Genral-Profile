@@ -5,58 +5,149 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-    title="Manage Addresses"
-    :links="[
-        'Home' => 'Admin.Dashboard',
-        'Students' => 'students.Studentlist',
-        'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
-        'Manage Addresses' => ''
-    ]"
-/>
+        title="Manage Addresses"
+        :links="[
+            'Home' => 'Admin.Dashboard',
+            'Students' => 'students.Studentlist',
+            'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+            'Manage Addresses' => ''
+        ]"
+    />
+
     <!-- Address Form -->
     <form id="studentAddressForm">
         @csrf
         <div class="row">
             <div class="col-md-3">
-                <x-inputbox id="state" label="State" type="text" placeholder="Enter State Name" name="state"
-                    value="{{ old('state') }}" :required="false" helpertxt="Max 120 characters" />
+                <x-inputbox 
+                    id="state" 
+                    label="State" 
+                    type="text" 
+                    placeholder="Enter State Name" 
+                    name="state"
+                    value="{{ old('state') }}" 
+                    :required="false" 
+                    helpertxt="Enter state name (max 120 characters)" 
+                />
             </div>
+
             <div class="col-md-3">
-                <x-inputbox id="district" label="District" type="text" placeholder="Enter District Name" name="district"
-                    value="{{ old('district') }}" :required="false" helpertxt="Max 120 characters" />
+                <x-inputbox 
+                    id="district" 
+                    label="District" 
+                    type="text" 
+                    placeholder="Enter District Name" 
+                    name="district"
+                    value="{{ old('district') }}" 
+                    :required="false" 
+                    helpertxt="Enter district name (max 120 characters)" 
+                />
             </div>
+
             <div class="col-md-3">
-                <x-inputbox id="city" label="City" type="text" placeholder="Enter City Name" name="city"
-                    value="{{ old('city') }}" :required="false" helpertxt="Max 120 characters" />
+                <x-inputbox 
+                    id="city" 
+                    label="City" 
+                    type="text" 
+                    placeholder="Enter City Name" 
+                    name="city"
+                    value="{{ old('city') }}" 
+                    :required="false" 
+                    helpertxt="Enter city name (max 120 characters)" 
+                />
             </div>
+
             <div class="col-md-3">
-                <x-inputbox id="pincode" label="Pincode" type="text" placeholder="Enter Pincode" name="pincode"
-                    value="{{ old('pincode') }}" :required="false" helpertxt="6 digits only" />
+                <x-inputbox 
+                    id="pincode" 
+                    label="Pincode" 
+                    type="text" 
+                    placeholder="Enter Pincode" 
+                    name="pincode"
+                    value="{{ old('pincode') }}" 
+                    :required="false" 
+                    helpertxt="Enter 6-digit postal code" 
+                />
             </div>
+
             <div class="col-md-4">
-                <x-inputbox id="line1" label="Line 1" type="text" placeholder="Enter Line 1" name="line1"
-                    value="{{ old('line1') }}" :required="false" />
+                <x-inputbox 
+                    id="line1" 
+                    label="Line 1" 
+                    type="text" 
+                    placeholder="Enter Line 1" 
+                    name="line1"
+                    value="{{ old('line1') }}" 
+                    :required="false" 
+                    helpertxt="House number / street / area" 
+                />
             </div>
+
             <div class="col-md-4">
-                <x-inputbox id="line2" label="Line 2" type="text" placeholder="Enter Line 2" name="line2"
-                    value="{{ old('line2') }}" :required="false" />
+                <x-inputbox 
+                    id="line2" 
+                    label="Line 2" 
+                    type="text" 
+                    placeholder="Enter Line 2" 
+                    name="line2"
+                    value="{{ old('line2') }}" 
+                    :required="false" 
+                    helpertxt="Apartment / locality / landmark (optional)" 
+                />
             </div>
+
             <div class="col-md-4">
-                <x-inputbox id="landmark" label="Landmark" type="text" placeholder="Enter Landmark" name="landmark"
-                    value="{{ old('landmark') }}" :required="false" />
+                <x-inputbox 
+                    id="landmark" 
+                    label="Landmark" 
+                    type="text" 
+                    placeholder="Enter Landmark" 
+                    name="landmark"
+                    value="{{ old('landmark') }}" 
+                    :required="false" 
+                    helpertxt="Nearby point of reference (optional)" 
+                />
             </div>
+
             <div class="col-md-4">
-                <x-inputbox id="label" label="Label" type="text" placeholder="Enter Label" name="label"
-                    value="{{ old('label') }}" :required="false" helpertxt="Ex: Parents Address" />
+                <x-inputbox 
+                    id="label" 
+                    label="Label" 
+                    type="text" 
+                    placeholder="Enter Label" 
+                    name="label"
+                    value="{{ old('label') }}" 
+                    :required="false" 
+                    helpertxt="E.g., Home, Parents, Hostel, etc." 
+                />
             </div>
+
             <div class="col-md-4">
-                <x-inputbox id="longitude" label="Longitude (Optional)" type="text" placeholder="Enter Longitude" name="longitude"
-                    value="{{ old('longitude') }}" :required="false" />
+                <x-inputbox 
+                    id="longitude" 
+                    label="Longitude (Optional)" 
+                    type="text" 
+                    placeholder="Enter Longitude" 
+                    name="longitude"
+                    value="{{ old('longitude') }}" 
+                    :required="false" 
+                    helpertxt="Enter geographical longitude (optional)" 
+                />
             </div>
+
             <div class="col-md-4">
-                <x-inputbox id="latitude" label="Latitude (Optional)" type="text" placeholder="Enter Latitude" name="latitude"
-                    value="{{ old('latitude') }}" :required="false" />
+                <x-inputbox 
+                    id="latitude" 
+                    label="Latitude (Optional)" 
+                    type="text" 
+                    placeholder="Enter Latitude" 
+                    name="latitude"
+                    value="{{ old('latitude') }}" 
+                    :required="false" 
+                    helpertxt="Enter geographical latitude (optional)" 
+                />
             </div>
+
             <div class="col-lg-12 mt-2">
                 <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
             </div>
@@ -90,7 +181,7 @@
 <script>
     let baseUrl = "{{ url('students') }}";
     let student_id = "{{ $id }}";
-    let edit_id = null; // track address being edited
+    let edit_id = null;
 
     // Fetch & render addresses
     function loadAddresses() {

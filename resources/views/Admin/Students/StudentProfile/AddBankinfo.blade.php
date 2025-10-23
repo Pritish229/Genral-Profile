@@ -44,6 +44,8 @@
                             id="upi_id"
                             label="UPI ID"
                             type="text"
+                            value="{{old('upi_id')}}"
+                            helpertxt="Your UPI Virtual Payment Address"
                             placeholder="example@upi"
                             name="upi_id"
                             :required="false" />
@@ -53,7 +55,9 @@
                             id="upi_name"
                             label="UPI Holder Name"
                             type="text"
+                            value="{{old('upi_name')}}"
                             placeholder="Full Name"
+                            helpertxt="Name as per UPI records"
                             name="upi_name"
                             :required="false" />
                     </div>
@@ -68,7 +72,9 @@
                             id="account_holder"
                             label="Account Holder"
                             type="text"
+                            value="{{old('account_holder')}}"
                             placeholder="John Doe"
+                            helpertxt="Name as per bank records"
                             name="account_holder"
                             :required="false" />
                     </div>
@@ -77,8 +83,10 @@
                             id="bank_name"
                             label="Bank Name"
                             type="text"
+                            value="{{old('bank_name')}}"
                             placeholder="State Bank of India"
                             name="bank_name"
+                            helpertxt="Full name of the bank"
                             :required="false" />
                     </div>
                 </div>
@@ -88,17 +96,21 @@
                             id="branch_name"
                             label="Branch Name"
                             type="text"
+                            value="{{old('branch_name')}}"
                             placeholder="MG Road Branch"
                             name="branch_name"
+                            helpertxt="Name of the bank branch"
                             :required="false" />
                     </div>
                     <div class="col-md-6">
                         <x-inputbox
                             id="ifsc_code"
                             label="IFSC Code"
+                            value="{{old('ifsc_code')}}"
                             type="text"
                             placeholder="SBIN0001234"
                             name="ifsc_code"
+                            helpertxt="Indian Financial System Code"
                             :required="false" />
                     </div>
                 </div>
@@ -107,9 +119,11 @@
                         <x-inputbox
                             id="swift_code"
                             label="SWIFT Code"
+                            value="{{old('swift_code')}}"
                             type="text"
                             placeholder="SBININBBXXX"
                             name="swift_code"
+                            helpertxt="For international transactions"
                             :required="false" />
                     </div>
                 </div>
@@ -226,7 +240,7 @@
 
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}/${student_id}/storeBank`,
+                url: `${baseUrl}/${student_id}/saveBank`,
                 data: $(this).serialize(),
                 success: function(response) {
                     Swal.close();

@@ -44,24 +44,24 @@
                 <small class="form-text text-muted">Purpose of the media file.</small>
             </div>
             <div class="col-md-6" id="subject_name_wrapper">
-                <x-inputbox id="subject_name" label="Subject Name" type="text" placeholder="Enter custom purpose" name="subject_name" />
+                <x-inputbox id="subject_name" label="Subject Name" type="text" placeholder="Enter custom purpose" name="subject_name" value="{{old('subject_name')}}" required="true" helpertxt=""/>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <x-inputbox id="file_name_media" label="File Name" type="text" placeholder="Original file name" name="file_name_media" />
+                <x-inputbox id="file_name_media" label="File Name" type="text" placeholder="Original file name" name="file_name_media" value="{{old('file_name_media')}}" required="true" helpertxt="" />
             </div>
             <div class="col-md-6">
                 <label for="file_url_media">Upload File</label>
-                <input type="file" class="form-control" id="file_url_media" name="file_url" required>
+                <input type="file" class="form-control" id="file_url_media" name="file_url" value="{{old('file_url_media')}}" required helpertxt="">
                 <small class="form-text text-muted">Upload media (image, pdf, etc.).</small>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <x-inputbox id="caption" label="Caption" type="text" placeholder="Short description" name="caption" />
+                <x-inputbox id="caption" label="Caption" type="text" placeholder="Short description" name="caption" value="{{old('file_url_media')}}" required="true" helpertxt="" />
             </div>
             <div class="col-md-6">
                 <label for="tags">Tags</label>
@@ -80,39 +80,39 @@
 @endsection
 @section('script')
 <script>
-function updateProgress(percent) {
-    $("#progressContainer").show();
-    $("#progressBar").css("width", percent + "%").text(percent + "%");
-}
+    function updateProgress(percent) {
+        $("#progressContainer").show();
+        $("#progressBar").css("width", percent + "%").text(percent + "%");
+    }
 
-$(document).ready(function() {
-    let baseUrl = "{{ url('/students') }}";
-    let student_id = "{{ $id }}";
+    $(document).ready(function() {
+        let baseUrl = "{{ url('/students') }}";
+        let student_id = "{{ $id }}";
 
-    $("#tags").select2({
-        tags: true,
-        tokenSeparators: [',', ' '],
-        placeholder: "Add tags",
-        width: '100%'
-    });
+        $("#tags").select2({
+            tags: true,
+            tokenSeparators: [',', ' '],
+            placeholder: "Add tags",
+            width: '100%'
+        });
 
-    $(".flatpickr").flatpickr({
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j F Y",
-        allowInput: true
-    });
+        $(".flatpickr").flatpickr({
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",
+            allowInput: true
+        });
 
-    // Fetch student details
-    function fetchDetails() {
-        $.ajax({
-            type: "GET",
-            url: `${baseUrl}/${student_id}/Basicinfo/Details`,
-            dataType: "json",
-            success: function(response) {
-                if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
-                    $("#student-details").html(`
+        // Fetch student details
+        function fetchDetails() {
+            $.ajax({
+                type: "GET",
+                url: `${baseUrl}/${student_id}/Basicinfo/Details`,
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        let imgSrc = `/storage/${response.data.avatar_url}`;
+                        $("#student-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
                                 <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
@@ -126,129 +126,129 @@ $(document).ready(function() {
                             </div>
                         </div>
                     `);
-                }
-            }
-        });
-    }
-
-    fetchDetails();
-    updateProgress(80);
-
-    // Document Upload
-    $("#documentForm").on("submit", function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
-        updateProgress(0);
-
-        $.ajax({
-            xhr: function() {
-                let xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function(evt) {
-                    if (evt.lengthComputable) {
-                        let percentComplete = Math.round((evt.loaded / evt.total) * 50); // 0-50%
-                        updateProgress(percentComplete);
                     }
-                }, false);
-                return xhr;
-            },
-            type: "POST",
-            url: `${baseUrl}/${student_id}/storeDocument`,
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    updateProgress(50);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Document Saved!',
-                        text: 'Document uploaded successfully.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
                 }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let html = '<div class="alert alert-danger"><ul>';
-                    $.each(errors, function(key, value) {
-                        html += '<li>' + value[0] + '</li>';
-                    });
-                    html += '</ul></div>';
-                    $("#alert-box").html(html);
-                } else {
-                    Swal.fire("Error", "Something went wrong.", "error");
-                }
-            }
-        });
-    });
+            });
+        }
 
-    // Media Upload
-    $("#mediaForm").on("submit", function(e) {
-        e.preventDefault();
-        let formData = new FormData(this);
+        fetchDetails();
+        updateProgress(80);
 
-        $.ajax({
-            xhr: function() {
-                let xhr = new window.XMLHttpRequest();
-                xhr.upload.addEventListener("progress", function(evt) {
-                    if (evt.lengthComputable) {
-                        let percentComplete = 50 + Math.round((evt.loaded / evt.total) * 50); // 50-100%
-                        updateProgress(percentComplete);
+        // Document Upload
+        $("#documentForm").on("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            updateProgress(0);
+
+            $.ajax({
+                xhr: function() {
+                    let xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            let percentComplete = Math.round((evt.loaded / evt.total) * 50); // 0-50%
+                            updateProgress(percentComplete);
+                        }
+                    }, false);
+                    return xhr;
+                },
+                type: "POST",
+                url: `${baseUrl}/${student_id}/storeDocument`,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        updateProgress(50);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Document Saved!',
+                            text: 'Document uploaded successfully.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
                     }
-                }, false);
-                return xhr;
-            },
-            type: "POST",
-            url: "{{ route('students.Bank.storeMedia', ['id' => $id]) }}",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    updateProgress(100);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'All Steps Completed!',
-                        text: 'Student document & media uploaded successfully.',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.href = "{{ route('students.create') }}";
-                    });
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let html = '<div class="alert alert-danger"><ul>';
+                        $.each(errors, function(key, value) {
+                            html += '<li>' + value[0] + '</li>';
+                        });
+                        html += '</ul></div>';
+                        $("#alert-box").html(html);
+                    } else {
+                        Swal.fire("Error", "Something went wrong.", "error");
+                    }
                 }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let html = '<div class="alert alert-danger"><ul>';
-                    $.each(errors, function(key, value) {
-                        html += '<li>' + value[0] + '</li>';
-                    });
-                    html += '</ul></div>';
-                    $("#alert-box").html(html);
-                } else {
-                    Swal.fire("Error", "Something went wrong.", "error");
-                }
-            }
+            });
         });
-    });
 
-    // Skip Button
-    $("#skipBtn").on("click", function() {
-        Swal.fire({
-            icon: 'info',
-            title: 'Skipped!',
-            text: 'You have skipped this step.',
-            timer: 1200,
-            showConfirmButton: false,
-            allowOutsideClick: false
-        }).then(() => {
-            window.location.href = "{{ route('students.create') }}";
+        // Media Upload
+        $("#mediaForm").on("submit", function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            $.ajax({
+                xhr: function() {
+                    let xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            let percentComplete = 50 + Math.round((evt.loaded / evt.total) * 50); // 50-100%
+                            updateProgress(percentComplete);
+                        }
+                    }, false);
+                    return xhr;
+                },
+                type: "POST",
+                url: "{{ route('students.Bank.storeMedia', ['id' => $id]) }}",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        updateProgress(100);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'All Steps Completed!',
+                            text: 'Student document & media uploaded successfully.',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = "{{ route('students.create') }}";
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let html = '<div class="alert alert-danger"><ul>';
+                        $.each(errors, function(key, value) {
+                            html += '<li>' + value[0] + '</li>';
+                        });
+                        html += '</ul></div>';
+                        $("#alert-box").html(html);
+                    } else {
+                        Swal.fire("Error", "Something went wrong.", "error");
+                    }
+                }
+            });
+        });
+
+        // Skip Button
+        $("#skipBtn").on("click", function() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Skipped!',
+                text: 'You have skipped this step.',
+                timer: 1200,
+                showConfirmButton: false,
+                allowOutsideClick: false
+            }).then(() => {
+                window.location.href = "{{ route('students.create') }}";
+            });
         });
     });
-});
 </script>
 @endsection

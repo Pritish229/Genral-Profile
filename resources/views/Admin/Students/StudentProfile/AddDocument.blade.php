@@ -35,7 +35,10 @@
                 <x-inputbox
                     id="document_type"
                     label="Document Type"
+                    helpertxt="e.g., Passport, Aadhar Card"
                     type="text"
+                    required="true"
+                    value="{{old('document_type')}}"
                     placeholder="e.g., Passport, Aadhar Card"
                     name="document_type" />
             </div>
@@ -44,6 +47,9 @@
                     id="document_number"
                     label="Document Number"
                     type="text"
+                    required="false"
+                    value="{{old('document_number')}}"
+                    helpertxt="Unique number of the document"
                     placeholder="Enter Document Number"
                     name="document_number" />
             </div>
@@ -74,7 +80,10 @@
                     id="file_name"
                     label="File Name"
                     type="text"
+                    required="true"
+                    helpertxt="e.g., Passport Scan"
                     placeholder="e.g., Passport Scan"
+                    value="{{old('file_name')}}"
                     name="file_name" />
             </div>
             <div class="col-md-6">
@@ -90,6 +99,9 @@
                     id="remarks"
                     label="Remarks"
                     name="remarks"
+                    value="{{old('remarks')}}"
+                    required="false"
+                    helpertxt="Enter additional remarks about this document"
                     placeholder="Enter additional remarks about this document" />
             </div>
         </div>

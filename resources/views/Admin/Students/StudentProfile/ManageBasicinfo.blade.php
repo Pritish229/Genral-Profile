@@ -16,7 +16,7 @@
 
     <form id="studentForm" enctype="multipart/form-data">
         <div class="row align-items-center">
-            <!-- Profile Picture on the left-middle -->
+            <!-- Profile Picture -->
             <div class="col-md-3 mb-3 text-center">
                 <label for="avatar" class="form-label">Profile Picture</label>
                 <div class="input-images"></div>
@@ -136,14 +136,19 @@ $(function(){
 
     const studentId = "{{ $id }}";
 
-    // Initialize image uploader
-    let avatarUploader = $('.input-images').imageUploader({
-        multiple: false,
-        imagesInputName: 'avatar_url',
-        preloadedInputName: 'preloaded',
-        label: 'Click to upload profile picture',
-        preloaded: []
-    });
+    // ✅ Function to initialize/re-initialize the image uploader safely
+    function initImageUploader(preloaded = []) {
+        $('.input-images').empty().imageUploader({
+            multiple: false,
+            imagesInputName: 'avatar_url',
+            preloadedInputName: 'preloaded',
+            label: 'Click to upload profile picture',
+            preloaded: preloaded
+        });
+    }
+
+    // Initialize empty uploader by default
+    initImageUploader();
 
     // Initialize date picker
     $(".flatpickr").flatpickr({
@@ -154,16 +159,17 @@ $(function(){
     });
 
     // Fetch existing details
-     $.get("{{ url('students') }}/" + studentId + "/Basicinfo/Details", function(response){
+    $.get("{{ url('students') }}/" + studentId + "/Basicinfo/Details", function(response){
         if(response.success){
+            
             let data = response.data;
             let primary = response.primary_details;
 
             $('#first_name').val(data.first_name || primary.first_name);
             $('#middle_name').val(data.middle_name || primary.middle_name);
             $('#last_name').val(data.last_name || primary.last_name);
-            
-            // ✅ Use Flatpickr API instead of .val()
+
+            // ✅ Set DOB correctly with Flatpickr API
             if (data.dob) {
                 let dobPicker = document.querySelector("#dob")._flatpickr;
                 if (dobPicker) {
@@ -187,11 +193,9 @@ $(function(){
             $('#section').val(data.section);
             $('#rollno').val(data.roll_no);
 
-            if(data.avatar_url){
-                avatarUploader[0].imageUploader.setPreloaded([{
-                    id: 1,
-                    src: data.avatar_url
-                }]);
+            // ✅ Safely reinitialize image uploader with preloaded image
+            if (data.avatar_url) {
+                initImageUploader([{ id: 1, src: data.avatar_url }]);
             }
         }
     });
@@ -243,5 +247,3 @@ $(function(){
 });
 </script>
 @endsection
-
-
