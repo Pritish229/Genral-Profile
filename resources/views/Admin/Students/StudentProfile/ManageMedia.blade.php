@@ -5,11 +5,11 @@
 @section('content')
 <div class="page-content">
     <x-breadcrumb
-        title="Manage Medias"
+        title="Manage Media"
         :links="[
             'Home' => 'Admin.Dashboard',
-            'Students' => 'students.StudentList',
-            'Student Detail' => ['students.StudentList.studentDetailsPage', $id],
+            'Students' => 'students.Studentlist',
+            'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
             'Manage Media' => ''
         ]" />
 
@@ -43,13 +43,13 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="subject_name" label="Subject Name" type="text" name="subject_name" placeholder="Enter custom purpose" />
+                            <x-inputbox id="subject_name" label="Subject Name" value="{{old('subject_name')}}" type="text" name="subject_name" placeholder="Enter custom purpose" required  helpertxt=""/>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="file_name_media" label="File Name" type="text" name="file_name" placeholder="Original file name" />
+                            <x-inputbox id="file_name_media" label="File Name" value="{{old('file_name')}}" type="text" name="file_name" placeholder="Original file name" required helpertxt="" />
                         </div>
                         <div class="col-md-6">
                             <label for="file_url_media">Upload File</label>
@@ -59,7 +59,7 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="caption" label="Caption" type="text" name="caption" placeholder="Short description" />
+                            <x-inputbox id="caption" label="Caption" value="{{old('')}}" type="text" name="caption" placeholder="Short description" required helpertxt=""/>
                         </div>
                         <div class="col-md-6">
                             <label for="tags">Tags</label>

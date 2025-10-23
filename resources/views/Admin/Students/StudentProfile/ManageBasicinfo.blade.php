@@ -11,8 +11,7 @@
             'Students' => 'students.Studentlist',
             'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
             'Update Basic info' => ''
-        ]" 
-    />
+        ]" />
 
     <form id="studentForm" enctype="multipart/form-data">
         <div class="row align-items-center">
@@ -132,118 +131,127 @@
 
 @section('script')
 <script>
-$(function(){
+    $(function() {
 
-    const studentId = "{{ $id }}";
+        const studentId = "{{ $id }}";
 
-    // ✅ Function to initialize/re-initialize the image uploader safely
-    function initImageUploader(preloaded = []) {
-        $('.input-images').empty().imageUploader({
-            multiple: false,
-            imagesInputName: 'avatar_url',
-            preloadedInputName: 'preloaded',
-            label: 'Click to upload profile picture',
-            preloaded: preloaded
-        });
-    }
-
-    // Initialize empty uploader by default
-    initImageUploader();
-
-    // Initialize date picker
-    $(".flatpickr").flatpickr({
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "j F Y",
-        allowInput: true
-    });
-
-    // Fetch existing details
-    $.get("{{ url('students') }}/" + studentId + "/Basicinfo/Details", function(response){
-        if(response.success){
-            
-            let data = response.data;
-            let primary = response.primary_details;
-
-            $('#first_name').val(data.first_name || primary.first_name);
-            $('#middle_name').val(data.middle_name || primary.middle_name);
-            $('#last_name').val(data.last_name || primary.last_name);
-
-            // ✅ Set DOB correctly with Flatpickr API
-            if (data.dob) {
-                let dobPicker = document.querySelector("#dob")._flatpickr;
-                if (dobPicker) {
-                    dobPicker.setDate(data.dob, true);
-                }
-            }
-
-            $('#gender').val(data.gender || primary.gender);
-            $('#blood_group').val(data.blood_group);
-            $('#religion').val(data.religion);
-            $('#caste').val(data.caste);
-            $('#nationality').val(data.nationality);
-            $('#mother_tongue').val(data.mother_tongue);
-            $('#guardian_name').val(data.guardian_name);
-            $('#guardian_relation').val(data.guardian_relation);
-            $('#guardian_phone').val(data.guardian_phone);
-            $('#guardian_email').val(data.guardian_email);
-            $('#guardian_occupation').val(data.guardian_occupation);
-            $('#parent_income').val(data.parent_income);
-            $('#current_class').val(data.current_class);
-            $('#section').val(data.section);
-            $('#rollno').val(data.roll_no);
-
-            // ✅ Safely reinitialize image uploader with preloaded image
-            if (data.avatar_url) {
-                initImageUploader([{ id: 1, src: data.avatar_url }]);
-            }
+        // ✅ Function to initialize/re-initialize the image uploader safely
+        function initImageUploader(preloaded = []) {
+            $('.input-images').empty().imageUploader({
+                multiple: false,
+                imagesInputName: 'avatar_url',
+                preloadedInputName: 'preloaded',
+                label: 'Click to upload profile picture',
+                preloaded: preloaded
+            });
         }
-    });
 
-    // Submit form via AJAX
-    $('#studentForm').submit(function(e){
-        e.preventDefault();
-        let formData = new FormData(this);
+        // Initialize empty uploader by default
+        initImageUploader();
 
-        $.ajax({
-            url: "{{ url('students') }}/" + studentId + "/Basicinfo/Update",
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(res){
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: res.message,
-                    confirmButtonText: 'OK'
-                });
-            },
-            error: function(xhr){
-                if(xhr.status === 422){
-                    let errors = xhr.responseJSON.errors;
-                    let errorList = '';
-                    $.each(errors, function(key, messages){
-                        messages.forEach(function(msg){
-                            errorList += msg + '\n';
-                        });
-                    });
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validation Error',
-                        text: errorList
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Something went wrong!'
+        // Initialize date picker
+        $(".flatpickr").flatpickr({
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",
+            allowInput: true
+        });
+
+        // Fetch existing details
+        $.get("{{ url('students') }}/" + studentId + "/Basicinfo/Details", function(response) {
+            if (response.success) {
+                console.log(response);
+
+                let data = response.data;
+                let primary = response.primary_details;
+
+                $('#first_name').val(data.first_name || primary.first_name);
+                $('#middle_name').val(data.middle_name || primary.middle_name);
+                $('#last_name').val(data.last_name || primary.last_name);
+
+                // ✅ Set DOB correctly with Flatpickr API
+                if (data.dob) {
+                    let dobPicker = document.querySelector("#dob")._flatpickr;
+                    if (dobPicker) {
+                        dobPicker.setDate(data.dob, true);
+                    }
+                }
+
+                $('#gender').val(data.gender || primary.gender);
+                $('#blood_group').val(data.blood_group);
+                $('#religion').val(data.religion);
+                $('#caste').val(data.caste);
+                $('#nationality').val(data.nationality);
+                $('#mother_tongue').val(data.mother_tongue);
+                $('#guardian_name').val(data.guardian_name);
+                $('#guardian_relation').val(data.guardian_relation);
+                $('#guardian_phone').val(data.guardian_phone);
+                $('#guardian_email').val(data.guardian_email);
+                $('#guardian_occupation').val(data.guardian_occupation);
+                $('#parent_income').val(data.parent_income);
+                $('#current_class').val(data.current_class);
+                $('#section').val(data.section);
+                $('#rollno').val(data.roll_no);
+
+                if (data.avatar_url) {
+                    $('.input-images').imageUploader({
+                        multiple: false,
+                        imagesInputName: 'avatar_url',
+                        preloadedInputName: 'preloaded',
+                        label: 'Click to upload profile picture',
+                        preloaded: [{
+                            id: 1,
+                            src: data.avatar_url
+                        }]
                     });
                 }
             }
         });
-    });
 
-});
+        // Submit form via AJAX
+        $('#studentForm').submit(function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            $.ajax({
+                url: "{{ url('students') }}/" + studentId + "/Basicinfo/Update",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: res.message,
+                        confirmButtonText: 'OK'
+                    });
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let errorList = '';
+                        $.each(errors, function(key, messages) {
+                            messages.forEach(function(msg) {
+                                errorList += msg + '\n';
+                            });
+                        });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Validation Error',
+                            text: errorList
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong!'
+                        });
+                    }
+                }
+            });
+        });
+
+    });
 </script>
 @endsection

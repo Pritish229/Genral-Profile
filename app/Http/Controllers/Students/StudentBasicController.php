@@ -61,6 +61,11 @@ class StudentBasicController extends Controller
             ? Carbon::parse($primary_details->admission_date)->format('d-M-Y')
             : '-';
 
+        // Fix avatar_url to use correct storage path
+        $detailsArray['avatar_url'] = $details->avatar_url
+            ? asset('storage/' . $details->avatar_url)
+            : null;
+
         return response()->json([
             'success' => true,
             'data' => $detailsArray,
@@ -68,28 +73,32 @@ class StudentBasicController extends Controller
         ]);
     }
 
-    public function updateDetails(Request $request, $employee_id)
+    public function updateDetails(Request $request, $student_id)
     {
         $rules = [
-            'first_name'             => 'sometimes|string|max:70',
-            'middle_name'            => 'nullable|string|max:70',
-            'last_name'              => 'sometimes|string|max:70',
-            'designation'            => 'nullable|string|max:255',
-            'department'             => 'nullable|string|max:255',
-            'employment_type'        => 'nullable|string|max:50',
-            'salary_currency'        => 'nullable|string|max:3',
-            'base_salary'            => 'nullable|numeric',
-            'experience_years'       => 'nullable|string|max:10',
-            'emergency_contact_name' => 'nullable|string|max:70',
-            'emergency_relation'     => 'nullable|string|max:70',
-            'emergency_contact_phone' => 'nullable|string|max:20',
-            'dob'                    => 'sometimes|date',
-            'gender'                 => 'sometimes|in:male,female,other,unspecified',
-            'blood_group'            => 'nullable|string|max:10',
-            'skills'                 => 'nullable|array',
-            'skills.*'               => 'string|max:100',
-            'manager_id'             => 'nullable|exists:employee_profiles,id',
-            'avatar_url'             => 'nullable|file|image|max:5120',
+            'first_name' => 'sometimes|string|max:70',
+            'middle_name' => 'nullable|string|max:70',
+            'last_name' => 'sometimes|string|max:70',
+            'dob' => 'sometimes|date',
+            'gender' => 'sometimes|in:male,female,other,unspecified',
+            'blood_group' => 'nullable|string|max:10',
+            'religion' => 'nullable|string|max:100',
+            'caste' => 'nullable|string|max:100',
+            'nationality' => 'nullable|string|max:70',
+            'mother_tongue' => 'nullable|string|max:70',
+            'guardian_name' => 'nullable|string|max:150',
+            'guardian_relation' => 'nullable|string|max:100',
+            'guardian_phone' => 'nullable|string|max:20',
+            'guardian_email' => 'nullable|email|max:150',
+            'guardian_occupation' => 'nullable|string|max:100',
+            'parent_income' => 'nullable|numeric',
+            'current_class' => 'nullable|string|max:40',
+            'section' => 'nullable|string|max:10',
+            'roll_no' => 'nullable|string|max:30',
+            'enrollment_status' => 'nullable|string|max:50',
+            'scholarship_status' => 'nullable|string|max:50',
+            'extracurriculars' => 'nullable|array',
+            'avatar_url' => 'nullable|file|image|max:5120',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -97,64 +106,47 @@ class StudentBasicController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors'  => $validator->errors()
+                'errors' => $validator->errors()
             ], 422);
         }
 
-        $employee = Employee::with('profile')->find($employee_id);
-
-        if (!$employee || !$employee->profile) {
+        $student = Student::with('profile')->find($student_id);
+        if (!$student) {
             return response()->json([
                 'success' => false,
-                'message' => 'Employee profile not found'
+                'message' => 'Student not found'
             ], 404);
         }
 
-        $profile = $employee->profile;
+        // Create profile if it doesn't exist
+        $profile = $student->profile ?? $student->profile()->create([]);
 
-        // Extract only valid fields
         $data = $request->only(array_keys($rules));
 
-        // ✅ Build full_name safely
-        $nameParts = array_filter([
-            $data['first_name'] ?? null,
-            $data['middle_name'] ?? null,
-            $data['last_name'] ?? null,
-        ]);
-        $data['full_name'] = implode(' ', $nameParts);
-
-        // ✅ Handle avatar update
+        // Handle avatar
         if ($request->hasFile('avatar_url')) {
             $file = $request->file('avatar_url');
-            $extension = $file->getClientOriginalExtension();
+            $fileName = ($student->student_uid ?? 'student') . '_' . now()->format('Ymd_His') . '.' . $file->getClientOriginalExtension();
 
-            $fileName = ($employee->employee_uid ?? 'employee') . '_' . now()->format('Ymd_His') . '.' . $extension;
-
-            // Delete old file if exists
-            if (!empty($profile->avatar_url)) {
-                $oldPath = storage_path('app/public/' . $profile->avatar_url);
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
+            // Delete old avatar
+            if (!empty($profile->avatar_url) && file_exists(storage_path('app/public/' . $profile->avatar_url))) {
+                unlink(storage_path('app/public/' . $profile->avatar_url));
             }
 
-            // Store new file
-            $file->storeAs('employeeImages', $fileName, 'public');
-
-            // Save relative path
-            $data['avatar_url'] = "employeeImages/{$fileName}";
+            $file->storeAs('StudentImages', $fileName, 'public');
+            $data['avatar_url'] = "StudentImages/{$fileName}";
         }
 
-        if (!empty($data)) {
-            $profile->update($data);
-        }
+        $profile->update($data);
 
         return response()->json([
             'success' => true,
-            'message' => 'Employee profile updated successfully',
-            'data'    => $profile
+            'message' => 'Student profile updated successfully',
+            'data' => $profile
         ]);
     }
+
+
 
 
 

@@ -7,10 +7,10 @@
     <x-breadcrumb
         title="Manage Contacts"
         :links="[
-        'Home' => 'Admin.Dashboard',
-        'Students' => 'students.Studentlist',
-        'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
-        'Manage Contacts' => ''
+            'Home' => 'Admin.Dashboard',
+            'Students' => 'students.Studentlist',
+            'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+            'Manage Contacts' => ''
     ]" />
     <!-- Contact Form -->
     <form id="studentContactForm">

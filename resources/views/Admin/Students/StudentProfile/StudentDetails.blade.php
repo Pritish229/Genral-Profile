@@ -6,7 +6,11 @@
 <div class="page-content">
     <x-breadcrumb
         title="Student Detail"
-        :links="['Home' => 'Admin.Dashboard', 'Students' => 'students.Studentlist','Student Detail' => '']" />
+        :links="[
+            'Home' => 'Admin.Dashboard',
+            'Students' => 'students.Studentlist',
+            'Student Detail' => ['students.Studentlist.studentDetailsPage', $id],
+            'Student Detail' => '']" />
 
     <div class="mt-2">
         <div class="card">
@@ -241,7 +245,7 @@
                 if (response.success) {
                     primaryinfo(response.primary_details, response.data);
 
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let imgSrc = `${response.data.avatar_url}`;
                     let manageBankUrl = `/students/${response.data.id}/manageBank`;
                     let manageDocUrl = `/students/${response.data.id}/manageDocument`;
                     let managemediaUrl = `/students/${response.data.id}/Media/manage`;

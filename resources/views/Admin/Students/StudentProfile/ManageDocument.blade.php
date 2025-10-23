@@ -1,3 +1,4 @@
+
 @extends('Admin.layout.app')
 
 @section('title', 'Manage Document')
@@ -32,12 +33,28 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="document_type" label="Document Type" type="text" name="document_type"
-                                placeholder="e.g., Passport, Aadhar Card" />
+                            <x-inputbox 
+                                id="document_type" 
+                                label="Document Type" 
+                                type="text" 
+                                name="document_type"
+                                placeholder="e.g., Passport, Aadhar Card" 
+                                value="{{ old('document_type', '') }}" 
+                                helpertxt="Enter the type of document, e.g., Passport or Aadhar Card" 
+                                required="true" 
+                            />
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="document_number" label="Document Number" type="text" name="document_number"
-                                placeholder="Enter Document Number" />
+                            <x-inputbox 
+                                id="document_number" 
+                                label="Document Number" 
+                                type="text" 
+                                name="document_number"
+                                placeholder="Enter Document Number" 
+                                value="{{ old('document_number', '') }}" 
+                                helpertxt="Provide the unique document number" 
+                                required="true" 
+                            />
                         </div>
                     </div>
 
@@ -56,8 +73,16 @@
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <x-inputbox id="file_name" label="File Name" type="text" name="file_name"
-                                placeholder="e.g., Passport Scan" />
+                            <x-inputbox 
+                                id="file_name" 
+                                label="File Name" 
+                                type="text" 
+                                name="file_name"
+                                placeholder="e.g., Passport Scan" 
+                                value="{{ old('file_name', '') }}" 
+                                helpertxt="Enter a descriptive name for the file" 
+                                required="false" 
+                            />
                         </div>
                         <div class="col-md-6">
                             <label for="file_url">Upload File</label>
@@ -68,8 +93,14 @@
 
                     <div class="row mb-3">
                         <div class="col-md-12">
-                            <x-textareabox id="remarks" label="Remarks" name="remarks"
-                                placeholder="Enter additional remarks about this document" />
+                            <x-textareabox 
+                                id="remarks" 
+                                label="Remarks" 
+                                value="{{ old('remarks', '') }}"
+                                name="remarks"
+                                helpertxt="Any additional remarks about this document"
+                                placeholder="Enter additional remarks about this document" 
+                            />
                         </div>
                     </div>
 
@@ -83,7 +114,6 @@
     </div>
 </div>
 @endsection
-
 
 @section('script')
 <script>
@@ -167,7 +197,6 @@
             $("#documentList").html(html);
         });
     }
-
 
     // Add/Edit document
     $("#documentForm").on("submit", function(e) {
