@@ -47,24 +47,25 @@ class StudentBasicController extends Controller
             ], 404);
         }
 
-        // Convert models to arrays
         $detailsArray = $details->toArray();
         $primaryArray = $primary_details->toArray();
 
-        // Fix DOB formatting
+        // Format dates
         $detailsArray['dob'] = $details->dob
             ? Carbon::parse($details->dob)->format('d-M-Y')
             : '-';
 
-        // Fix Admission Date formatting
         $primaryArray['admission_date'] = $primary_details->admission_date
             ? Carbon::parse($primary_details->admission_date)->format('d-M-Y')
             : '-';
 
-        // Fix avatar_url to use correct storage path
-        $detailsArray['avatar_url'] = $details->avatar_url
-            ? asset('storage/' . $details->avatar_url)
-            : null;
+        // Generate full avatar URL
+        if (!empty($details->avatar_url)) {
+            $path = str_replace('storage/', '', $details->avatar_url);
+            $detailsArray['avatar_url'] = asset('storage/' . $path);
+        } else {
+            $detailsArray['avatar_url'] = asset('images/default-avatar.png'); // fallback
+        }
 
         return response()->json([
             'success' => true,

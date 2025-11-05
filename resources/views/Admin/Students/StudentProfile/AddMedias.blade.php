@@ -44,7 +44,7 @@
                 <small class="form-text text-muted">Purpose of the media file.</small>
             </div>
             <div class="col-md-6" id="subject_name_wrapper">
-                <x-inputbox id="subject_name" label="Subject Name" type="text" placeholder="Enter custom purpose" name="subject_name" value="{{old('subject_name')}}" required="true" helpertxt=""/>
+                <x-inputbox id="subject_name" label="Subject Name" type="text" placeholder="Enter custom purpose" name="subject_name" value="{{old('subject_name')}}" required="true" helpertxt="" />
             </div>
         </div>
 
@@ -111,7 +111,7 @@
                 dataType: "json",
                 success: function(response) {
                     if (response.success) {
-                        let imgSrc = `/storage/${response.data.avatar_url}`;
+                        let imgSrc = `${response.data.avatar_url}`;
                         $("#student-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">
@@ -126,7 +126,13 @@
                             </div>
                         </div>
                     `);
+                    } else {
+                        $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
                     }
+                },
+                error: function(xhr) {
+                    $("#student-details").html(`<p class="text-danger">Something went wrong.</p>`);
+                    console.error(xhr.responseText);
                 }
             });
         }

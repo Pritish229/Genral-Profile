@@ -318,34 +318,27 @@ class CustomerContactController extends Controller
     public function addBusinessContact(Request $request, $customer_id, $business_id)
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:phone,email,mobile,whatsapp,telegram,skype,other',
-            'value' => 'required|string|max:255',
-            'country_code' => 'nullable|string|max:10',
-            'label' => 'nullable|string|max:100',
-            'is_primary' => 'nullable|boolean',
-            'is_emergency' => 'nullable|boolean',
+            'contact_type'         => 'required|string|in:phone,email,mobile,whatsapp,telegram,other',
+            'value'                => 'required|string|max:255',
+            'country_code'         => 'nullable|string|max:10',
+            'label'                => 'nullable|string|max:100',
+            'department'           => 'nullable|string|max:100',
+            'designation'          => 'nullable|string|max:100',
+            'contact_person_type'  => 'nullable|string|max:100',
+            'contact_person_name'  => 'nullable|string|max:191',
+            'extension'            => 'nullable|string|max:20',
+            'is_primary'           => 'nullable|boolean',
+            'is_emergency'         => 'nullable|boolean',
         ]);
 
-        $customer = customer::find($customer_id);
-        if (!$customer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'customer not found'
-            ], 404);
-        }
+        $customer = Customer::find($customer_id);
+        if (!$customer) return response()->json(['success' => false, 'message' => 'Customer not found'], 404);
 
-        $business = customerBusinessProfile::where('customer_id', $customer_id)
-            ->where('id', $business_id)
-            ->first();
-        if (!$business) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Business profile not found'
-            ], 404);
-        }
+        $business = CustomerBusinessProfile::where('customer_id', $customer_id)->where('id', $business_id)->first();
+        if (!$business) return response()->json(['success' => false, 'message' => 'Business profile not found'], 404);
 
-        // If setting as primary for phone or email, unset other primary contacts of the same contact_type
-        if (($validated['is_primary'] ?? false) && in_array($validated['contact_type'], ['phone', 'email'])) {
+        $isPrimary = !empty($validated['is_primary']);
+        if ($isPrimary && in_array($validated['contact_type'], ['phone', 'email'])) {
             CustomerContact::where('customer_id', $customer_id)
                 ->where('business_id', $business_id)
                 ->where('contact_type', $validated['contact_type'])
@@ -353,130 +346,102 @@ class CustomerContactController extends Controller
         }
 
         $contact = CustomerContact::create([
-            'tenant_id' => $customer->tenant_id,
-            'customer_id' => $customer_id,
-            'business_id' => $business_id,
-            'profile_type' => 'business',
-            'contact_type' => $validated['contact_type'],
-            'value' => $validated['value'],
-            'country_code' => $validated['country_code'],
-            'label' => $validated['label'],
-            'is_primary' => $validated['is_primary'] ?? false,
-            'is_emergency' => $validated['is_emergency'] ?? false,
+            'tenant_id'           => $customer->tenant_id,
+            'customer_id'         => $customer_id,
+            'business_id'         => $business_id,
+            'profile_type'        => 'business',
+            'contact_type'        => $validated['contact_type'],
+            'value'               => $validated['value'],
+            'country_code'        => $validated['country_code'] ?? null,
+            'label'               => $validated['label'] ?? null,
+            'department'          => $validated['department'] ?? null,
+            'designation'         => $validated['designation'] ?? null,
+            'contact_person_type' => $validated['contact_person_type'] ?? null,
+            'contact_person_name' => $validated['contact_person_name'] ?? null,
+            'extension'           => $validated['extension'] ?? null,
+            'is_primary'          => $isPrimary,
+            'is_emergency'        => !empty($validated['is_emergency']),
         ]);
 
-        // Sync primary_email or primary_phone in customer model
-        if ($contact->is_primary && in_array($contact->contact_type, ['phone', 'email'])) {
+        if ($isPrimary && in_array($validated['contact_type'], ['phone', 'email'])) {
             $updateData = [];
-            if ($contact->contact_type === 'email') {
-                $updateData['primary_email'] = $contact->value;
-            } elseif ($contact->contact_type === 'phone') {
-                $updateData['primary_phone'] = $contact->country_code ? $contact->country_code . $contact->value : $contact->value;
-            }
-            $customer->update($updateData);
+            if ($validated['contact_type'] === 'email') $updateData['primary_email'] = $validated['value'];
+            if ($validated['contact_type'] === 'phone') $updateData['primary_phone'] = ($validated['country_code'] ?? '') . $validated['value'];
+            $business->update($updateData);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Business contact added successfully',
-            'data' => $contact
-        ]);
+        return response()->json(['success' => true, 'message' => 'Business contact added successfully', 'data' => $contact]);
     }
+
 
     public function updateBusinessContact(Request $request, $customer_id, $business_id, $contact_id)
     {
         $validated = $request->validate([
-            'contact_type' => 'required|string|in:phone,email,mobile,whatsapp,telegram,skype,other',
-            'value' => 'required|string|max:255',
-            'country_code' => 'nullable|string|max:10',
-            'label' => 'nullable|string|max:100',
-            'is_primary' => 'nullable|boolean',
-            'is_emergency' => 'nullable|boolean',
+            'contact_type'        => 'required|string|in:phone,email,mobile,whatsapp,telegram,other',
+            'value'               => 'required|string|max:255',
+            'country_code'        => 'nullable|string|max:10',
+            'label'               => 'nullable|string|max:100',
+            'department'          => 'nullable|string|max:100',
+            'designation'         => 'nullable|string|max:100',
+            'contact_person_type' => 'nullable|string|max:100',
+            'contact_person_name' => 'nullable|string|max:191',
+            'extension'           => 'nullable|string|max:20',
+            'is_primary'          => 'nullable|boolean',
+            'is_emergency'        => 'nullable|boolean',
         ]);
 
-        $contact = CustomerContact::where('customer_id', $customer_id)
-            ->where('business_id', $business_id)
-            ->find($contact_id);
+        $contact = CustomerContact::where('customer_id', $customer_id)->where('business_id', $business_id)->find($contact_id);
+        if (!$contact) return response()->json(['success' => false, 'message' => 'Contact not found'], 404);
 
-        if (!$contact) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Contact not found'
-            ], 404);
-        }
+        $business = CustomerBusinessProfile::where('customer_id', $customer_id)->where('id', $business_id)->first();
+        if (!$business) return response()->json(['success' => false, 'message' => 'Business profile not found'], 404);
 
-        $business = customerBusinessProfile::where('customer_id', $customer_id)
-            ->where('id', $business_id)
-            ->first();
-        if (!$business) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Business profile not found'
-            ], 404);
-        }
+        $wasPrimary = $contact->is_primary;
+        $isPrimaryNow = !empty($validated['is_primary']);
+        $contactType = $validated['contact_type'];
 
-        // If setting as primary for phone or email, unset other primary contacts of the same contact_type
-        if (($validated['is_primary'] ?? false) && in_array($validated['contact_type'], ['phone', 'email'])) {
+        if ($isPrimaryNow && in_array($contactType, ['phone', 'email'])) {
             CustomerContact::where('customer_id', $customer_id)
                 ->where('business_id', $business_id)
-                ->where('contact_type', $validated['contact_type'])
+                ->where('contact_type', $contactType)
                 ->where('id', '!=', $contact_id)
                 ->update(['is_primary' => false]);
         }
 
-        // Check if the contact was previously primary and is being unset
-        $wasPrimary = $contact->is_primary;
-        $isPrimaryNow = $validated['is_primary'] ?? false;
-
         $contact->update([
-            'contact_type' => $validated['contact_type'],
-            'value' => $validated['value'],
-            'country_code' => $validated['country_code'],
-            'label' => $validated['label'],
-            'is_primary' => $isPrimaryNow,
-            'is_emergency' => $validated['is_emergency'] ?? false,
+            'contact_type'        => $contactType,
+            'value'               => $validated['value'],
+            'country_code'        => $validated['country_code'] ?? null,
+            'label'               => $validated['label'] ?? null,
+            'department'          => $validated['department'] ?? null,
+            'designation'         => $validated['designation'] ?? null,
+            'contact_person_type' => $validated['contact_person_type'] ?? null,
+            'contact_person_name' => $validated['contact_person_name'] ?? null,
+            'extension'           => $validated['extension'] ?? null,
+            'is_primary'          => $isPrimaryNow,
+            'is_emergency'        => !empty($validated['is_emergency']),
         ]);
 
-        // Sync primary_contact_email or primary_contact_phone in customerBusinessProfile model
-        if (in_array($validated['contact_type'], ['phone', 'email'])) {
+        if (in_array($contactType, ['phone', 'email'])) {
             $updateData = [];
             if ($isPrimaryNow) {
-                // Set primary_contact_email or primary_contact_phone
-                if ($validated['contact_type'] === 'email') {
-                    $updateData['primary_contact_email'] = $validated['value'];
-                    // Debug: Log or verify the value being set
-                    Log::info('Setting primary_contact_email to: ' . $validated['value']);
-                } elseif ($validated['contact_type'] === 'phone') {
-                    $updateData['primary_contact_phone'] = $validated['country_code'] ? $validated['country_code'] . $validated['value'] : $validated['value'];
-                }
+                if ($contactType === 'email') $updateData['primary_email'] = $validated['value'];
+                if ($contactType === 'phone') $updateData['primary_phone'] = ($validated['country_code'] ?? '') . $validated['value'];
             } elseif ($wasPrimary && !$isPrimaryNow) {
-                // Clear primary_contact_email or primary_contact_phone if no other primary contact exists for this type
-                $hasOtherPrimary = CustomerContact::where('customer_id', $customer_id)
+                $hasOther = CustomerContact::where('customer_id', $customer_id)
                     ->where('business_id', $business_id)
-                    ->where('contact_type', $validated['contact_type'])
+                    ->where('contact_type', $contactType)
                     ->where('id', '!=', $contact_id)
                     ->where('is_primary', true)
                     ->exists();
-
-                if (!$hasOtherPrimary) {
-                    if ($validated['contact_type'] === 'email') {
-                        $updateData['primary_contact_email'] = null;
-                        Log::info('Clearing primary_contact_email');
-                    } elseif ($validated['contact_type'] === 'phone') {
-                        $updateData['primary_contact_phone'] = null;
-                    }
+                if (!$hasOther) {
+                    if ($contactType === 'email') $updateData['primary_email'] = null;
+                    if ($contactType === 'phone') $updateData['primary_phone'] = null;
                 }
             }
-            if (!empty($updateData)) {
-                $business->update($updateData);
-                Log::info('Updated customer BusinessProfile with: ', $updateData);
-            }
+            if (!empty($updateData)) $business->update($updateData);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Business contact updated successfully',
-            'data' => $contact->fresh()
-        ]);
+        return response()->json(['success' => true, 'message' => 'Business contact updated successfully', 'data' => $contact->fresh()]);
     }
 }

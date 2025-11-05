@@ -27,15 +27,15 @@
                 <div class="row">
                     <div class="col-md-4">
                         <x-inputbox id="first_name" label="First Name" type="text" placeholder="Enter First Name" name="first_name"
-                            :required="true" helpertxt="First Name Maximum 70 Characters" />
+                            :required="true" helpertxt="First Name Maximum 70 Characters" helpertxt="" value="" />
                     </div>
                     <div class="col-md-4">
                         <x-inputbox id="middle_name" label="Middle Name" type="text" placeholder="Enter Middle Name" name="middle_name"
-                            :required="false" helpertxt="Middle Name Maximum 70 Characters" />
+                            :required="false" helpertxt="Middle Name Maximum 70 Characters" helpertxt="" value="" />
                     </div>
                     <div class="col-md-4">
                         <x-inputbox id="last_name" label="Last Name" type="text" placeholder="Enter Last Name" name="last_name"
-                            :required="false" helpertxt="Last Name Maximum 70 Characters" />
+                            :required="false" helpertxt="Last Name Maximum 70 Characters" helpertxt="" value="" />
                     </div>
                 </div>
 
@@ -67,11 +67,11 @@
         <div class="row mt-3">
             <div class="col-md-4">
                 <x-inputbox id="designation" label="Designation" type="text" placeholder="Enter Designation" name="designation"
-                    :required="false" helpertxt="Designation" />
+                    :required="false" helpertxt="Designation" helpertxt="" value="" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="department" label="Department" type="text" placeholder="Enter Department" name="department"
-                    :required="false" helpertxt="Department" />
+                    :required="false" helpertxt="Department" helpertxt="" value="" />
             </div>
             <div class="col-md-4">
                 <label for="manager_id">Manager</label>
@@ -90,32 +90,32 @@
             </div>
             <div class="col-md-3 mt-3">
                 <x-inputbox id="salary_currency" label="Salary Currency" type="text" placeholder="Enter Salary Currency" name="salary_currency"
-                    :required="false" helpertxt="Salary currency Max 3 Digits" />
+                    :required="false" helpertxt="Salary currency Max 3 Digits" helpertxt="" value="" />
             </div>
             <div class="col-md-3 mt-3">
                 <x-inputbox id="base_salary" label="Base Salary" type="number" placeholder="Enter Base Salary" name="base_salary"
-                    :required="false" helpertxt="Base Salary must be a valid number" />
+                    :required="false" helpertxt="Base Salary must be a valid number" helpertxt="" value="" />
             </div>
             <div class="col-md-3 mt-3">
                 <x-inputbox id="experience_years" label="Experience Years" type="text" placeholder="Enter Experience Years" name="experience_years"
-                    :required="false" helpertxt="Experience Years Must Be Number Eg: 2.3" />
+                    :required="false" helpertxt="Experience Years Must Be Number Eg: 2.3" helpertxt="" value="" />
             </div>
 
             <div class="col-md-3 mt-3">
                 <x-inputbox id="emergency_contact_name" label="Emergency Contact Person" type="text" placeholder="Enter Emergency Contact Person" name="emergency_contact_name"
-                    :required="false" helpertxt="Maximum 70 Characters" />
+                    :required="false" helpertxt="Maximum 70 Characters" helpertxt="" value="" />
             </div>
             <div class="col-md-3 mt-3">
                 <x-inputbox id="emergency_relation" label="Emergency Contact Relation" type="text" placeholder="Enter Emergency Contact Relation" name="emergency_relation"
-                    :required="false" helpertxt="Maximum 70 Characters" />
+                    :required="false" helpertxt="Maximum 70 Characters" helpertxt="" value="" />
             </div>
             <div class="col-md-3 mt-3">
                 <x-inputbox id="emergency_contact_phone" label="Emergency Contact Number" type="text" placeholder="Enter Emergency Contact Number" name="emergency_contact_phone"
-                    :required="false" helpertxt="Maximum 20 Characters" />
+                    :required="false" helpertxt="Maximum 20 Characters" helpertxt="" value="" />
             </div>
             <div class="col-md-3 mt-3">
                 <x-inputbox id="location" label="Location" type="text" placeholder="Enter Location" name="location"
-                    :required="false" helpertxt="Maximum 100 Characters" />
+                    :required="false" helpertxt="Maximum 100 Characters"  helpertxt="" value="" />
             </div>
             <div class="col-md-6 mt-3">
                 <label for="skills">Skills</label>

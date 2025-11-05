@@ -66,7 +66,7 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let imgSrc = `${response.data.avatar_url}`;
                     $("#student-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">

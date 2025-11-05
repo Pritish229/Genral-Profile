@@ -15,7 +15,7 @@
                 <tr>
                     <th>Avatar</th>
                     <th>Type</th>
-                    <th>customer UID</th>
+                    <th>Customer UID</th>
                     <th>Full Name</th>
                     <th>Email</th>
                     <th>Phone</th>

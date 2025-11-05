@@ -54,6 +54,17 @@ class CustomerBankController extends Controller
         $is_primary        = filter_var($request->input('is_primary', 0), FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $is_default_payout = filter_var($request->input('is_default_payout', 0), FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
 
+        // 🟩 CHECK if customer already has a primary account
+        $hasPrimary = CustomerPaymentAccount::where('customer_id', $customer_id)
+            ->where('is_primary', 1)
+            ->exists();
+
+        // 🟩 If no primary yet, make this one both primary & default payout
+        if (!$hasPrimary) {
+            $is_primary = 1;
+            $is_default_payout = 1;
+        }
+
         $account_number       = null;
         $account_number_mask  = null;
         $account_number_hash  = null;
@@ -66,7 +77,7 @@ class CustomerBankController extends Controller
 
         $data = [
             'tenant_id'           => $customer->tenant_id,
-            'customer_id'           => $customer->id,
+            'customer_id'         => $customer->id,
             'method'              => $validated['method'],
             'status'              => 'active',
             'is_primary'          => $is_primary,
@@ -82,7 +93,6 @@ class CustomerBankController extends Controller
             'account_number_hash' => $account_number_hash,
         ];
 
-        // Determine profile_type based on business_id
         if ($business_id) {
             $business = customerBusinessProfile::where('customer_id', $customer->id)->where('id', $business_id)->first();
             if (!$business) {
@@ -127,6 +137,7 @@ class CustomerBankController extends Controller
             'data'    => $account
         ]);
     }
+
 
     public function customerBanks($id)
     {

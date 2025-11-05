@@ -279,3 +279,5 @@
   });
 </script>
 @endsection
+
+add missing elements

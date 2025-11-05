@@ -30,10 +30,7 @@ class CustomerAddressController extends Controller
             ->where('profile_type', 'individual')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $addresses
-        ]);
+        return response()->json(['success' => true, 'data' => $addresses]);
     }
 
     public function getAddress($customer_id, $address_id)
@@ -43,117 +40,108 @@ class CustomerAddressController extends Controller
             ->where('profile_type', 'individual')
             ->findOrFail($address_id);
 
-        return response()->json([
-            'success' => true,
-            'data' => $address
-        ]);
+        return response()->json(['success' => true, 'data' => $address]);
     }
 
     public function storeAddress(Request $request, $customer_id, $type = 'individual')
     {
-        $customer = Customer::findOrFail($customer_id);
+        try {
+            $customer = Customer::findOrFail($customer_id);
 
-        $validated = $request->validate([
-            'state' => 'required|string|max:120',
-            'district' => 'required|string|max:120',
-            'city' => 'required|string|max:120',
-            'pincode' => 'required|digits:6',
-            'line1' => 'nullable|string|max:120',
-            'line2' => 'nullable|string|max:120',
-            'landmark' => 'nullable|string|max:150',
-            'label' => 'nullable|string|max:100',
-            'longitude' => 'nullable|string|max:50',
-            'latitude' => 'nullable|string|max:50',
-            'address_type' => 'required|string|in:permanent,temporary,office',
-            'is_primary' => 'nullable|boolean',
-        ]);
+            $validated = $request->validate([
+                'state'       => 'required|string|max:120',
+                'district'    => 'required|string|max:120',
+                'city'        => 'required|string|max:120',
+                'pincode'     => 'required|digits:6',
+                'line1'       => 'nullable|string|max:120',
+                'line2'       => 'nullable|string|max:120',
+                'landmark'    => 'nullable|string|max:150',
+                'label'       => 'nullable|string|max:100',
+                'longitude'   => 'nullable|string|max:50',
+                'latitude'    => 'nullable|string|max:50',
+                'address_type'=> 'required|string|in:permanent,temporary,office',
+                'is_primary'  => 'nullable|boolean',
+            ]);
 
-        // ✅ Check for business type
-        if ($type === 'business') {
-            $business = CustomerBusinessProfile::where('customer_id', $customer_id)->first();
-            if (!$business) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Business profile not found. Please create business profile first.'
-                ], 404);
+            if ($type === 'business') {
+                $business = CustomerBusinessProfile::where('customer_id', $customer_id)->first();
+                if (! $business) {
+                    return response()->json(['success'=>false,'message'=>'Business profile not found.'], 404);
+                }
             }
+
+            $existingCount = CustomerAddress::where('customer_id', $customer_id)
+                ->where('profile_type', $type)->count();
+
+            if ($existingCount === 0) {
+                $validated['is_primary'] = true;
+            } elseif (!empty($validated['is_primary'])) {
+                CustomerAddress::where('customer_id', $customer_id)
+                    ->where('profile_type', $type)
+                    ->update(['is_primary' => false]);
+            }
+
+            $address = CustomerAddress::create([
+                'tenant_id'    => $customer->tenant_id,
+                'customer_id'  => $customer_id,
+                'profile_type' => $type,
+                'state'        => $validated['state'],
+                'district'     => $validated['district'],
+                'city'         => $validated['city'],
+                'pincode'      => $validated['pincode'],
+                'line1'        => $validated['line1'] ?? null,
+                'line2'        => $validated['line2'] ?? null,
+                'landmark'     => $validated['landmark'] ?? null,
+                'label'        => $validated['label'] ?? null,
+                'longitude'    => $validated['longitude'] ?? null,
+                'latitude'     => $validated['latitude'] ?? null,
+                'address_type' => $validated['address_type'],
+                'is_primary'   => $validated['is_primary'] ?? false,
+            ]);
+
+            return response()->json(['success'=>true,'message'=>'Address added successfully','data'=>$address]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['success'=>false,'message'=>'Validation failed','errors'=>$e->errors()], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Address store DB error', [
+                'customer_id'=>$customer_id,'type'=>$type,'error'=>$e->getMessage(),'sql'=>$e->getSql()
+            ]);
+            return response()->json(['success'=>false,'message'=>'Database error: '.$e->getMessage()], 500);
+        } catch (Exception $e) {
+            Log::error('Unexpected error in storeAddress', [
+                'customer_id'=>$customer_id,'type'=>$type,'exception'=>$e
+            ]);
+            return response()->json(['success'=>false,'message'=>'An unexpected error occurred: '.$e->getMessage()], 500);
         }
-
-        // ✅ Check if any existing address exists
-        $existingAddressesCount = CustomerAddress::where('customer_id', $customer_id)
-            ->where('profile_type', $type)
-            ->count();
-
-        // ✅ If this is the first address, make it primary
-        if ($existingAddressesCount === 0) {
-            $validated['is_primary'] = true;
-        } elseif ($validated['is_primary'] ?? false) {
-            // If user marks a new one as primary, unset others
-            CustomerAddress::where('customer_id', $customer_id)
-                ->where('profile_type', $type)
-                ->update(['is_primary' => false]);
-        }
-
-        // ✅ Create address
-        $address = CustomerAddress::create([
-            'tenant_id' => $customer->tenant_id,
-            'customer_id' => $customer_id,
-            'profile_type' => $type,
-            'state' => $validated['state'],
-            'district' => $validated['district'],
-            'city' => $validated['city'],
-            'pincode' => $validated['pincode'],
-            'line1' => $validated['line1'] ?? null,
-            'line2' => $validated['line2'] ?? null,
-            'landmark' => $validated['landmark'] ?? null,
-            'label' => $validated['label'] ?? null,
-            'longitude' => $validated['longitude'] ?? null,
-            'latitude' => $validated['latitude'] ?? null,
-            'address_type' => $validated['address_type'],
-            'is_primary' => $validated['is_primary'] ?? false,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Address added successfully',
-            'data' => $address
-        ]);
     }
 
     public function updateAddress(Request $request, $customer_id, $type, $address_id)
     {
         try {
             $customer = Customer::findOrFail($customer_id);
-
             if ($type !== 'individual') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid profile type for individual address update'
-                ], 400);
+                return response()->json(['success'=>false,'message'=>'Invalid profile type for individual address update'], 400);
             }
 
-            // Validate request data
             $validated = $request->validate([
-                'state' => 'required|string|max:120',
-                'district' => 'required|string|max:120',
-                'city' => 'required|string|max:120',
-                'pincode' => 'required|digits:6',
-                'line1' => 'nullable|string|max:120',
-                'line2' => 'nullable|string|max:120',
-                'landmark' => 'nullable|string|max:150',
-                'label' => 'nullable|string|max:100',
-                'longitude' => 'nullable|string|max:50',
-                'latitude' => 'nullable|string|max:50',
-                'address_type' => 'required|string|in:permanent,temporary,office',
-                'is_primary' => 'nullable|boolean',
+                'state'       => 'required|string|max:120',
+                'district'    => 'required|string|max:120',
+                'city'        => 'required|string|max:120',
+                'pincode'     => 'required|digits:6',
+                'line1'       => 'nullable|string|max:120',
+                'line2'       => 'nullable|string|max:120',
+                'landmark'    => 'nullable|string|max:150',
+                'label'       => 'nullable|string|max:100',
+                'longitude'   => 'nullable|string|max:50',
+                'latitude'    => 'nullable|string|max:50',
+                'address_type'=> 'required|string|in:permanent,other,office',
+                'is_primary'  => 'nullable|boolean',
             ]);
 
-            // Find the address
             $address = CustomerAddress::where('customer_id', $customer_id)
                 ->where('profile_type', $type)
                 ->findOrFail($address_id);
 
-            // If setting as primary, reset other addresses
             if ($validated['is_primary'] ?? false) {
                 CustomerAddress::where('customer_id', $customer_id)
                     ->where('profile_type', $type)
@@ -161,55 +149,34 @@ class CustomerAddressController extends Controller
                     ->update(['is_primary' => false]);
             }
 
-            // Update the address
             $address->update([
-                'state' => $validated['state'],
-                'district' => $validated['district'],
-                'city' => $validated['city'],
-                'pincode' => $validated['pincode'],
-                'line1' => $validated['line1'],
-                'line2' => $validated['line2'],
-                'landmark' => $validated['landmark'],
-                'label' => $validated['label'],
-                'longitude' => $validated['longitude'],
-                'latitude' => $validated['latitude'],
-                'address_type' => $validated['address_type'],
-                'is_primary' => $validated['is_primary'] ?? false,
+                'state'       => $validated['state'],
+                'district'    => $validated['district'],
+                'city'        => $validated['city'],
+                'pincode'     => $validated['pincode'],
+                'line1'       => $validated['line1'],
+                'line2'       => $validated['line2'],
+                'landmark'    => $validated['landmark'],
+                'label'       => $validated['label'],
+                'longitude'   => $validated['longitude'],
+                'latitude'    => $validated['latitude'],
+                'address_type'=> $validated['address_type'],
+                'is_primary'  => $validated['is_primary'] ?? false,
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Address updated successfully',
-                'data' => $address->fresh()
-            ]);
+            return response()->json(['success'=>true,'message'=>'Address updated successfully','data'=>$address->fresh()]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation error in updateAddress', [
-                'customer_id' => $customer_id,
-                'address_id' => $address_id,
-                'profile_type' => $type,
-                'errors' => $e->errors(),
-                'request_data' => $request->all(),
-                'timestamp' => now()->toDateTimeString()
+                'customer_id'=>$customer_id,'address_id'=>$address_id,'profile_type'=>$type,
+                'errors'=>$e->errors(),'request_data'=>$request->all(),'timestamp'=>now()->toDateTimeString()
             ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], 422);
+            return response()->json(['success'=>false,'message'=>'Validation failed','errors'=>$e->errors()], 422);
         } catch (\Exception $e) {
             Log::error('Error in updateAddress', [
-                'customer_id' => $customer_id,
-                'address_id' => $address_id,
-                'profile_type' => $type,
-                'error' => $e->getMessage(),
-                'timestamp' => now()->toDateTimeString()
+                'customer_id'=>$customer_id,'address_id'=>$address_id,'profile_type'=>$type,
+                'error'=>$e->getMessage(),'timestamp'=>now()->toDateTimeString()
             ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while updating the address'
-            ], 500);
+            return response()->json(['success'=>false,'message'=>'An error occurred while updating the address'], 500);
         }
     }
 
@@ -221,18 +188,11 @@ class CustomerAddressController extends Controller
             ->findOrFail($address_id);
 
         if ($address->is_primary) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete primary address. Please set another address as primary first.'
-            ], 403);
+            return response()->json(['success'=>false,'message'=>'Cannot delete primary address. Set another as primary first.'], 403);
         }
 
         $address->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Address deleted successfully'
-        ]);
+        return response()->json(['success'=>true,'message'=>'Address deleted successfully']);
     }
 
     public function permanentAddress($customer_id, $type = 'individual')
@@ -244,24 +204,15 @@ class CustomerAddressController extends Controller
             ->first();
 
         if ($address) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Address fetched successfully',
-                'data' => $address
-            ]);
+            return response()->json(['success'=>true,'message'=>'Address fetched successfully','data'=>$address]);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'No primary address found'
-        ], 404);
+        return response()->json(['success'=>false,'message'=>'No primary address found'], 404);
     }
-
-    // Business Address Methods
 
     public function businessAddress($id, $business_id)
     {
-        return view('Admin.Customers.CustomerProfile.BusinessAddress', ['id' => $id, 'business_id' => $business_id]);
+        return view('Admin.Customers.CustomerProfile.BusinessAddress', ['id'=>$id,'business_id'=>$business_id]);
     }
 
     public function getBusinessAddresses($customer_id, $business_id)
@@ -275,10 +226,7 @@ class CustomerAddressController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data' => $addresses
-        ]);
+        return response()->json(['success'=>true,'data'=>$addresses]);
     }
 
     public function getBusinessAddress($customer_id, $business_id, $address_id)
@@ -290,10 +238,7 @@ class CustomerAddressController extends Controller
             ->where('profile_type', 'business')
             ->findOrFail($address_id);
 
-        return response()->json([
-            'success' => true,
-            'data' => $address
-        ]);
+        return response()->json(['success'=>true,'data'=>$address]);
     }
 
     public function storeBusinessAddress(Request $request, $customer_id, $business_id)
@@ -301,18 +246,18 @@ class CustomerAddressController extends Controller
         $customer = Customer::findOrFail($customer_id);
         $business = CustomerBusinessProfile::where('customer_id', $customer_id)->findOrFail($business_id);
         $validated = $request->validate([
-            'state' => 'required|string|max:120',
-            'district' => 'required|string|max:120',
-            'city' => 'required|string|max:120',
-            'pincode' => 'required|digits:6',
-            'line1' => 'nullable|string|max:255',
-            'line2' => 'nullable|string|max:255',
-            'landmark' => 'nullable|string|max:255',
-            'label' => 'nullable|string|max:120',
-            'address_type' => 'required|string|in:permanent,office,billing,shipping',
-            'is_primary' => 'nullable|boolean',
-            'longitude' => 'nullable|string|max:50',
-            'latitude' => 'nullable|string|max:50'
+            'state'        => 'required|string|max:120',
+            'district'     => 'required|string|max:120',
+            'city'         => 'required|string|max:120',
+            'pincode'      => 'required|digits:6',
+            'line1'        => 'nullable|string|max:255',
+            'line2'        => 'nullable|string|max:255',
+            'landmark'     => 'nullable|string|max:255',
+            'label'        => 'nullable|string|max:120',
+            'address_type' => 'required|string|in:permanent,other,office,billing,shipping,',
+            'is_primary'   => 'nullable|boolean',
+            'longitude'    => 'nullable|string|max:50',
+            'latitude'     => 'nullable|string|max:50'
         ]);
 
         if ($validated['is_primary'] ?? false) {
@@ -324,39 +269,34 @@ class CustomerAddressController extends Controller
         }
 
         $address = CustomerAddress::create(array_merge($validated, [
-            'customer_id' => $customer_id,
-            'business_id' => $business_id,
-            'tenant_id' => $customer->tenant_id,
-            'profile_type' => 'business',
+            'customer_id'   => $customer_id,
+            'business_id'   => $business_id,
+            'tenant_id'     => $customer->tenant_id,
+            'profile_type'  => 'business',
             'business_name' => $business->business_name
         ]));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Business address created successfully',
-            'data' => $address
-        ]);
+        return response()->json(['success'=>true,'message'=>'Business address created successfully','data'=>$address]);
     }
 
     public function updateBusinessAddress(Request $request, $customer_id, $business_id, $address_id)
     {
         $customer = Customer::findOrFail($customer_id);
-        $business = CustomerBusinessProfile::where('customer_id', $customer_id)
-            ->findOrFail($business_id);
+        $business = CustomerBusinessProfile::where('customer_id', $customer_id)->findOrFail($business_id);
 
         $validated = $request->validate([
-            'state' => 'required|string|max:120',
-            'district' => 'required|string|max:120',
-            'city' => 'required|string|max:120',
-            'pincode' => 'required|digits:6',
-            'line1' => 'nullable|string|max:255',
-            'line2' => 'nullable|string|max:255',
-            'landmark' => 'nullable|string|max:255',
-            'label' => 'nullable|string|max:120',
+            'state'        => 'required|string|max:120',
+            'district'     => 'required|string|max:120',
+            'city'         => 'required|string|max:120',
+            'pincode'      => 'required|digits:6',
+            'line1'        => 'nullable|string|max:255',
+            'line2'        => 'nullable|string|max:255',
+            'landmark'     => 'nullable|string|max:255',
+            'label'        => 'nullable|string|max:120',
             'address_type' => 'required|string|in:permanent,office,billing,shipping',
-            'is_primary' => 'nullable|boolean',
-            'longitude' => 'nullable|string|max:50',
-            'latitude' => 'nullable|string|max:50',
+            'is_primary'   => 'nullable|boolean',
+            'longitude'    => 'nullable|string|max:50',
+            'latitude'     => 'nullable|string|max:50',
         ]);
 
         $validated['business_name'] = $business->business_name;
@@ -376,14 +316,8 @@ class CustomerAddressController extends Controller
         }
 
         $address->update($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Business address updated successfully',
-            'data' => $address
-        ]);
+        return response()->json(['success'=>true,'message'=>'Business address updated successfully','data'=>$address]);
     }
-
 
     public function deleteBusinessAddress($customer_id, $business_id, $address_id)
     {
@@ -395,18 +329,11 @@ class CustomerAddressController extends Controller
             ->findOrFail($address_id);
 
         if ($address->is_primary) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete primary address'
-            ], 403);
+            return response()->json(['success'=>false,'message'=>'Cannot delete primary address'], 403);
         }
 
         $address->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Address deleted successfully'
-        ]);
+        return response()->json(['success'=>true,'message'=>'Address deleted successfully']);
     }
 
     public function permanentBusinessAddress($id, $business_id)
@@ -419,21 +346,12 @@ class CustomerAddressController extends Controller
                 ->first();
 
             if (!$address) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No address found for this business.',
-                ]);
+                return response()->json(['success'=>false,'message'=>'No address found for this business.'], 404);
             }
 
-            return response()->json([
-                'success' => true,
-                'data' => $address,
-            ]);
+            return response()->json(['success'=>true,'data'=>$address]);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Server Error: ' . $e->getMessage(),
-            ], 500);
+            return response()->json(['success'=>false,'message'=>'Server Error: '.$e->getMessage()], 500);
         }
     }
 }

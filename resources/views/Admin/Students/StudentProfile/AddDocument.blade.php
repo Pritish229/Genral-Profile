@@ -127,21 +127,21 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let imgSrc = `${response.data.avatar_url}`;
                     $("#student-details").html(`
-                    <div class="d-flex align-items-start gap-3">
-                        <div style="flex: 0 0 150px;">
-                            <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
+                        <div class="d-flex align-items-start gap-3">
+                            <div style="flex: 0 0 150px;">
+                                <img src="${imgSrc}" class="img-thumbnail w-100" alt="Profile picture">
+                            </div>
+                            <div class="flex-grow-1">
+                                <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
+                                <p><strong>Name:</strong> ${response.data.full_name}</p>
+                                <p><strong>Gender:</strong> ${response.data.gender}</p>
+                                <p><strong>Caste:</strong> ${response.data.caste}</p>
+                                <p><strong>Religion:</strong> ${response.data.religion}</p>
+                            </div>
                         </div>
-                        <div class="flex-grow-1">
-                            <p><strong>UID:</strong> ${response.primary_details.student_uid}</p>
-                            <p><strong>Name:</strong> ${response.data.full_name}</p>
-                            <p><strong>Gender:</strong> ${response.data.gender}</p>
-                            <p><strong>Caste:</strong> ${response.data.caste}</p>
-                            <p><strong>Religion:</strong> ${response.data.religion}</p>
-                        </div>
-                    </div>
-                `);
+                    `);
                 } else {
                     $("#student-details").html(`<p class="text-danger">${response.errors}</p>`);
                 }

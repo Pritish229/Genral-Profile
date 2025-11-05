@@ -13,7 +13,6 @@
             'Manage Address' => ''
         ]" />
 
-    <!-- Address Form -->
     <form id="customerAddressForm" data-profile-type="individual">
         @csrf
         <input type="hidden" name="profile_type" value="individual">
@@ -34,49 +33,53 @@
                 <x-inputbox id="pincode" label="Pincode" type="text" placeholder="Enter Pincode" name="pincode"
                     value="{{ old('pincode') }}" :required="true" helpertxt="6 digits only" />
             </div>
+
             <div class="col-md-4">
                 <x-inputbox id="line1" label="Line 1" type="text" placeholder="Enter Line 1" name="line1"
-                    value="{{ old('line1') }}" :required="false" helpertxt="" />
+                    value="{{ old('line1') }}" :required="false" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="line2" label="Line 2" type="text" placeholder="Enter Line 2" name="line2"
-                    value="{{ old('line2') }}" :required="false" helpertxt="" />
+                    value="{{ old('line2') }}" :required="false" />
             </div>
             <div class="col-md-4">
                 <x-inputbox id="landmark" label="Landmark" type="text" placeholder="Enter Landmark" name="landmark"
-                    value="{{ old('landmark') }}" :required="false" helpertxt="" />
+                    value="{{ old('landmark') }}" :required="false" />
             </div>
+
             <div class="col-md-4">
                 <x-inputbox id="label" label="Label" type="text" placeholder="Enter Label" name="label"
-                    value="{{ old('label') }}" :required="false" helpertxt="Ex: Home Address, Office Address" />
+                    value="{{ old('label') }}" :required="false" helpertxt="Ex: Home, Office" />
             </div>
+
             <div class="col-md-4">
                 <div class="mb-2">
                     <label for="address_type" class="mb-2 labeltxt">Address Type</label>
                     <select name="address_type" class="form-select" id="address_type" required>
                         <option value="permanent">Permanent</option>
-                        <option value="temporary">Temporary</option>
                         <option value="office">Office</option>
+                        <option value="other">Other</option>
                     </select>
                     <small class="mb-3 pt-1 helpertxt">Select Address Type</small>
                 </div>
             </div>
+
             <div class="col-md-4">
                 <div class="form-check mt-4">
                     <input class="form-check-input" type="checkbox" id="is_primary" name="is_primary" value="1">
-                    <label class="form-check-label" for="is_primary">
-                        Set as Primary Address
-                    </label>
+                    <label class="form-check-label" for="is_primary">Set as Primary Address</label>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <x-inputbox id="longitude" label="Longitude (Optional)" type="text" placeholder="Enter Longitude" name="longitude"
-                    value="{{ old('longitude') }}" :required="false" helpertxt="" />
+                <x-inputbox id="longitude" label="Longitude (Optional)" type="text" placeholder="Enter Longitude"
+                    name="longitude" value="{{ old('longitude') }}" :required="false" />
             </div>
             <div class="col-md-4">
-                <x-inputbox id="latitude" label="Latitude (Optional)" type="text" placeholder="Enter Latitude" name="latitude"
-                    value="{{ old('latitude') }}" :required="false" helpertxt="" />
+                <x-inputbox id="latitude" label="Latitude (Optional)" type="text" placeholder="Enter Latitude"
+                    name="latitude" value="{{ old('latitude') }}" :required="false" />
             </div>
+
             <div class="col-lg-12 mt-2">
                 <button type="submit" class="btn btn-primary" id="save-btn">Save</button>
                 <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
@@ -84,25 +87,15 @@
         </div>
     </form>
 
-    <!-- Address Table -->
     <div class="mt-4">
         <table class="table table-bordered" id="addressesTable">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>State</th>
-                    <th>District</th>
-                    <th>City</th>
-                    <th>Pincode</th>
-                    <th>Label</th>
-                    <th>Type</th>
-                    <th>Primary</th>
-                    <th>Action</th>
+                    <th>#</th><th>State</th><th>District</th><th>City</th><th>Pincode</th>
+                    <th>Label</th><th>Type</th><th>Primary</th><th>Action</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Filled dynamically with JS -->
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 </div>
@@ -110,255 +103,158 @@
 
 @section('script')
 <script>
-    $(document).ready(function() {
-        // Initialize Select2 for address type
-        if (typeof $.fn.select2 !== 'undefined') {
-            $('#address_type').select2({
-                minimumResultsForSearch: Infinity,
-                width: '100%'
-            }).on('change', function() {
-                // Ensure the underlying select value is updated
-                $(this).val($(this).val()).trigger('change.select2');
-            });
-        } else {
-            console.warn('Select2 is not loaded. Using default select.');
-        }
-
-        // CSRF Token for AJAX
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
+$(document).ready(function(){
+    if(typeof $.fn.select2!=='undefined'){
+        $('#address_type').select2({minimumResultsForSearch:Infinity,width:'100%'}).on('change',function(){
+            $(this).val($(this).val()).trigger('change.select2');
         });
+    }
 
-        const baseUrl = "{{ url('customers') }}";
-        const customerId = "{{ $id }}";
-        const profileType = "individual";
-        let editId = null;
+    $.ajaxSetup({headers:{'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')}});
 
-        // Fetch & render addresses
-        function loadAddresses() {
-            const url = `${baseUrl}/${customerId}/Get/Address/List`;
-            $.get(url, function(res) {
-                if (res.success) {
-                    console.log(res);
-                    
-                    let rows = "";
-                    let index = 1;
-                    res.data.forEach(address => {
-                        rows += `
-                            <tr data-id="${address.id}">
-                                <td>${index++}</td>
-                                <td>${address.state || '-'}</td>
-                                <td>${address.district || '-'}</td>
-                                <td>${address.city || '-'}</td>
-                                <td>${address.pincode || '-'}</td>
-                                <td>${address.label || '-'}</td>
-                                <td>${address.address_type || '-'}</td>
-                                <td>${address.is_primary ? 'Yes' : 'No'}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning editBtn">Edit</button>
-                                    ${address.is_primary ? '' : `<button class="btn btn-sm btn-danger deleteBtn">Delete</button>`}
-                                </td>
-                            </tr>`;
-                    });
-                    $("#addressesTable tbody").html(rows);
-                } else {
-                    $("#addressesTable tbody").html('<tr><td colspan="9">No addresses found.</td></tr>');
-                }
-            }).fail(function(xhr) {
-                console.error('Error loading addresses:', xhr.responseText);
-                $("#addressesTable tbody").html('<tr><td colspan="9">Failed to load addresses.</td></tr>');
-            });
-        }
+    const baseUrl = "{{ url('customers') }}";
+    const customerId = "{{ $id }}";
+    const profileType = "individual";
+    let editId = null;
 
-        // Reset form
-        function resetForm() {
-            $("#customerAddressForm")[0].reset();
-            $("#save-btn").text("Save");
-            $("#is_primary").prop('checked', false);
-            editId = null;
-            if (typeof $.fn.select2 !== 'undefined') {
-                $('#address_type').val('permanent').trigger('change.select2');
-            } else {
-                $('#address_type').val('permanent');
-            }
-        }
-
-        // Create or Update address
-        $("#customerAddressForm").on("submit", function(e) {
-            e.preventDefault();
-
-            // Validate required fields client-side
-            const state = $("#state").val().trim();
-            const district = $("#district").val().trim();
-            const city = $("#city").val().trim();
-            const pincode = $("#pincode").val().trim();
-            const addressType = $("#address_type").val();
-
-            if (!state || !district || !city || !pincode || !addressType) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    html: 'Please fill all required fields: State, District, City, Pincode, and Address Type.'
+    function loadAddresses(){
+        const url = `${baseUrl}/${customerId}/Get/Address/List`;
+        $.get(url,function(res){
+            if(res.success){
+                let rows='',idx=1;
+                res.data.forEach(a=>{
+                    const badge = a.is_primary
+                        ? `<span class="badge bg-success rounded-pill">Primary</span>`
+                        : `<span class="text-muted">—</span>`;
+                    rows+=`<tr data-id="${a.id}">
+                        <td>${idx++}</td>
+                        <td>${a.state||'-'}</td>
+                        <td>${a.district||'-'}</td>
+                        <td>${a.city||'-'}</td>
+                        <td>${a.pincode||'-'}</td>
+                        <td>${a.label||'-'}</td>
+                        <td>${a.address_type||'-'}</td>
+                        <td>${badge}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning editBtn">Edit</button>
+                            ${a.is_primary?'':`<button class="btn btn-sm btn-danger deleteBtn">Delete</button>`}
+                        </td>
+                    </tr>`;
                 });
-                return;
+                $("#addressesTable tbody").html(rows);
+            }else{
+                $("#addressesTable tbody").html('<tr><td colspan="9">No addresses found.</td></tr>');
             }
+        }).fail(function(xhr){
+            $("#addressesTable tbody").html('<tr><td colspan="9">Failed to load addresses.</td></tr>');
+        });
+    }
 
-            const formData = new FormData(this);
-            formData.append('profile_type', profileType); // Ensure profile_type is sent
-            // Debug: Log form data
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}: ${value}`);
+    function resetForm(){
+        $("#customerAddressForm")[0].reset();
+        $("#save-btn").text("Save");
+        $("#is_primary").prop('checked',false);
+        editId=null;
+        if(typeof $.fn.select2!=='undefined'){
+            $('#address_type').val('permanent').trigger('change.select2');
+        }else{
+            $('#address_type').val('permanent');
+        }
+    }
+
+    $("#customerAddressForm").on("submit",function(e){
+        e.preventDefault();
+        const required = ['state','district','city','pincode','address_type'];
+        let missing = required.filter(f=>!$(`#${f}`).val().trim());
+        if(missing.length){
+            Swal.fire({icon:'error',title:'Validation Error',
+                html:'Please fill all required fields: '+missing.join(', ')+'.'});
+            return;
+        }
+
+        const formData = new FormData(this);
+        formData.append('profile_type',profileType);
+
+        const url = editId
+            ? `${baseUrl}/${customerId}/individual/addresses/${editId}`
+            : `${baseUrl}/${customerId}/Manage/Addresses`;
+
+        $.ajax({
+            url, type:'POST', data:formData,
+            processData:false, contentType:false,
+            success:function(res){
+                if(res.success){
+                    Swal.fire({icon:'success',title:'Success!',text:res.message,timer:2000,showConfirmButton:false});
+                    loadAddresses(); resetForm();
+                }else{
+                    Swal.fire({icon:'error',title:'Error!',text:res.message||'Error saving address'});
+                }
+            },
+            error:function(xhr){
+                let html='';
+                if(xhr.status===422){
+                    $.each(xhr.responseJSON.errors,function(k,v){html+=v[0]+'<br>';});
+                    Swal.fire({icon:'error',title:'Validation Error',html});
+                }else{
+                    Swal.fire({icon:'error',title:'Error',text:'Something went wrong.'});
+                }
             }
-
-            const url = editId
-                ? `${baseUrl}/${customerId}/individual/addresses/${editId}`
-                : `${baseUrl}/${customerId}/Manage/Addresses`;
-            const method = "POST";
-
-            $.ajax({
-                url: url,
-                type: method,
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(res) {
-                    if (res.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: res.message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                        loadAddresses();
-                        resetForm();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: res.message || 'Error saving address'
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error saving address:', xhr.responseText);
-                    let html = '';
-                    if (xhr.status === 422) {
-                        $.each(xhr.responseJSON.errors, function(k, v) {
-                            html += v[0] + '<br>';
-                        });
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Validation Error',
-                            html: html
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Something went wrong.'
-                        });
-                    }
-                }
-            });
         });
-
-        // Cancel edit
-        $("#cancel-btn").on("click", function() {
-            resetForm();
-        });
-
-        // Edit address
-        $(document).on("click", ".editBtn", function() {
-            const tr = $(this).closest("tr");
-            editId = tr.data("id");
-            const url = `${baseUrl}/${customerId}/addresses/${editId}?profile_type=${profileType}`; // Add profile_type as query param
-
-            $.get(url, function(res) {
-                if (res.success) {
-                    const address = res.data;
-
-                    // Log address data for debugging
-                    console.log('Fetched address:', address);
-
-                    // Validate required fields
-                    if (!address.state || !address.district || !address.city || !address.pincode || !address.address_type) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Invalid Address Data',
-                            text: 'This address is missing required fields. Please update manually or fix the database record.'
-                        });
-                        return;
-                    }
-
-                    $("#state").val(address.state);
-                    $("#district").val(address.district);
-                    $("#city").val(address.city);
-                    $("#pincode").val(address.pincode);
-                    $("#line1").val(address.line1 || '');
-                    $("#line2").val(address.line2 || '');
-                    $("#landmark").val(address.landmark || '');
-                    $("#label").val(address.label || '');
-                    $("#address_type").val(address.address_type).trigger('change.select2');
-                    $("#longitude").val(address.longitude || '');
-                    $("#latitude").val(address.latitude || '');
-                    $("#is_primary").prop('checked', !!address.is_primary);
-                    $("#save-btn").text("Update");
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: res.message || 'Failed to load address details.'
-                    });
-                }
-            }).fail(function(xhr) {
-                console.error('Error fetching address:', xhr.responseText);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to load address details.'
-                });
-            });
-        });
-
-        // Delete address
-        $(document).on("click", ".deleteBtn", function() {
-            const addressId = $(this).closest("tr").data("id");
-            const url = `${baseUrl}/${customerId}/individual/addresses/${addressId}`;
-
-            Swal.fire({
-                title: "Are you sure?",
-                text: "This address will be deleted!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, delete it!"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: url,
-                        type: "DELETE",
-                        success: function(res) {
-                            if (res.success) {
-                                Swal.fire("Deleted!", res.message, "success");
-                                loadAddresses();
-                            } else {
-                                Swal.fire("Error!", res.message, "error");
-                            }
-                        },
-                        error: function() {
-                            Swal.fire("Error!", "Something went wrong.", "error");
-                        }
-                    });
-                }
-            });
-        });
-
-        // Load addresses on page load
-        loadAddresses();
     });
+
+    $("#cancel-btn").on("click",resetForm);
+
+    $(document).on("click",".editBtn",function(){
+        const tr=$(this).closest("tr");
+        editId=tr.data("id");
+        const url=`${baseUrl}/${customerId}/addresses/${editId}?profile_type=${profileType}`;
+        $.get(url,function(res){
+            if(res.success){
+                const a=res.data;
+                $("#state").val(a.state);
+                $("#district").val(a.district);
+                $("#city").val(a.city);
+                $("#pincode").val(a.pincode);
+                $("#line1").val(a.line1||'');
+                $("#line2").val(a.line2||'');
+                $("#landmark").val(a.landmark||'');
+                $("#label").val(a.label||'');
+                $("#address_type").val(a.address_type).trigger('change.select2');
+                $("#longitude").val(a.longitude||'');
+                $("#latitude").val(a.latitude||'');
+                $("#is_primary").prop('checked',!!a.is_primary);
+                $("#save-btn").text("Update");
+            }else{
+                Swal.fire({icon:'error',title:'Error!',text:res.message||'Failed to load address.'});
+            }
+        }).fail(function(){
+            Swal.fire({icon:'error',title:'Error',text:'Failed to load address details.'});
+        });
+    });
+
+    $(document).on("click",".deleteBtn",function(){
+        const addressId=$(this).closest("tr").data("id");
+        const url=`${baseUrl}/${customerId}/individual/addresses/${addressId}`;
+        Swal.fire({
+            title:"Are you sure?",text:"This address will be deleted!",icon:"warning",
+            showCancelButton:true,confirmButtonColor:"#d33",cancelButtonColor:"#3085d6",
+            confirmButtonText:"Yes, delete it!"
+        }).then(result=>{
+            if(result.isConfirmed){
+                $.ajax({url,type:"DELETE",success:function(res){
+                    if(res.success){
+                        Swal.fire("Deleted!",res.message,"success"); loadAddresses();
+                    }else{
+                        Swal.fire("Error!",res.message,"error");
+                    }
+                },error:function(){
+                    Swal.fire("Error!","Something went wrong.","error");
+                }});
+            }
+        });
+    });
+
+    loadAddresses();
+});
 </script>
 @endsection

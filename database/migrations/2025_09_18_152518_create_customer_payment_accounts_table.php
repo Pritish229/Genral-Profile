@@ -25,8 +25,10 @@ return new class extends Migration
             $table->boolean('is_default_payout')->default(false); // Default for refunds/payouts
 
             // --- Bank fields ---
+            $table->string('account_type', 50)->nullable();
             $table->string('account_holder', 150)->nullable();
             $table->string('bank_name', 120)->nullable();
+            $table->string('account_number', 50)->nullable();
             $table->string('branch_name', 120)->nullable();
             $table->string('ifsc_code', 15)->nullable();
             $table->string('swift_code', 15)->nullable();

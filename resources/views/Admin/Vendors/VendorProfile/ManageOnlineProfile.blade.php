@@ -197,7 +197,7 @@
     $('#onlineProfileForm').submit(function(e) {
         e.preventDefault();
 
-        let url = getApiUrl('');
+        let url = getApiUrl('/Add');
         let data = $(this).serialize();
 
         $.ajax({

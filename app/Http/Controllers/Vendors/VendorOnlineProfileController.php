@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Vendors;
 
 use App\Models\Vendor;
 use Illuminate\Http\Request;
-use App\Models\VendorOnlineProfile;
 use App\Http\Controllers\Controller;
 use App\Models\VendorBusinessProfile;
+use App\Models\VendorOnlineProfile;
 
 class VendorOnlineProfileController extends Controller
 {
@@ -64,10 +64,7 @@ class VendorOnlineProfileController extends Controller
 
     public function individualList($id)
     {
-        $vendor = Vendor::findOrFail($id);
-        // Removed type check
         $profiles = VendorOnlineProfile::where('vendor_id', $id)->where('profile_type', 'individual')->get();
-
         return response()->json(['success' => true, 'data' => $profiles]);
     }
 

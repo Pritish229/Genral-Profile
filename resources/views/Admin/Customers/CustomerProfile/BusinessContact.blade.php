@@ -19,34 +19,70 @@
             @csrf
             <div class="row">
                 <div class="col-md-3">
-                    <div class="mb-2">
-                        <label for="contact_type" class="mb-2 labeltxt">Contact Type</label>
-                        <select name="contact_type" class="form-select" id="contact_type" required>
-                            <option value="">Select Contact Type</option>
-                            <option value="phone">Phone</option>
-                            <option value="email">Email</option>
-                            <option value="mobile">Mobile</option>
-                            <option value="whatsapp">WhatsApp</option>
-                            <option value="telegram">Telegram</option>
-                            <option value="other">Other</option>
-                        </select>
-                        <small class="mb-3 pt-1 helpertxt">Select Contact Type</small>
-                    </div>
+                    <x-inputbox id="contact_person_type" label="Contact Person Type"
+                        type="text" placeholder="Enter type" name="contact_person_type"
+                        value="{{ old('contact_person_type') }}" :required="false"
+                        helpertxt="E.g., Office Address, Branch Address" />
                 </div>
 
                 <div class="col-md-3">
-                    <x-inputbox id="value" label="Contact Value" type="text" placeholder="Enter contact value" name="value"
-                        value="{{ old('value') }}" :required="true" helpertxt="Phone number, email, etc." />
+                    <x-inputbox id="department" label="Department" type="text"
+                        placeholder="Ex: Sales, HR, Accounts" name="department"
+                        value="{{ old('department') }}" :required="false" helpertxt="Ex: Sales / HR / Accounts" />
                 </div>
 
                 <div class="col-md-3">
-                    <x-inputbox id="country_code" label="Country Code" type="text" placeholder="Enter country code" name="country_code"
-                        value="{{ old('country_code') }}" :required="false" helpertxt="Ex: +91, +1" />
+                    <x-inputbox id="designation" label="Designation" type="text"
+                        placeholder="Ex: Manager, Executive" name="designation"
+                        value="{{ old('designation') }}" :required="false" helpertxt="Ex: Manager / Executive" />
                 </div>
 
                 <div class="col-md-3">
-                    <x-inputbox id="label" label="Label" type="text" placeholder="Enter Label" name="label"
-                        value="{{ old('label') }}" :required="false" helpertxt="Ex: Personal, Work" />
+                    <x-inputbox id="contact_person_name" label="Contact Person Name" type="text"
+                        placeholder="Enter Name" name="contact_person_name"
+                        value="{{ old('contact_person_name') }}" :required="false" helpertxt="Ex: John Doe" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="contact_type" class="mb-2 labeltxt">Contact Type</label>
+                    <select name="contact_type" class="form-select" id="contact_type" required>
+                        <option value="">Select Contact Type</option>
+                        <option value="phone">Phone</option>
+                        <option value="email">Email</option>
+                        <option value="mobile">Mobile</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <small class="helpertxt">Select Contact Type</small>
+                </div>
+
+                <div class="col-md-3">
+                    <x-inputbox id="value" label="Contact Value" type="text"
+                        placeholder="Enter contact value" name="value"
+                        value="{{ old('value') }}" :required="true"
+                        helpertxt="Phone number, email, etc." />
+                </div>
+
+                <div class="col-md-3" id="extension_field" style="display:none;">
+                    <x-inputbox id="extension" label="Extension" type="text"
+                        placeholder="Enter extension (optional)" name="extension"
+                        value="{{ old('extension') }}" :required="false"
+                        helpertxt="Ex: 101, 205" />
+                </div>
+
+                <div class="col-md-3">
+                    <x-inputbox id="country_code" label="Country Code" type="text"
+                        placeholder="Enter country code" name="country_code"
+                        value="{{ old('country_code') }}" :required="false"
+                        helpertxt="Ex: +91, +1" />
+                </div>
+
+                <div class="col-md-3">
+                    <x-inputbox id="label" label="Label" type="text"
+                        placeholder="Enter Label" name="label"
+                        value="{{ old('label') }}" :required="false"
+                        helpertxt="Ex: Personal, Work" />
                 </div>
 
                 <div class="col-md-4">
@@ -70,26 +106,29 @@
             </div>
         </form>
 
-        <!-- Contact Table -->
         <div class="mt-4">
             <table class="table table-bordered" id="contactsTable">
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>Person Type</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Person Name</th>
                         <th>Type</th>
                         <th>Value</th>
-                        <th>Country Code</th>
+                        <th>Extension</th>
+                        <th>Code</th>
                         <th>Label</th>
                         <th>Primary</th>
                         <th>Emergency</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Filled dynamically with JS -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
+
     </div>
 </div>
 @endsection
@@ -102,149 +141,103 @@
     let business_id = "{{ $business_id }}";
     let editingContactId = null;
 
-    // Load contacts list
+    $('#contact_type').on('change', function() {
+        $(this).val() === 'phone' ? $('#extension_field').show() : $('#extension_field').hide();
+    });
+
     function loadContacts() {
-        $.get(`${baseUrl}/${customer_id}/${business_id}/Business/Contacts/List`, function(response) {
-            if (response.success) {
-                let rows = "";
-                let index = 1;
-                response.data.forEach(contact => {
-                    rows += `
-                    <tr data-id="${contact.id}">
-                        <td>${index++}</td>
-                        <td>${contact.contact_type}</td>
-                        <td>${contact.value}</td>
-                        <td>${contact.country_code ?? '-'}</td>
-                        <td>${contact.label ?? '-'}</td>
-                        <td>${contact.is_primary ? 'Yes' : 'No'}</td>
-                        <td>${contact.is_emergency ? 'Yes' : 'No'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning editBtn">Edit</button>
-                            ${contact.is_primary ? '' : `<button class="btn btn-sm btn-danger deleteBtn">Delete</button>`}
-                        </td>
-                    </tr>`;
-                });
-                $("#contactsTable tbody").html(rows);
-            } else {
-                $("#contactsTable tbody").html('<tr><td colspan="8" class="text-center">No contacts found</td></tr>');
-            }
-        }).fail(function() {
-            $("#contactsTable tbody").html('<tr><td colspan="8" class="text-center">Error loading contacts</td></tr>');
+        $.get(`${baseUrl}/${customer_id}/${business_id}/Business/Contacts/List`, function(r) {
+            let rows = "",
+                i = 1;
+            r.data.forEach(c => {
+                rows += `
+                <tr data-id="${c.id}">
+                    <td>${i++}</td>
+                    <td>${c.contact_person_type ?? '-'}</td>
+                    <td>${c.department ?? '-'}</td>
+                    <td>${c.designation ?? '-'}</td>
+                    <td>${c.contact_person_name ?? '-'}</td>
+                    <td>${c.contact_type}</td>
+                    <td>${c.value}</td>
+                    <td>${c.extension ?? '-'}</td>
+                    <td>${c.country_code ?? '-'}</td>
+                    <td>${c.label ?? '-'}</td>
+                    <td>${c.is_primary ? 'Yes' : 'No'}</td>
+                    <td>${c.is_emergency ? 'Yes' : 'No'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning editBtn">Edit</button>
+                        ${c.is_primary ? '' : `<button class="btn btn-sm btn-danger deleteBtn">Delete</button>`}
+                    </td>
+                </tr>`;
+            });
+            $("#contactsTable tbody").html(rows);
         });
     }
 
-    // Save contact (add/update)
     $("#customerContactForm").submit(function(e) {
         e.preventDefault();
-        let formData = $(this).serializeArray();
-        formData.push({
-            name: "_token",
-            value: "{{ csrf_token() }}"
-        });
-
         let url = editingContactId ?
             `${baseUrl}/${customer_id}/${business_id}/Business/Contacts/${editingContactId}` :
             `${baseUrl}/${customer_id}/${business_id}/Business/Contacts`;
 
-        let type = editingContactId ? "PUT" : "POST";
-
-        $("#save-btn").attr("disabled", true);
-
-        Swal.fire({
-            title: editingContactId ? "Updating..." : "Adding...",
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
+        let formData = $(this).serialize();
 
         $.ajax({
             url: url,
-            type: type,
+            type: editingContactId ? "PUT" : "POST",
             data: formData,
-            success: function(response) {
-                Swal.close();
-                $("#save-btn").attr("disabled", false);
-                Swal.fire('Success', response.message || "Operation successful", 'success');
+            success: function(res) {
                 editingContactId = null;
                 $("#customerContactForm")[0].reset();
                 $("#cancel-btn").hide();
                 loadContacts();
-            },
-            error: function(xhr) {
-                Swal.close();
-                $("#save-btn").attr("disabled", false);
-                Swal.fire('Error', xhr.responseJSON?.message || "Something went wrong", 'error');
+                Swal.fire('Success', res.message, 'success');
             }
         });
     });
 
-    // Edit contact
     $(document).on("click", ".editBtn", function() {
         editingContactId = $(this).closest("tr").data("id");
         $("#cancel-btn").show();
 
-        $.get(`${baseUrl}/${customer_id}/${business_id}/Business/Contact/${editingContactId}`, function(response) {
-            if (response.success) {
-                let contact = response.data;
-                $("#contact_type").val(contact.contact_type);
-                $("#value").val(contact.value);
-                $("#country_code").val(contact.country_code || "");
-                $("#label").val(contact.label || "");
-                $("#is_primary").prop("checked", contact.is_primary);
-                $("#is_emergency").prop("checked", contact.is_emergency);
-            } else {
-                Swal.fire('Error', response.message || "Could not fetch contact", 'error');
-            }
-        }).fail(function() {
-            Swal.fire('Error', "Failed to load contact details", 'error');
+        $.get(`${baseUrl}/${customer_id}/${business_id}/Business/Contact/${editingContactId}`, function(r) {
+            let c = r.data;
+            $("#contact_person_type").val(c.contact_person_type || "");
+            $("#department").val(c.department || "");
+            $("#designation").val(c.designation || "");
+            $("#contact_person_name").val(c.contact_person_name || "");
+            $("#contact_type").val(c.contact_type);
+            $("#value").val(c.value);
+            $("#extension").val(c.extension || "");
+            $("#country_code").val(c.country_code || "");
+            $("#label").val(c.label || "");
+            $("#is_primary").prop("checked", c.is_primary);
+            $("#is_emergency").prop("checked", c.is_emergency);
+            c.contact_type === 'phone' ? $('#extension_field').show() : $('#extension_field').hide();
         });
     });
 
-    // Cancel editing
+    $(document).on("click", ".deleteBtn", function() {
+        let id = $(this).closest("tr").data("id");
+        $.ajax({
+            url: `${baseUrl}/${customer_id}/${business_id}/Business/Contacts/${id}`,
+            type: "DELETE",
+            data: {
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(res) {
+                loadContacts();
+                Swal.fire('Deleted', res.message, 'success');
+            }
+        });
+    });
+
     $("#cancel-btn").click(function() {
         editingContactId = null;
         $("#customerContactForm")[0].reset();
         $(this).hide();
     });
 
-    // Delete contact
-    $(document).on("click", ".deleteBtn", function() {
-        let contactId = $(this).closest("tr").data("id");
-
-        Swal.fire({
-            title: "Are you sure?",
-            text: "This will delete the contact permanently!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, delete it!"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: "Deleting...",
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading()
-                });
-                $.ajax({
-                    url: `${baseUrl}/${customer_id}/${business_id}/Business/Contacts/${contactId}`,
-                    type: "DELETE",
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-                    success: function(response) {
-                        Swal.close();
-                        Swal.fire('Deleted!', response.message || "Contact deleted.", 'success');
-                        loadContacts();
-                    },
-                    error: function() {
-                        Swal.close();
-                        Swal.fire('Error', "Could not delete contact", 'error');
-                    }
-                });
-            }
-        });
-    });
-
-    $(document).ready(function() {
-        loadContacts();
-    });
+    $(document).ready(loadContacts);
 </script>
 @endsection

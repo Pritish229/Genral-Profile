@@ -26,7 +26,8 @@
     <div class="mt-4">
         <form id="bankDetailsForm">
             <div class="row mb-3">
-                <div class="col-md-12">
+                <div class="col-md-6">
+                    <label for="is_default_payout">Payment Method</label>
                     <select class="form-select" id="method" name="method">
                         <option value="">-- Select Method --</option>
                         <option value="bank" selected>Bank</option>
@@ -34,32 +35,30 @@
                     </select>
                     <small class="form-text text-muted">Choose whether you want to add Bank details or UPI details.</small>
                 </div>
+                <div class="col-md-6">
+                    <label for="is_default_payout">Default Payout</label>
+                    <select class="form-select" id="is_default_payout" name="is_default_payout">
+                        <option value="1" selected>Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                    <small class="form-text text-muted">Choose the Default Payout.</small>
+                </div>
             </div>
 
             <!-- UPI fields -->
             <div id="upi-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_id"
-                            label="UPI ID"
-                            type="text"
-                            value="{{old('upi_id')}}"
-                            helpertxt="Your UPI Virtual Payment Address"
-                            placeholder="example@upi"
-                            name="upi_id"
-                            :required="false" />
+                        <x-inputbox id="upi_id" label="UPI ID" type="text"
+                            placeholder="example@upi" name="upi_id"
+                            :required="false" value="{{ old('upi_id') }}"
+                            helpertxt="Enter your valid UPI ID (e.g., mobile@upi)." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="upi_name"
-                            label="UPI Holder Name"
-                            type="text"
-                            value="{{old('upi_name')}}"
-                            placeholder="Full Name"
-                            helpertxt="Name as per UPI records"
-                            name="upi_name"
-                            :required="false" />
+                        <x-inputbox id="upi_name" label="UPI Holder Name" type="text"
+                            placeholder="Full Name" name="upi_name"
+                            :required="false" value="{{ old('upi_name') }}"
+                            helpertxt="Enter the name as registered with UPI." />
                     </div>
                 </div>
             </div>
@@ -68,63 +67,44 @@
             <div id="bank-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="account_holder"
-                            label="Account Holder"
-                            type="text"
-                            value="{{old('account_holder')}}"
-                            placeholder="John Doe"
-                            helpertxt="Name as per bank records"
-                            name="account_holder"
-                            :required="false" />
+                        <x-inputbox id="account_holder" label="Account Holder" type="text"
+                            placeholder="John Doe" name="account_holder"
+                            :required="false" value="{{ old('account_holder') }}"
+                            helpertxt="Enter the account holder’s full name as per bank records." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="bank_name"
-                            label="Bank Name"
-                            type="text"
-                            value="{{old('bank_name')}}"
-                            placeholder="State Bank of India"
-                            name="bank_name"
-                            helpertxt="Full name of the bank"
-                            :required="false" />
+                        <x-inputbox id="bank_name" label="Bank Name" type="text"
+                            placeholder="State Bank of India" name="bank_name"
+                            :required="false" value="{{ old('bank_name') }}"
+                            helpertxt="Mention the official name of the bank." />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="branch_name"
-                            label="Branch Name"
-                            type="text"
-                            value="{{old('branch_name')}}"
-                            placeholder="MG Road Branch"
-                            name="branch_name"
-                            helpertxt="Name of the bank branch"
-                            :required="false" />
+                        <x-inputbox id="branch_name" label="Branch Name" type="text"
+                            placeholder="MG Road Branch" name="branch_name"
+                            :required="false" value="{{ old('branch_name') }}"
+                            helpertxt="Provide the branch name where the account is opened." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="ifsc_code"
-                            label="IFSC Code"
-                            value="{{old('ifsc_code')}}"
-                            type="text"
-                            placeholder="SBIN0001234"
-                            name="ifsc_code"
-                            helpertxt="Indian Financial System Code"
-                            :required="false" />
+                        <x-inputbox id="account_number" label="Account Number" type="text"
+                            placeholder="Enter Account Number" name="account_number"
+                            :required="true" value="{{ old('account_number') }}"
+                            helpertxt="Double-check your account number before submitting." />
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <x-inputbox
-                            id="swift_code"
-                            label="SWIFT Code"
-                            value="{{old('swift_code')}}"
-                            type="text"
-                            placeholder="SBININBBXXX"
-                            name="swift_code"
-                            helpertxt="For international transactions"
-                            :required="false" />
+                        <x-inputbox id="ifsc_code" label="IFSC Code" type="text"
+                            placeholder="SBIN0001234" name="ifsc_code"
+                            :required="false" value="{{ old('ifsc_code') }}"
+                            helpertxt="Enter the 11-digit IFSC code (for Indian banks)." />
+                    </div>
+                    <div class="col-md-6">
+                        <x-inputbox id="swift_code" label="SWIFT Code" type="text"
+                            placeholder="SBININBBXXX" name="swift_code"
+                            :required="false" value="{{ old('swift_code') }}"
+                            helpertxt="Enter SWIFT code (for international transactions)." />
                     </div>
                 </div>
             </div>
@@ -153,7 +133,7 @@
             dataType: "json",
             success: function(response) {
                 if (response.success) {
-                    let imgSrc = `/storage/${response.data.avatar_url}`;
+                    let imgSrc = `${response.data.avatar_url}`;
                     $("#student-details").html(`
                         <div class="d-flex align-items-start gap-3">
                             <div style="flex: 0 0 150px;">

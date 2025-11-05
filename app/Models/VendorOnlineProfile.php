@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class VendorOnlineProfile extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $table = 'vendor_onilne_profiles';
+    protected $table = 'vendor_online_profiles'; // Fixed typo
 
     protected $fillable = [
         'tenant_id',

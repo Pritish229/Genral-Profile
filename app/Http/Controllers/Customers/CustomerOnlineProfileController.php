@@ -128,7 +128,7 @@ class CustomerOnlineProfileController extends Controller
     public function businessIndex($id, $business_id)
     {
         
-        return view('Admin.customers.customerProfile.ManageBusinessOnlineProfile', ['id' => $id, 'business_id' => $business_id, 'type' => 'business']);
+        return view('Admin.Customers.CustomerProfile.ManageBusinessOnlineProfile', ['id' => $id, 'business_id' => $business_id, 'type' => 'business']);
     }
 
     public function businessManage($id)

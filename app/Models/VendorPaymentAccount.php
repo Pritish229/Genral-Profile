@@ -14,6 +14,7 @@ class VendorPaymentAccount extends Model
         'is_default_payout',
         'business_name',
         'method',
+        'account_type',
         'account_holder',
         'bank_name',
         'account_number',

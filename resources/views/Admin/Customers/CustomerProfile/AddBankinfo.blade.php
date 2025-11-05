@@ -25,10 +25,11 @@
     <!-- Bank/UPI form -->
     <div class="mt-4">
         <form id="bankDetailsForm">
+            @csrf
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="is_default_payout">Payment Method</label>
-                    <select class="form-select" id="method" name="method">
+                    <label for="method">Payment Method <span class="text-danger">*</span></label>
+                    <select class="form-select" id="method" name="method" required>
                         <option value="">-- Select Method --</option>
                         <option value="bank" selected>Bank</option>
                         <option value="upi">UPI</option>
@@ -36,16 +37,14 @@
                     <small class="form-text text-muted">Choose whether you want to add Bank details or UPI details.</small>
                 </div>
                 <div class="col-md-6">
-                    <label for="is_default_payout">Default Payout</label>
-                    <select class="form-select" id="is_default_payout" name="is_default_payout">
+                    <label for="is_default_payout">Default Payout <span class="text-danger">*</span></label>
+                    <select class="form-select" id="is_default_payout" name="is_default_payout" required>
                         <option value="1" selected>Yes</option>
                         <option value="0">No</option>
                     </select>
                     <small class="form-text text-muted">Choose the Default Payout.</small>
                 </div>
             </div>
-
-            <!-- UPI fields -->
             <div id="upi-fields" class="d-none">
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -62,9 +61,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Bank fields -->
-            <div id="bank-fields" class="d-none">
+            <div id="bank-fields">
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <x-inputbox id="account_holder" label="Account Holder" type="text"
@@ -79,6 +76,38 @@
                             helpertxt="Mention the official name of the bank." />
                     </div>
                 </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="account_type">Account Type <span class="text-danger">*</span></label>
+                        <select name="account_type" id="account_type" class="form-select">
+                            <option value="">Select Account Type</option>
+                            <option value="savings" {{ old('account_type') == 'savings' ? 'selected' : '' }}>Savings Account</option>
+                            <option value="current" {{ old('account_type') == 'current' ? 'selected' : '' }}>Current Account</option>
+                            <option value="salary" {{ old('account_type') == 'salary' ? 'selected' : '' }}>Salary Account</option>
+                            <option value="fixed_deposit" {{ old('account_type') == 'fixed_deposit' ? 'selected' : '' }}>Fixed Deposit Account</option>
+                            <option value="recurring_deposit" {{ old('account_type') == 'recurring_deposit' ? 'selected' : '' }}>Recurring Deposit Account</option>
+                            <option value="cash_credit" {{ old('account_type') == 'cash_credit' ? 'selected' : '' }}>Cash Credit Account</option>
+                            <option value="overdraft" {{ old('account_type') == 'overdraft' ? 'selected' : '' }}>Overdraft Account</option>
+                            <option value="nri" {{ old('account_type') == 'nri' ? 'selected' : '' }}>NRI Account</option>
+                            <option value="business_current" {{ old('account_type') == 'business_current' ? 'selected' : '' }}>Business Current Account</option>
+                            <option value="joint" {{ old('account_type') == 'joint' ? 'selected' : '' }}>Joint Account</option>
+                            <option value="merchant" {{ old('account_type') == 'merchant' ? 'selected' : '' }}>Merchant Account</option>
+                            <option value="escrow" {{ old('account_type') == 'escrow' ? 'selected' : '' }}>Escrow Account</option>
+                            <option value="demat" {{ old('account_type') == 'demat' ? 'selected' : '' }}>Demat Account</option>
+                            <option value="loan" {{ old('account_type') == 'loan' ? 'selected' : '' }}>Loan Account</option>
+                            <option value="other" {{ old('account_type') == 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                        <small class="form-text text-muted">Select the type of bank account.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <x-inputbox id="account_number" label="Account Number" type="text"
+                            placeholder="Enter Account Number" name="account_number"
+                            :required="false" value="{{ old('account_number') }}"
+                            helpertxt="Double-check your account number before submitting." />
+                    </div>
+                </div>
+
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <x-inputbox id="branch_name" label="Branch Name" type="text"
@@ -87,25 +116,21 @@
                             helpertxt="Provide the branch name where the account is opened." />
                     </div>
                     <div class="col-md-6">
-                        <x-inputbox id="account_number" label="Account Number" type="text"
-                            placeholder="Enter Account Number" name="account_number"
-                            :required="true" value="{{ old('account_number') }}"
-                            helpertxt="Double-check your account number before submitting." />
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
                         <x-inputbox id="ifsc_code" label="IFSC Code" type="text"
                             placeholder="SBIN0001234" name="ifsc_code"
                             :required="false" value="{{ old('ifsc_code') }}"
                             helpertxt="Enter the 11-digit IFSC code (for Indian banks)." />
                     </div>
+                </div>
+
+                <div class="row mb-3">
                     <div class="col-md-6">
                         <x-inputbox id="swift_code" label="SWIFT Code" type="text"
                             placeholder="SBININBBXXX" name="swift_code"
                             :required="false" value="{{ old('swift_code') }}"
                             helpertxt="Enter SWIFT code (for international transactions)." />
                     </div>
+                    <div class="col-md-6"></div>
                 </div>
             </div>
 

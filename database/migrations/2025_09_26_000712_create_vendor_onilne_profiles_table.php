@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vendor_onilne_profiles', function (Blueprint $table) {
+        Schema::create('vendor_online_profiles', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('tenant_id');
             $table->unsignedBigInteger('vendor_id');
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('vendor_onile_profiles');
+        Schema::dropIfExists('vendor_online_profiles');
     }
 };

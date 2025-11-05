@@ -28,8 +28,6 @@
         <div class="progress-bar bg-success" role="progressbar" style="width:70%;" id="progressBar">70%</div>
     </div>
 
-    <!-- Document Form -->
-    <!-- Document Form -->
     <form id="documentForm" enctype="multipart/form-data">
         <div class="row mb-3">
             <div class="col-md-4">
