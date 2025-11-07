@@ -24,7 +24,7 @@
                     <th>Start</th>
                     <th>End</th>
                     <th>Active</th>
-                    <th width="120px">Actions</th>
+                    <th width="140">Actions</th>
                 </tr>
                 </thead>
             </table>

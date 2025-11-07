@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('session_year_id')->constrained('session_years')->onDelete('cascade');
             $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
             $table->foreignId('course_class_id')->constrained('course_classes')->onDelete('cascade');
-            $table->string('name');
+            $table->string('subject_name');
             $table->string('subject_code')->nullable();
             $table->boolean('is_active')->default(false);
             $table->timestamps();

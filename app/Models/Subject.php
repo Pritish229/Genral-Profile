@@ -11,8 +11,10 @@ class Subject extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'subjects';
     protected $fillable = [
+        'session_year_id',
+        'course_id',
         'course_class_id',
-        'name',
+        'subject_name',
         'subject_code',
         'description',
         'is_active',
@@ -21,5 +23,13 @@ class Subject extends Model
     public function class()
     {
         return $this->belongsTo(CourseClass::class, 'course_class_id');
+    }
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id');
+    }
+    public function sessionYear()
+    {
+        return $this->belongsTo(SessionYear::class, 'session_year_id');
     }
 }

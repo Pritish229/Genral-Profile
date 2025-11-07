@@ -14,25 +14,24 @@ class CourseClass extends Model
     protected $fillable = [
         'tenet_id',
         'emp_id',
+        'session_year_id',
         'course_id',
-        'name',
+        'class_name',
         'class_code',
         'description',
         'is_active',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+    public function sessionYear()
+    {
+        return $this->belongsTo(SessionYear::class);
+    }
+
     public function course()
     {
         return $this->belongsTo(Course::class);
-    }
-
-    public function subjects()
-    {
-        return $this->hasMany(Subject::class, 'course_class_id');
-    }
-
-    public function sections()
-    {
-        return $this->hasMany(Section::class, 'course_class_id');
     }
 }

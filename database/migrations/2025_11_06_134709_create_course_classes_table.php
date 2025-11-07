@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('emp_id')->nullable();
             $table->foreignId('session_year_id')->constrained('session_years')->onDelete('cascade');
             $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
-            $table->string('name');
+            $table->string('class_name');
             $table->string('class_code')->unique();
             $table->boolean('is_active')->default(false);
             $table->text('description')->nullable();

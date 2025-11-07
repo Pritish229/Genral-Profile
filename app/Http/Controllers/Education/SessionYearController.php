@@ -32,8 +32,8 @@ class SessionYearController extends Controller
                 })
                 ->addColumn('action', function ($row) {
                     return '
-                <button class="btn btn-sm btn-primary editSessionYear" data-id="' . $row->id . '">Edit</button>
-                <button class="btn btn-sm btn-danger deleteSessionYear" data-id="' . $row->id . '">Delete</button>
+                <button class="btn btn-sm btn-primary editSessionYear" data-id="' . $row->id . '"> <i class="fas fa-edit"></i> Edit</button>
+                <button class="btn btn-sm btn-danger deleteSessionYear" data-id="' . $row->id . '"><i class="fas fa-trash"></i> Delete</button>
             ';
                 })
                 ->rawColumns(['is_active', 'action'])

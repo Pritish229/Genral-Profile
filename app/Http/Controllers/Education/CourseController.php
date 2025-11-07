@@ -34,8 +34,8 @@ class CourseController extends Controller
                     : '<span class="badge bg-secondary">Inactive</span>'
             )
             ->addColumn('action', fn($row) =>
-                '<button class="btn btn-sm btn-primary editCourse" data-id="' . $row->id . '">Edit</button>
-                 <button class="btn btn-sm btn-danger deleteCourse" data-id="' . $row->id . '">Delete</button>'
+                '<button class="btn btn-sm btn-primary editCourse" data-id="' . $row->id . '"> <i class="fas fa-edit"></i> Edit</button>
+                 <button class="btn btn-sm btn-danger deleteCourse" data-id="' . $row->id . '"><i class="fas fa-trash"></i> Delete</button>'
             )
             ->rawColumns(['course_image','is_active', 'action'])
             ->make(true);
@@ -104,5 +104,18 @@ class CourseController extends Controller
     {
         Course::findOrFail($id)->delete();
         return response()->json(['status' => true, 'message' => 'Course Deleted Successfully']);
+    }
+
+    public function listSessionWise(Request $request)
+    {
+        $query = Course::whereNull('deleted_at')->orderBy('course_name');
+
+        if ($request->session_year_id) {
+            $query->where('session_year_id', $request->session_year_id);
+        }
+
+        $courses = $query->get();
+
+        return response()->json(['status' => true, 'data' => $courses]);
     }
 }
