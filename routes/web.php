@@ -4,12 +4,14 @@ use App\Models\Employee;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Vendors\VendorController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Education\CourseController;
 use App\Http\Controllers\Students\StudentController;
 use App\Http\Controllers\Customers\CustomerController;
 use App\Http\Controllers\Employees\EmployeeController;
 use App\Http\Controllers\Vendors\VendorBankController;
 use App\Http\Controllers\Vendors\VendorMediaController;
 use App\Http\Controllers\Students\StudentBankController;
+use App\Http\Controllers\Education\SessionYearController;
 use App\Http\Controllers\Students\StudentBasicController;
 use App\Http\Controllers\Students\StudentMediaController;
 use App\Http\Controllers\Vendors\VendorAddressController;
@@ -217,7 +219,7 @@ Route::prefix('vendors/')->group(function () {
     Route::get('{id}/{business_id}/Business/Address/list', [VendorAddressController::class, 'getBusinessAddresses'])->name('vendors.businessAddress.list');
     Route::get('{id}/{business_id}/Business/Address/{address_id}', [VendorAddressController::class, 'getBusinessAddress'])->name('vendors.businessAddress.get');
     Route::post('{id}/{business_id}/Business/Address/Add', [VendorAddressController::class, 'storeBusinessAddress'])->name('vendors.businessAddress.store');
-    Route::put('{id}/{business_id}/Business/Address/{address_id}/Update', [VendorAddressController::class, 'updateBusinessAddress'])->name('vendors.businessAddress.update');
+    Route::post('{id}/{business_id}/Business/Address/{address_id}/Update', [VendorAddressController::class, 'updateBusinessAddress'])->name('vendors.businessAddress.update');
     Route::delete('{id}/{business_id}/Business/Address/{address_id}/Delete', [VendorAddressController::class, 'deleteBusinessAddress'])->name('vendors.businessAddress.delete');
     Route::get('{id}/{business_id}/Permanat/Business/Address/', [VendorAddressController::class, 'permanentBusinessAddress'])
         ->name('vendors.BusinessAddress.Permanent');
@@ -372,7 +374,7 @@ Route::prefix('customers/')->group(function () {
     Route::get('{id}/{business_id}/Business/Address/list', [CustomerAddressController::class, 'getBusinessAddresses'])->name('customers.businessAddress.list');
     Route::get('{id}/{business_id}/Business/Address/{address_id}', [CustomerAddressController::class, 'getBusinessAddress'])->name('customers.businessAddress.get');
     Route::post('{id}/{business_id}/Business/Address/Add', [CustomerAddressController::class, 'storeBusinessAddress'])->name('customers.businessAddress.store');
-    Route::put('{id}/{business_id}/Business/Address/{address_id}/Update', [CustomerAddressController::class, 'updateBusinessAddress'])->name('customers.businessAddress.update');
+    Route::post('{id}/{business_id}/Business/Address/{address_id}/Update', [CustomerAddressController::class, 'updateBusinessAddress'])->name('customers.businessAddress.update');
     Route::delete('{id}/{business_id}/Business/Address/{address_id}/Delete', [CustomerAddressController::class, 'deleteBusinessAddress'])->name('customers.businessAddress.delete');
     Route::get('{id}/{business_id}/Permanat/Business/Address/', [CustomerAddressController::class, 'permanentBusinessAddress'])
         ->name('customers.BusinessAddress.Permanent');
@@ -413,7 +415,7 @@ Route::prefix('customers/')->group(function () {
     Route::get('{id}/{business_id}/BusinessBank', [CustomerBankController::class, 'permanentBusinessBank'])->name('customers.BusinessBank');
     Route::post('{id}/{business_id}/business/saveBank', [CustomerBankController::class, 'saveBank'])->name('customers.business.saveBank'); // New
     Route::get('{id}/{business_id}/business/bank/{account_id}', [CustomerBankController::class, 'fetchBank'])->name('customers.business.bank.fetch'); // New
-    Route::post('{id}/{business_id}/business/updateBank/{account_id}', [CustomerBankController::class, 'updateBank'])->name('customers.business.bank.update'); // New
+    Route::post('{id}/{business_id}/{account_id}/business/updateBank/', [CustomerBankController::class, 'updateBank'])->name('customers.business.bank.update'); // New
     Route::delete('{id}/{business_id}/business/deleteBank/{account_id}', [CustomerBankController::class, 'deleteBank'])->name('customers.business.bank.delete'); // New Removed {type}
 
     
@@ -475,4 +477,23 @@ Route::prefix('customers/')->group(function () {
     Route::delete('{id}/business/OnlineProfile/{profile}', [CustomerOnlineProfileController::class, 'businessDestroy'])->name('business.destroy');
 
 
+});
+
+
+Route::prefix('education/')->group(function () {
+   Route::get('/session-years', [SessionYearController::class, 'index'])->name('education.sessionyear.index');
+   Route::get('/session-years/Pagenate', [SessionYearController::class, 'sessionPaginate'])->name('education.sessionyear.sessionPaginate');
+   Route::get('/session-years/list', [SessionYearController::class, 'list'])->name('education.sessionyear.list');
+   Route::post('/session-years/store', [SessionYearController::class, 'store'])->name('education.sessionyear.store');
+   Route::get('/session-years/{id}/edit', [SessionYearController::class, 'edit'])->name('education.sessionyear.edit');
+   Route::post('/session-years/{id}/update', [SessionYearController::class, 'update'])->name('education.sessionyear.update');
+   Route::delete('/session-years/{id}/delete', [SessionYearController::class, 'destroy'])->name('education.sessionyear.delete');
+
+
+   Route::get('/courses', [CourseController::class, 'index'])->name('education.course.index');
+   Route::get('/courses/paginate', [CourseController::class, 'paginate'])->name('education.course.paginate');
+   Route::post('/courses/store', [CourseController::class, 'store'])->name('education.course.store');
+   Route::get('/courses/{id}/edit', [CourseController::class, 'edit'])->name('education.course.edit');
+   Route::post('/courses/{id}/update', [CourseController::class, 'update'])->name('education.course.update');
+   Route::delete('/courses/{id}/delete', [CourseController::class, 'destroy'])->name('education.course.delete');
 });

@@ -21,6 +21,7 @@ class CustomerPaymentAccount extends Model
         'method',
         'account_holder',
         'bank_name',
+        'account_type',
         'account_number',
         'account_number_mask',
         'account_number_hash',

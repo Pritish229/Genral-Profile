@@ -13,6 +13,7 @@ class CustomerContact extends Model
     protected $fillable = [
         'tenant_id',
         'vendor_id',
+        'customer_id',
         'business_id',
         'business_name',
         'profile_type',

@@ -81,6 +81,23 @@
                         </li>
                     </ul>
                 </li>
+
+                <!-- Education -->
+                 <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index',]) ? 'mm-active' : '' }}">
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i class="fas fa-graduation-cap" style="color: #545a6d;font-size: 0.99rem;"></i>
+                        <span data-key="t-authentication">Education</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index']) ? 'active' : '' }}">
+                            <a href="{{ route('education.sessionyear.index') }}"><span>Manage Session</span></a>
+                        </li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['education.course.index']) ? 'active' : '' }}">
+                            <a href="{{ route('education.course.index') }}"><span>Manage Course</span></a>
+                        </li>
+                        
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

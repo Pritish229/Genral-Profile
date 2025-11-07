@@ -19,11 +19,12 @@ return new class extends Migration
             $table->string('business_name')->nullable();
 
             $table->enum('profile_type', ['business', 'individual'])->default('individual');
-            $table->string('department', 100)->nullable()->after('label');
-            $table->string('designation', 100)->nullable()->after('department');
-            $table->string('contact_person_type', 100)->nullable()->after('profile_type');
-            $table->string('contact_person_name', 200)->nullable()->after('contact_person_type');
-            $table->string('extension', 20)->nullable()->after('value');
+            $table->string('department', 100)->nullable();
+            $table->string('designation', 100)->nullable();
+            $table->string('contact_person_type', 100)->nullable();
+            $table->string('contact_person_name', 200)->nullable();
+            $table->string('extension', 20)->nullable();
+
 
             $table->enum('contact_type', ['email', 'phone', 'whatsapp', 'telegram', 'fax', 'other'])
                 ->default('whatsapp');

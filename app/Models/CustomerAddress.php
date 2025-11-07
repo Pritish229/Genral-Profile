@@ -12,17 +12,37 @@ class CustomerAddress extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'tenant_id','customer_id','address_type','profile_type','business_id','business_name',
-        'label','line1','line2','landmark','city','district','state','country','pincode',
-        'latitude','longitude','is_primary','is_verified','verified_at','row_version',
+        'vendor_id',
+        'tenant_id',
+        'employee_id',
+        'address_type',
+        'address_type_name',
+        'profile_type',
+        'business_id',
+        'business_name',
+        'label',
+        'line1',
+        'line2',
+        'landmark',
+        'city',
+        'district',
+        'state',
+        'country',
+        'pincode',
+        'latitude',
+        'longitude',
+        'is_primary',
+        'is_verified',
+        'verified_at',
+        'row_version',
     ];
 
     protected $casts = [
-        'is_primary'   => 'boolean',
-        'is_verified'  => 'boolean',
-        'verified_at'  => 'datetime',
-        'latitude'     => 'decimal:7',
-        'longitude'    => 'decimal:7',
+        'is_primary'     => 'boolean',
+        'is_verified'    => 'boolean',
+        'verified_at'    => 'datetime',
+        'latitude'       => 'decimal:7',
+        'longitude'      => 'decimal:7',
     ];
 
     public function customer()

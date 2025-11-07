@@ -303,19 +303,21 @@ class VendorAddressController extends Controller
     {
         $vendor = Vendor::findOrFail($vendor_id);
         $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->findOrFail($business_id);
+
         $validated = $request->validate([
-            'state' => 'required|string|max:120',
-            'district' => 'required|string|max:120',
-            'city' => 'required|string|max:120',
-            'pincode' => 'required|digits:6',
-            'line1' => 'nullable|string|max:255',
-            'line2' => 'nullable|string|max:255',
-            'landmark' => 'nullable|string|max:255',
-            'label' => 'nullable|string|max:120',
-            'address_type' => 'required|string|in:permanent,office,billing,shipping',
-            'is_primary' => 'nullable|boolean',
-            'longitude' => 'nullable|string|max:50',
-            'latitude' => 'nullable|string|max:50'
+            'state'               => 'required|string|max:120',
+            'district'            => 'required|string|max:120',
+            'city'                => 'required|string|max:120',
+            'pincode'             => 'required|digits:6',
+            'line1'               => 'nullable|string|max:180',
+            'line2'               => 'nullable|string|max:180',
+            'landmark'            => 'nullable|string|max:150',
+            'label'               => 'nullable|string|max:120',
+            'address_type'        => 'required|in:permanent,office,billing,shipping,other',
+            'address_type_name'   => 'nullable|string|max:120',
+            'is_primary'          => 'nullable|boolean',
+            'longitude'           => 'nullable|numeric',
+            'latitude'            => 'nullable|numeric',
         ]);
 
         if ($validated['is_primary'] ?? false) {
@@ -327,42 +329,40 @@ class VendorAddressController extends Controller
         }
 
         $address = VendorAddress::create(array_merge($validated, [
-            'vendor_id' => $vendor_id,
-            'business_id' => $business_id,
-            'tenant_id' => $vendor->tenant_id,
-            'profile_type' => 'business',
-            'business_name' => $business->business_name
+            'vendor_id'     => $vendor_id,
+            'business_id'   => $business_id,
+            'tenant_id'     => $vendor->tenant_id,
+            'profile_type'  => 'business',
+            'business_name' => $business->business_name,
         ]));
 
         return response()->json([
             'success' => true,
             'message' => 'Business address created successfully',
-            'data' => $address
+            'data'    => $address
         ]);
     }
 
     public function updateBusinessAddress(Request $request, $vendor_id, $business_id, $address_id)
     {
         $vendor = Vendor::findOrFail($vendor_id);
-        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)
-            ->findOrFail($business_id);
+        $business = VendorBusinessProfile::where('vendor_id', $vendor_id)->findOrFail($business_id);
 
         $validated = $request->validate([
-            'state' => 'required|string|max:120',
-            'district' => 'required|string|max:120',
-            'city' => 'required|string|max:120',
-            'pincode' => 'required|digits:6',
-            'line1' => 'nullable|string|max:255',
-            'line2' => 'nullable|string|max:255',
-            'landmark' => 'nullable|string|max:255',
-            'label' => 'nullable|string|max:120',
-            'address_type' => 'required|string|in:permanent,office,billing,shipping',
-            'is_primary' => 'nullable|boolean',
-            'longitude' => 'nullable|string|max:50',
-            'latitude' => 'nullable|string|max:50',
+            'state'               => 'required|string|max:120',
+            'district'            => 'required|string|max:120',
+            'city'                => 'required|string|max:120',
+            'pincode'             => 'required|digits:6',
+            'line1'               => 'nullable|string|max:180',
+            'line2'               => 'nullable|string|max:180',
+            'landmark'            => 'nullable|string|max:150',
+            'label'               => 'nullable|string|max:120',
+            'address_type'        => 'required|in:permanent,office,billing,shipping,other',
+            'address_type_name'   => 'nullable|string|max:120',
+            'is_primary'          => 'nullable|boolean',
+            'longitude'           => 'nullable|numeric',
+            'latitude'            => 'nullable|numeric',
         ]);
-
-        $validated['business_name'] = $business->business_name;
 
         $address = VendorAddress::where('vendor_id', $vendor_id)
             ->where('business_id', $business_id)
@@ -383,7 +383,7 @@ class VendorAddressController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Business address updated successfully',
-            'data' => $address
+            'data'    => $address->fresh()
         ]);
     }
 

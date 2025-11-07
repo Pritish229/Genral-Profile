@@ -16,6 +16,7 @@ class VendorAddress extends Model
         'tenant_id',
         'employee_id',
         'address_type',
+        'address_type_name',
         'profile_type',
         'business_id',
         'business_name',

@@ -18,13 +18,8 @@ return new class extends Migration
             $table->unsignedBigInteger('business_id')->nullable();
             $table->string('business_name')->nullable();
             $table->enum('profile_type', ['business', 'individual',])->default('individual');
-
-            $table->enum('address_type', [
-                'permanent',
-                'other',
-                'hostel',
-            ])->default('permanent');
-
+            $table->string('address_type_name')->nullable();
+            $table->enum('address_type', ['permanent','other','hostel',])->default('permanent');
             $table->string('label', 120)->nullable();
             $table->string('line1', 180)->nullable();
             $table->string('line2', 180)->nullable();

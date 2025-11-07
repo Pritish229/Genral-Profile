@@ -15,7 +15,6 @@
         'Business Address' => ''
     ]" />
     <div class="mt-4">
-        <!-- FORM -->
         <form id="businessAddressForm">
             @csrf
             <input type="hidden" id="address_id" name="address_id" value="">
@@ -53,9 +52,13 @@
                             <option value="office">Office</option>
                             <option value="billing">Billing</option>
                             <option value="shipping">Shipping</option>
+                            <option value="other">Other</option>
                         </select>
-                        <small class="mb-3 pt-1 helpertxt">Select Address Type</small>
+                        <small class="mb-3 pt-1 helpertxt">Select system address type</small>
                     </div>
+                </div>
+                <div class="col-md-4">
+                    <x-inputbox id="address_type_name" label="Address Type Name" type="text" placeholder="e.g. Head Office, Factory" name="address_type_name" value="" :required="false" helpertxt="Custom name for this address type" />
                 </div>
                 <div class="col-md-4">
                     <div class="form-check mt-4">
@@ -78,13 +81,12 @@
 
         <hr>
 
-        <!-- ADDRESS LIST -->
         <h4>Business Addresses</h4>
         <table class="table table-bordered" id="addressTable">
             <thead>
                 <tr>
                     <th>Label</th>
-                    <th>Type</th>
+                    <th>Address Type Name</th>
                     <th>Address</th>
                     <th>Primary</th>
                     <th>Actions</th>
@@ -111,8 +113,8 @@
                     data.data.forEach(address => {
                         tbody.append(`
                         <tr data-id="${address.id}">
-                            <td>${address.label}</td>
-                            <td>${address.address_type}</td>
+                            <td>${address.label || '-'}</td>
+                            <td>${address.address_type_name || '-'}</td>
                             <td>${address.line1} ${address.line2}, ${address.city}, ${address.district}, ${address.state} - ${address.pincode}</td>
                             <td>${address.is_primary ? '<span class="badge bg-success">Primary</span>' : ''}</td>
                             <td>
@@ -128,7 +130,6 @@
 
         loadAddresses();
 
-        // SAVE FORM (Insert/Update)
         $('#businessAddressForm').on('submit', function(e) {
             e.preventDefault();
             let addressId = $('#address_id').val();
@@ -136,10 +137,9 @@
             let method = 'POST';
             if (addressId) {
                 url = `/vendors/${vendorId}/${businessId}/Business/Address/${addressId}/Update`;
-                method = 'PUT';
+                method = 'POST';
             }
 
-            // Convert FormData to object for PUT since jQuery's processData:false+method:PUT has issues
             let formDataObj = {};
             (new FormData(this)).forEach((value, key) => {
                 formDataObj[key] = value;
@@ -154,19 +154,32 @@
                 },
                 success: function(data) {
                     if (data.success) {
-                        alert(data.message);
+                      
+                        swal.fire({
+                            title: "Success",
+                            text: data.message,
+                            icon: "success",
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                         $('#businessAddressForm')[0].reset();
                         $('#address_id').val('');
                         $('#cancel-edit').hide();
                         loadAddresses();
                     } else {
-                        alert(data.message || "Something went wrong");
+                        swal.fire({
+                            title: "Error",
+                            text: data.message || "Something went wrong",
+                            icon: "error",
+                            timer: 3000,
+                            showConfirmButton: true
+                        });
+                      
                     }
                 }
             });
         });
 
-        // EDIT ADDRESS
         $(document).on('click', '.edit-btn', function() {
             let id = $(this).data('id');
             $.get(`/vendors/${vendorId}/${businessId}/Business/Address/${id}`, function(data) {
@@ -180,8 +193,10 @@
                     $('#line1').val(a.line1);
                     $('#line2').val(a.line2);
                     $('#landmark').val(a.landmark);
+                    $('#address_type_name').val(a.address_type_name);
                     $('#label').val(a.label);
                     $('#address_type').val(a.address_type);
+                    $('#address_type_name').val(a.address_type_name);
                     $('#longitude').val(a.longitude);
                     $('#latitude').val(a.latitude);
                     $('#is_primary').prop('checked', a.is_primary);
@@ -190,14 +205,12 @@
             });
         });
 
-        // CANCEL EDIT
         $('#cancel-edit').click(function() {
             $('#businessAddressForm')[0].reset();
             $('#address_id').val('');
             $(this).hide();
         });
 
-        // DELETE ADDRESS
         $(document).on('click', '.delete-btn', function() {
             if (!confirm("Are you sure?")) return;
             let id = $(this).data('id');
