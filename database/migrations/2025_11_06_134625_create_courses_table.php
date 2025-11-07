@@ -12,16 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('courses', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('session_year_id')->constrained('session_years')->onDelete('cascade');
-        $table->string('course_name');
-        $table->string('course_code')->unique();
-        $table->string('course_image')->nullable();
-        $table->boolean('is_active')->default(false); 
-        $table->text('description')->nullable();
-        $table->timestamps();
-        $table->timestamp('deleted_at', 6)->nullable();
-    });
+            $table->id();
+            $table->string('tenet_id')->nullable();
+            $table->string('emp_id')->nullable();
+            $table->foreignId('session_year_id')->constrained('session_years')->onDelete('cascade');
+            $table->string('course_name');
+            $table->string('course_code')->unique();
+            $table->string('course_image')->nullable();
+            $table->boolean('is_active')->default(false);
+            $table->text('description')->nullable();
+            $table->timestamps();
+            $table->timestamp('deleted_at', 6)->nullable();
+        });
     }
 
     /**

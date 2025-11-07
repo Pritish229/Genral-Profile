@@ -52,6 +52,8 @@ class SessionYearController extends Controller
 
         $data = $request->all();
         $data['is_active'] = $request->filled('is_active') ? 1 : 0;
+        $data['tenet_id'] = 1;
+        $data['emp_id'] = 1;
 
         $sessionYear = SessionYear::create($data);
 
@@ -64,7 +66,11 @@ class SessionYearController extends Controller
 
     public function edit($id)
     {
-        return response()->json(SessionYear::findOrFail($id));
+        $data = SessionYear::findOrFail($id);
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
     }
 
     public function show($id)
@@ -85,11 +91,12 @@ class SessionYearController extends Controller
         ]);
     }
 
-    public function list()
+    public function list(Request $request)
     {
-        $sessionYears = SessionYear::where('is_active', '1')
-            ->where('deleted_at', null)
-            ->get();
+        $selectedId = $request->selected_id;
+
+        $query = SessionYear::whereNull('deleted_at');
+        $sessionYears = $query->get();
 
         return response()->json(['status' => true, 'data' => $sessionYears]);
     }

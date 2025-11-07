@@ -11,6 +11,8 @@ class SessionYear extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'session_years';
     protected $fillable = [
+        'tenet_id',
+        'emp_id',
         'name',
         'start_date',
         'end_date',

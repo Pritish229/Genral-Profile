@@ -12,6 +12,8 @@ class CourseClass extends Model
     protected $table = 'course_classes';
 
     protected $fillable = [
+        'tenet_id',
+        'emp_id',
         'course_id',
         'name',
         'class_code',

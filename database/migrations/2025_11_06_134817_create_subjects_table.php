@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
+            $table->string('tenet_id')->nullable();
+            $table->string('emp_id')->nullable();
+            $table->foreignId('session_year_id')->constrained('session_years')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
             $table->foreignId('course_class_id')->constrained('course_classes')->onDelete('cascade');
             $table->string('name');
             $table->string('subject_code')->nullable();

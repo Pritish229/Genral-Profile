@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('session_years', function (Blueprint $table) {
             $table->id();
+            $table->string('tenet_id')->nullable();
+            $table->string('emp_id')->nullable();
             $table->string('name')->unique(); 
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();

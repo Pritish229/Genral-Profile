@@ -11,6 +11,8 @@ class Section extends Model
     use HasFactory , SoftDeletes;
     protected $table = 'sections';
     protected $fillable = [
+        'tenet_id',
+        'emp_id',
         'course_class_id',
         'name',
         'section_code',

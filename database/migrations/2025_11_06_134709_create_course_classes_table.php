@@ -12,15 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('course_classes', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
-        $table->string('name'); 
-        $table->string('class_code')->unique();
-        $table->boolean('is_active')->default(false);
-        $table->text('description')->nullable();
-        $table->timestamps();
-        $table->timestamp('deleted_at', 6)->nullable();
-    });
+            $table->id();
+            $table->string('tenet_id')->nullable();
+            $table->string('emp_id')->nullable();
+            $table->foreignId('session_year_id')->constrained('session_years')->onDelete('cascade');
+            $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
+            $table->string('name');
+            $table->string('class_code')->unique();
+            $table->boolean('is_active')->default(false);
+            $table->text('description')->nullable();
+            $table->timestamps();
+            $table->timestamp('deleted_at', 6)->nullable();
+        });
     }
 
     /**
