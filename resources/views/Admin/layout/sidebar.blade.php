@@ -101,6 +101,9 @@
                         <li class="{{ in_array(Route::currentRouteName(), ['education.subject.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.subject.index') }}"><span>Subject Master</span></a>
                         </li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['education.chapter.index']) ? 'active' : '' }}">
+                            <a href="{{ route('education.chapter.index') }}"><span>Chapter Master</span></a>
+                        </li>
                         
                     </ul>
                 </li>

@@ -34,7 +34,7 @@ class SubjectController extends Controller
                 'is_active',
                 fn($row) => $row->is_active
                     ? '<span class="badge bg-success">Active</span>'
-                    : '<span class="badge bg-danger">Inactive</span>'
+                    : '<span class="badge bg-secondary">Inactive</span>'
             )
             ->addColumn('action', function ($row) {
                 return '<button class="btn btn-sm btn-primary editSubject" data-id="' . $row->id . '">
@@ -117,5 +117,15 @@ class SubjectController extends Controller
         return response()->json(['status' => true, 'message' => 'Subject deleted successfully']);
     }
 
-    
+    public function listSubjectsByClass(Request $request)
+    {
+        $request->validate([
+            'course_class_id' => 'required|exists:course_classes,id',
+        ]);
+
+        $subjects = Subject::where('course_class_id', $request->course_class_id)
+            ->get();
+
+        return response()->json(['status' => true, 'data' => $subjects]);
+    }
 }

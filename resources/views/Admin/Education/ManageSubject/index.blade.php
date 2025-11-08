@@ -1,11 +1,11 @@
 {{-- resources/views/Admin/Education/ManageSubject/index.blade.php --}}
 @extends('Admin.layout.app')
 
-@section('title', 'Manage Subjects')
+@section('title', 'Master')
 
 @section('content')
 <div class="page-content">
-    <x-breadcrumb title="Manage Subjects" :links="['Home' => 'Admin.Dashboard', 'Manage Subjects' => '']" />
+    <x-breadcrumb title="Subject Master" :links="['Home' => 'Admin.Dashboard', 'Subject Master' => '']" />
 
     <div class="p-1">
         <div class="row g-3 align-items-end mb-3">
@@ -114,24 +114,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Session Year</label>
-                            <select id="edit_session_year_id" class="form-select" disabled>
-                                <option value="">-- Loading... --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Course</label>
-                            <select id="edit_course_id" class="form-select" disabled>
-                                <option value="">-- Select Course --</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Class</label>
-                            <select id="edit_class_id" class="form-select" disabled>
-                                <option value="">-- Select Class --</option>
-                            </select>
-                        </div>
+                       
                         <div class="col-md-6">
                             <x-inputbox id="edit_subject_name" type="text" name="subject_name" label="Subject Name" placeholder="Enter subject name" :required="true" />
                         </div>
@@ -205,7 +188,6 @@ $(function () {
         });
     };
 
-    // === Load Classes ===
     const loadClasses = (sessionId, courseId, target, disableInactive = false) => {
         if (!sessionId || !courseId) {
             $(target).prop('disabled', true).html('<option value="">-- Select Class --</option>');
@@ -286,11 +268,11 @@ $(function () {
         ]
     });
 
-    // === Add Form ===
     $('#addSubjectForm').on('submit', function (e) {
         e.preventDefault();
         $.post("{{ route('education.subject.store') }}", $(this).serialize())
             .done(res => {
+                $('#add_session_year_id').val('').trigger('change');
                 $('#addSubjectModal').modal('hide');
                 $(this)[0].reset();
                 $('#add_course_id, #add_class_id').prop('disabled', true).html('<option value="">-- Select --</option>');
@@ -350,6 +332,7 @@ $(function () {
         const id = $('#edit_subject_id').val();
         $.post("{{ route('education.subject.update', ':id') }}".replace(':id', id), $(this).serialize())
             .done(res => {
+                
                 $('#editSubjectModal').modal('hide');
                 table.ajax.reload();
                 Swal.fire('Success', res.message, 'success');

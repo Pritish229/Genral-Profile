@@ -217,6 +217,7 @@ $(function () {
             .done(res => {
                 $('#addClassModal').modal('hide');
                 $('#addClassForm')[0].reset();
+                $('#add_session_year_id').val('').trigger('change');
                 $('#add_course_id').prop('disabled', true).html('<option value="">-- Select Course --</option>');
                 if ($('#add_course_id').data('select2')) $('#add_course_id').trigger('change.select2');
                 $('#add_is_active').prop('checked', true);
@@ -257,6 +258,7 @@ $(function () {
         const id = $('#edit_class_id').val();
         $.post("{{ route('education.class.update', ':id') }}".replace(':id', id), $(this).serialize())
             .done(res => {
+                $('#add_session_year_id').val('').trigger('change');
                 $('#editClassModal').modal('hide');
                 table.ajax.reload();
                 Swal.fire('Success', res.message, 'success');

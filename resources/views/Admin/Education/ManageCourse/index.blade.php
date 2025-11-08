@@ -40,7 +40,9 @@
     <div class="modal-dialog modal-lg">
         <form id="addCourseForm" enctype="multipart/form-data">@csrf
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Add Course</h5></div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Course</h5>
+                </div>
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -78,7 +80,9 @@
         <form id="editCourseForm" enctype="multipart/form-data">@csrf
             <input type="hidden" id="edit_course_id">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Edit Course</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Course</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -108,114 +112,205 @@
 
 @section('script')
 <script>
-$(function(){
+    $(function() {
 
-    const initSelect2 = () => {
-        $('#add_session_year_id').select2({width:"100%",dropdownParent:$('#addCourseModal')});
-        $('#filter_session_year').select2({width:"100%"});
-    };
-
-    const loadSessionYears = () => {
-        $.get("{{ route('education.sessionyear.list') }}", d=>{
-            let o = `<option value="">-- Select Session Year --</option>`;
-            d.data.forEach(i=>{
-                let status = i.is_active == 1 ? "(Active)" : "(Inactive)";
-                let disable = i.is_active == 0 ? "disabled" : "";
-                o += `<option value="${i.id}" ${disable}>${i.name} ${status}</option>`;
+        const initSelect2 = () => {
+            $('#add_session_year_id').select2({
+                width: "100%",
+                dropdownParent: $('#addCourseModal')
             });
-            $('#add_session_year_id').html(o);
-            $('#filter_session_year').html(o.replace(/disabled/g,""));
-            initSelect2();
-        });
-    };
-    loadSessionYears();
+            $('#filter_session_year').select2({
+                width: "100%"
+            });
+        };
 
-    const table = $('#courseTable').DataTable({
-        processing:true, serverSide:true,
-        ajax:{ url:"{{ route('education.course.paginate') }}", data:d=>d.session_year_id=$('#filter_session_year').val() },
-        columns:[
-            { data:'course_image', orderable:false, searchable:false },
-            { data:'session_year' },
-            { data:'course_name' },
-            { data:'course_code' },
-            { data:'is_active', orderable:false, searchable:false },
-            { data:'action', orderable:false, searchable:false }
-        ]
-    });
+        const loadSessionYears = () => {
+            $.get("{{ route('education.sessionyear.list') }}", d => {
+                // Step 1: Filter & sort data
+                const activeYears = [];
+                const inactiveYears = [];
 
-    $('#filter_session_year').change(()=>table.ajax.reload());
+                d.data.forEach(i => {
+                    const option = {
+                        id: i.id,
+                        name: i.name,
+                        is_active: i.is_active
+                    };
 
-    $('.course-images').imageUploader({multiple:false,imagesInputName:'course_image'});
+                    if (i.is_active == 1) {
+                        activeYears.push(option);
+                    } else {
+                        inactiveYears.push(option);
+                    }
+                });
 
-    $('#addCourseForm').on('submit',function(e){
-        e.preventDefault();
-        $.ajax({
-            url:"{{ route('education.course.store') }}",
-            type:"POST",
-            data:new FormData(this),
-            processData:false, contentType:false,
-            success:r=>{
-                $('#addCourseModal').modal('hide');
-                $('#addCourseForm')[0].reset();
-                $('.course-images').empty().imageUploader({multiple:false,imagesInputName:'course_image'});
-                $('#add_is_active').prop('checked',true);
-                table.ajax.reload();
-                Swal.fire("Success",r.message,"success");
+                // Step 2: Sort each group by name (e.g., "2024-2025")
+                const sortByName = (a, b) => a.name.localeCompare(b.name, undefined, {
+                    numeric: true
+                });
+
+                activeYears.sort(sortByName);
+                inactiveYears.sort(sortByName);
+                const sortedData = [...activeYears, ...inactiveYears];
+
+                let addOptions = `<option value="">-- Select Session Year --</option>`;
+                let filterOptions = `<option value="">-- Select Session Year --</option>`;
+
+                sortedData.forEach(i => {
+                    const status = i.is_active ? "(Active)" : "(Inactive)";
+                    const disabled = i.is_active ? "" : "disabled";
+
+                    const optionHtml = `<option value="${i.id}" ${disabled}>${i.name} ${status}</option>`;
+
+                    addOptions += optionHtml;
+                    filterOptions += optionHtml.replace('disabled', ''); // Filter shows all
+                });
+
+                $('#add_session_year_id').html(addOptions);
+                $('#filter_session_year').html(filterOptions);
+
+                initSelect2();
+            });
+        };
+        loadSessionYears();
+
+        const table = $('#courseTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('education.course.paginate') }}",
+                data: function(d) {
+                    d.session_year_id = $('#filter_session_year').val();
+                }
             },
-            error:err=>{
-                let msg = Object.values(err.responseJSON.errors)[0];
-                Swal.fire("Error",msg,"error");
-            }
+            columns: [{
+                    data: 'course_image',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'session_year'
+                },
+                {
+                    data: 'course_name'
+                },
+                {
+                    data: 'course_code'
+                },
+                {
+                    data: 'is_active',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'action',
+                    orderable: false,
+                    searchable: false
+                }
+            ]
         });
-    });
 
-    $(document).on('click','.editCourse',function(){
-        let id=$(this).data('id');
-        $.get("{{ route('education.course.edit',':id') }}".replace(':id',id),d=>{
-            $('#edit_course_id').val(d.id);
-            $('#edit_name').val(d.course_name);
-            $('#edit_code').val(d.course_code);
-            $('#edit_description').val(d.description);
-            $('#edit_is_active').prop('checked',d.is_active==1);
-            $('.course-images-edit').empty().imageUploader({
-                multiple:false,
-                imagesInputName:'course_image',
-                preloaded:d.course_image_url?[{id:1,src:d.course_image_url}]:[]
+        $('#filter_session_year').on('change', function() {
+            table.draw(); // Proper for serverSide filtered reload
+        });
+
+        $('.course-images').imageUploader({
+            multiple: false,
+            imagesInputName: 'course_image'
+        });
+
+        $('#addCourseForm').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: "{{ route('education.course.store') }}",
+                type: "POST",
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                success: r => {
+                    $('#addCourseModal').modal('hide');
+                    $('#addCourseForm')[0].reset();
+                    $('#add_session_year_id').val('').trigger('change');
+                    $('.course-images').empty().imageUploader({
+                        multiple: false,
+                        imagesInputName: 'course_image'
+                    });
+                    $('#add_is_active').prop('checked', true);
+                    table.ajax.reload();
+                    Swal.fire("Success", r.message, "success");
+                },
+                error: err => {
+                    let msg = Object.values(err.responseJSON.errors)[0];
+                    Swal.fire("Error", msg, "error");
+                }
             });
-            $('#editCourseModal').modal('show');
         });
-    });
 
-    $('#editCourseForm').on('submit',function(e){
-        e.preventDefault();
-        let id=$('#edit_course_id').val();
-        $.ajax({
-            url:"{{ route('education.course.update',':id') }}".replace(':id',id),
-            type:"POST",
-            data:new FormData(this),
-            processData:false, contentType:false,
-            success:r=>{
-                $('#editCourseModal').modal('hide');
-                table.ajax.reload();
-                Swal.fire("Success",r.message,"success");
-            },
-            error:err=>{
-                let msg = Object.values(err.responseJSON.errors)[0];
-                Swal.fire("Error",msg,"error");
-            }
-        });
-    });
-
-    $(document).on('click','.deleteCourse',function(){
-        let id=$(this).data('id');
-        Swal.fire({title:"Delete?",icon:"warning",showCancelButton:true})
-        .then(r=>{ if(r.isConfirmed){
-            $.ajax({ url:"{{ route('education.course.delete',':id') }}".replace(':id',id), type:"DELETE", data:{_token:"{{ csrf_token() }}"},
-                success:()=>{ table.ajax.reload(); Swal.fire("Deleted","","success"); }
+        $(document).on('click', '.editCourse', function() {
+            let id = $(this).data('id');
+            $.get("{{ route('education.course.edit',':id') }}".replace(':id', id), d => {
+                $('#edit_course_id').val(d.id);
+                $('#edit_name').val(d.course_name);
+                $('#edit_code').val(d.course_code);
+                $('#edit_description').val(d.description);
+                $('#edit_is_active').prop('checked', d.is_active == 1);
+                $('.course-images-edit').empty().imageUploader({
+                    multiple: false,
+                    imagesInputName: 'course_image',
+                    preloaded: d.course_image_url ? [{
+                        id: 1,
+                        src: d.course_image_url
+                    }] : []
+                });
+                $('#editCourseModal').modal('show');
             });
-        }});
-    });
+        });
 
-});
+        $('#editCourseForm').on('submit', function(e) {
+            e.preventDefault();
+            let id = $('#edit_course_id').val();
+            $.ajax({
+                url: "{{ route('education.course.update',':id') }}".replace(':id', id),
+                type: "POST",
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                success: r => {
+                    $('#editCourseModal').modal('hide');
+                    table.ajax.reload();
+                    Swal.fire("Success", r.message, "success");
+                },
+                error: err => {
+                    let msg = Object.values(err.responseJSON.errors)[0];
+                    Swal.fire("Error", msg, "error");
+                }
+            });
+        });
+
+        $(document).on('click', '.deleteCourse', function() {
+            let id = $(this).data('id');
+            Swal.fire({
+                    title: "Delete?",
+                    icon: "warning",
+                    showCancelButton: true
+                })
+                .then(r => {
+                    if (r.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('education.course.delete',':id') }}".replace(':id', id),
+                            type: "DELETE",
+                            data: {
+                                _token: "{{ csrf_token() }}"
+                            },
+                            success: () => {
+                                table.ajax.reload();
+                                Swal.fire("Deleted", "", "success");
+                            }
+                        });
+                    }
+                });
+        });
+
+    });
 </script>
 @endsection

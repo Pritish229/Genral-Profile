@@ -26,6 +26,7 @@ use App\Http\Controllers\Customers\CustomerMediaController;
 use App\Http\Controllers\Employees\EmployeeMediaController;
 use App\Http\Controllers\Students\StudentAddressController;
 use App\Http\Controllers\Students\StudentContactController;
+use App\Http\Controllers\Education\SubjectChapterController;
 use App\Http\Controllers\Customers\CustomerAddressController;
 use App\Http\Controllers\Customers\CustomerContactController;
 use App\Http\Controllers\Customers\CustomerProfileController;
@@ -511,7 +512,14 @@ Route::prefix('education/')->group(function () {
     Route::get('subjects/paginate', [SubjectController::class, 'paginate'])->name('education.subject.paginate');
     Route::post('subjects', [SubjectController::class, 'store'])->name('education.subject.store');
     Route::get('subjects/{id}/edit', [SubjectController::class, 'edit'])->name('education.subject.edit');
+    Route::get('class-subjects/list', [SubjectController::class, 'listSubjectsByClass'])->name('education.subject.ClassWise');
     Route::post('subjects/{id}', [SubjectController::class, 'update'])->name('education.subject.update');
     Route::delete('subjects/{id}', [SubjectController::class, 'destroy'])->name('education.subject.delete');
 
+    Route::get('/chapters', [SubjectChapterController::class, 'index'])->name('education.chapter.index');
+    Route::get('/chapters/paginate', [SubjectChapterController::class, 'paginate'])->name('education.chapter.paginate');
+    Route::post('/chapters/store', [SubjectChapterController::class, 'store'])->name('education.chapter.store');
+    Route::get('/chapters/{id}/edit', [SubjectChapterController::class, 'edit'])->name('education.chapter.edit');
+    Route::post('/chapters/{id}/update', [SubjectChapterController::class, 'update'])->name('education.chapter.update');
+    Route::delete('/chapters/{id}/delete', [SubjectChapterController::class, 'destroy'])->name('education.chapter.delete');
 });
