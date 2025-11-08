@@ -63,13 +63,13 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="add_name" type="text" name="class_name" label="Class Name" placeholder="Enter class name" :required="true" />
+                            <x-inputbox id="add_name" type="text" name="class_name" label="Class Name" placeholder="Enter class name" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="add_code" type="text" name="class_code" label="Class Code" placeholder="Unique code" :required="true" />
+                            <x-inputbox id="add_code" type="text" name="class_code" label="Class Code" placeholder="Unique code" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-12">
-                            <x-textareabox id="add_description" name="description" label="Description" placeholder="Optional details" />
+                            <x-textareabox id="add_description" name="description" label="Description" placeholder="Optional details" value="" helpertxt="" />
                         </div>
                         <div class="col-12">
                             <x-switch-toggle id="add_is_active" name="is_active" :checked="true" label="Active" />
@@ -97,13 +97,13 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <x-inputbox id="edit_name" type="text" name="class_name" label="Class Name" placeholder="Enter class name" :required="true" />
+                            <x-inputbox id="edit_name" type="text" name="class_name" label="Class Name" placeholder="Enter class name" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="edit_code" type="text" name="class_code" label="Class Code" placeholder="Unique code" :required="true" />
+                            <x-inputbox id="edit_code" type="text" name="class_code" label="Class Code" placeholder="Unique code" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-12">
-                            <x-textareabox id="edit_description" name="description" label="Description" placeholder="Optional details" />
+                            <x-textareabox id="edit_description" name="description" label="Description" placeholder="Optional details" value="" helpertxt="" />
                         </div>
                         <div class="col-12">
                             <x-switch-toggle id="edit_is_active" name="is_active" :checked="old('is_active') ?? false" label="Active" />

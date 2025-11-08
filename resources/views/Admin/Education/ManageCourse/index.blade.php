@@ -52,17 +52,17 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="add_name" type="text" name="course_name" label="Course Name" placeholder="Enter Course Name" :required="true" />
+                            <x-inputbox id="add_name" type="text" name="course_name" label="Course Name" placeholder="Enter Course Name" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-12">
-                            <x-inputbox id="add_code" type="text" name="course_code" label="Course Code" placeholder="Enter Course Code" :required="true" />
+                            <x-inputbox id="add_code" type="text" name="course_code" label="Course Code" placeholder="Enter Course Code" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-12">
                             <label>Course Image</label>
                             <div class="course-images"></div>
                         </div>
                         <div class="col-md-12">
-                            <x-textareabox id="description" label="Description" name="description" placeholder="Enter course description (optional)" />
+                            <x-textareabox id="description" label="Description" name="description" placeholder="Enter course description (optional)" value="" helpertxt="" />
                         </div>
                         <div class="col-md-12">
                             <x-switch-toggle id="add_is_active" name="is_active" :checked="true" label="Active" />
@@ -86,17 +86,17 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <x-inputbox id="edit_name" type="text" name="course_name" label="Course Name" placeholder="Enter Course Name" :required="true" />
+                            <x-inputbox id="edit_name" type="text" name="course_name" label="Course Name" placeholder="Enter Course Name" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="edit_code" type="text" name="course_code" label="Course Code" placeholder="Enter Course Code" :required="true" />
+                            <x-inputbox id="edit_code" type="text" name="course_code" label="Course Code" placeholder="Enter Course Code" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-12">
                             <label>Course Image</label>
                             <div class="course-images-edit"></div>
                         </div>
                         <div class="col-md-12">
-                            <x-textareabox id="edit_description" label="Description" name="description" placeholder="Enter course description (optional)" />
+                            <x-textareabox id="edit_description" label="Description" name="description" placeholder="Enter course description (optional)" value="" helpertxt="" />
                         </div>
                         <div class="col-md-12">
                             <x-switch-toggle id="edit_is_active" name="is_active" :checked="old('is_active') ?? false" label="Active" />

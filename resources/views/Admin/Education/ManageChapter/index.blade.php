@@ -1,10 +1,10 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Manage Chapters')
+@section('title', 'Chapter Master')
 
 @section('content')
 <div class="page-content">
-    <x-breadcrumb title="Manage Chapters" :links="['Home' => 'Admin.Dashboard', 'Manage Chapters' => '']" />
+    <x-breadcrumb title="Chapter Master" :links="['Home' => 'Admin.Dashboard', 'Chapter Master' => '']" />
 
     <div class="p-1">
     <div class="text-end mb-3">
@@ -94,7 +94,7 @@
                             </select>
                         </div>
                         <div class="col-md-12">
-                            <x-inputbox id="add_chapter_name" placeholder="Enter Chapter Name" type="text" name="chapter_name" label="Chapter Name" :required="true" />
+                            <x-inputbox id="add_chapter_name" placeholder="Enter Chapter Name" type="text" name="chapter_name" label="Chapter Name" :required="true" value="" helpertxt="" />
                         </div>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
                     <div class="row g-3">
 
                         <div class="col-md-12">
-                            <x-inputbox id="edit_chapter_name" placeholder="Enter Chapter Name" type="text" name="chapter_name" label="Chapter Name" :required="true" />
+                            <x-inputbox id="edit_chapter_name" placeholder="Enter Chapter Name" type="text" name="chapter_name" label="Chapter Name" :required="true" value="" helpertxt="" />
                         </div>
                     </div>
                 </div>
@@ -308,6 +308,7 @@
             e.preventDefault();
             $.post("{{ route('education.chapter.store') }}", $(this).serialize())
                 .done(res => {
+                    $('#add_session_year_id').val('').trigger('change');
                     $('#addChapterModal').modal('hide');
                     this.reset();
                     table.ajax.reload();

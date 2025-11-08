@@ -83,10 +83,10 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="add_subject_name" type="text" name="subject_name" label="Subject Name" placeholder="Enter subject name" :required="true" />
+                            <x-inputbox id="add_subject_name" type="text" name="subject_name" label="Subject Name" placeholder="Enter subject name" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="add_subject_code" type="text" name="subject_code" label="Subject Code" placeholder="Enter code (optional)" />
+                            <x-inputbox id="add_subject_code" type="text" name="subject_code" label="Subject Code" placeholder="Enter Subject Code" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-12">
                             <x-switch-toggle id="add_is_active" name="is_active" :checked="true" label="Active" />
@@ -116,10 +116,10 @@
                     <div class="row g-3">
                        
                         <div class="col-md-6">
-                            <x-inputbox id="edit_subject_name" type="text" name="subject_name" label="Subject Name" placeholder="Enter subject name" :required="true" />
+                            <x-inputbox id="edit_subject_name" type="text" name="subject_name" label="Subject Name" placeholder="Enter subject name" :required="true" value="" helpertxt="" />
                         </div>
                         <div class="col-md-6">
-                            <x-inputbox id="edit_subject_code" type="text" name="subject_code" label="Subject Code" placeholder="Enter code (optional)" />
+                            <x-inputbox id="edit_subject_code" type="text" name="subject_code" label="Subject Code" placeholder="Enter code (optional)" value="" helpertxt=""  :required="true"/>
                         </div>
                         <div class="col-12">
                             <x-switch-toggle id="edit_is_active" name="is_active" :checked="false" label="Active" />

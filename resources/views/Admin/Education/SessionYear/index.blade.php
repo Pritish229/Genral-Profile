@@ -43,12 +43,8 @@
                 </div>
 
                 <div class="modal-body">
-                    <x-inputbox id="add_name"
-                                type="text"
-                                placeholder="Enter Session Name"
-                                label="Session Name"
-                                name="name"
-                                :required="true" />
+                    <x-inputbox id="add_name" type="text" placeholder="Enter Session Name" label="Session Name" name="name"
+                                :required="true" value="" helpertxt="" />
 
                     <div class="row">
                         <div class="col-md-6 mt-3">
@@ -103,7 +99,7 @@
                                 placeholder="Enter Session Name"
                                 label="Session Name"
                                 name="name"
-                                :required="true" />
+                                :required="true" value="" helpertxt="" />
 
                     <div class="row">
                         <div class="col-md-6 mt-3">
