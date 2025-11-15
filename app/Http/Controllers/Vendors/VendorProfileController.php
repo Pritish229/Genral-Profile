@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Vendors;
 
-use App\Models\Vendor;
 use Illuminate\Http\Request;
+use App\Models\Vendor\Vendor;
 use App\Http\Controllers\Controller;
-use App\Models\VendorIndividualProfile;
-use App\Models\VendorBusinessProfile;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\Vendor\VendorBusinessProfile;
+use App\Models\Vendor\VendorIndividualProfile;
 
 class VendorProfileController extends Controller
 {

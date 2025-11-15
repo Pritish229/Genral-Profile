@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Employees;
 
-use App\Models\Employee;
+use App\Models\Employee\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\EmployeePaymentAccount;
+use App\Models\Employee\EmployeePaymentAccount;
 
 class EmployeeBankController extends Controller
 {

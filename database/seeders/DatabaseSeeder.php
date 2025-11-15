@@ -5,9 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Seeders\SpecificationSeeder;
-use Database\Seeders\ProductCategorySeeder;
-use Database\Seeders\ProductVariationSeeder;
+use Database\Seeders\EducationSeeder;
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,6 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       
+       $this->call([
+
+        // EducationSeeder::class,
+       ]);
     }
 }

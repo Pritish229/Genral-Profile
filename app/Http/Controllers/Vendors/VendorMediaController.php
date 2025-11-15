@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Vendors;
 
-use App\Models\Vendor;
-use App\Models\VendorMedia;
 use Illuminate\Http\Request;
+use App\Models\Vendor\Vendor;
+use App\Models\Vendor\VendorMedia;
 use App\Http\Controllers\Controller;
-use App\Models\VendorBusinessProfile;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Vendor\VendorBusinessProfile;
 
 class VendorMediaController extends Controller
 {

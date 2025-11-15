@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Students;
 
 use Carbon\Carbon;
-use App\Models\Student;
+use App\Models\Student\Student;
+use App\Models\Student\StudentDocument;
 use Illuminate\Http\Request;
-use App\Models\StudentDocument;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 

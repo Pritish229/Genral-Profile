@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Vendors;
 
 use Carbon\Carbon;
-use App\Models\Vendor;
 use Illuminate\Http\Request;
-use App\Models\VendorDocument;
+use App\Models\Vendor\Vendor;
 use App\Http\Controllers\Controller;
-use App\Models\VendorBusinessProfile;
+use App\Models\Vendor\VendorDocument;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Vendor\VendorBusinessProfile;
 
 class VendorDocumentController extends Controller
 {

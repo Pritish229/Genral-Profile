@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Vendors;
 
-use App\Models\Vendor;
 use Illuminate\Http\Request;
+use App\Models\Vendor\Vendor;
 use App\Models\VendorAddress;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Models\VendorBusinessProfile;
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\Vendor\VendorBusinessProfile;
 
 class VendorBusinessProfileController extends Controller
 {

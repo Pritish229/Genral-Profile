@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Education;
 
-use App\Models\Subject;
-use App\Models\CourseClass;
+use App\Models\Education\SessionYear;
 use Illuminate\Http\Request;
-use App\Models\SubjectChapters;
+use App\Models\Education\Subject;
 use App\Http\Controllers\Controller;
-use App\Models\SessionYear;
+use App\Models\Education\CourseClass;
+use App\Models\Education\SubjectChapters;
 
 class SubjectChapterController extends Controller
 {

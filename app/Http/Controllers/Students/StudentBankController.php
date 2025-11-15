@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Students;
 
-use App\Models\Student;
+use App\Models\Student\Student;
+use App\Models\Student\StudentPaymentAccount;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\StudentPaymentAccount;
 
 class StudentBankController extends Controller
 {

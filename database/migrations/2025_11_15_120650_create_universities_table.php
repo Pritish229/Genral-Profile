@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('universities', function (Blueprint $table) {
+            $table->id();
+            $table->string('org_name');
+            $table->string('city');
+            $table->string('district');
+            $table->string('state');
+            $table->string('phone_no');
+            $table->string('alternate_no')->nullable();
+            $table->string('email_id');
+            $table->string('alt_email_id')->nullable();
+            $table->string('org_logo')->nullable();
+            $table->text('address');
+            $table->text('website_url')->nullable();
+            $table->timestamp('deleted_at', 6)->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('universities');
+    }
+};

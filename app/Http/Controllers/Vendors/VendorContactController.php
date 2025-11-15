@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Vendors;
 
-use App\Models\Vendor;
 use Illuminate\Http\Request;
-use App\Models\VendorContact;
+use App\Models\Vendor\Vendor;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\VendorBusinessProfile;
+use App\Models\Vendor\VendorContact;
+use App\Models\Vendor\VendorBusinessProfile;
 
 class VendorContactController extends Controller
 {

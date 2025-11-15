@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Vendors;
 
-use App\Models\Vendor;
 use Illuminate\Http\Request;
+use App\Models\Vendor\Vendor;
 use App\Models\VendorAddress;
-use App\Models\VendorContact;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Vendor\VendorContact;
 use App\Models\VendorBusinessProfile;
-use App\Models\VendorIndividualProfile;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use App\Models\Vendor\VendorIndividualProfile;
 
 class VendorController extends Controller
 {

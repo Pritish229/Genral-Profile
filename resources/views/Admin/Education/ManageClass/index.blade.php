@@ -28,15 +28,15 @@
         <div class="card p-3">
             <table class="table table-bordered" id="classTable">
                 <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Session</th>
-                    <th>Course</th>
-                    <th>Class Name</th>
-                    <th>Code</th>
-                    <th>Active</th>
-                    <th width="140">Actions</th>
-                </tr>
+                    <tr>
+                        <th>#</th>
+                        <th>Session</th>
+                        <th>Course</th>
+                        <th>Class Name</th>
+                        <th>Code</th>
+                        <th>Active</th>
+                        <th width="140">Actions</th>
+                    </tr>
                 </thead>
             </table>
         </div>
@@ -47,7 +47,9 @@
     <div class="modal-dialog modal-lg">
         <form id="addClassForm">@csrf
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Add Class</h5></div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Class</h5>
+                </div>
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -123,6 +125,8 @@
 @section('script')
 <script>
 $(function () {
+
+    // ===== Initialize Select2 =====
     const initSelect2 = () => {
         const selects = $('#filter_session_year, #filter_course_id, #add_session_year_id, #add_course_id, #edit_session_year_id, #edit_course_id');
         selects.each(function() {
@@ -135,61 +139,78 @@ $(function () {
         });
     };
 
-    const loadSessionYears = (target, disableInactive = false) => {
+    // ===== Load Session Years =====
+    const loadSessionYears = () => {
+        // Filter dropdown → all sessions (active + inactive)
         $.get("{{ route('education.sessionyear.list') }}", res => {
             const html = `<option value="">-- Select Session Year --</option>` +
                 res.data.map(i => {
-                    const status = i.is_active == 1 ? ' (Active)' : ' (Inactive)';
-                    const disabled = disableInactive && i.is_active == 0 ? ' disabled' : '';
-                    return `<option value="${i.id}"${disabled}>${i.name}${status}</option>`;
+                    const status = i.is_active ? ' (Active)' : ' (Inactive)';
+                    return `<option value="${i.id}">${i.name}${status}</option>`;
                 }).join('');
-            $(target).html(html);
-            initSelect2();
+            $('#filter_session_year').html(html);
         });
+
+        // Add/Edit dropdown → only active sessions
+        $.get("{{ route('education.sessionyear.active') }}", res => {
+            const html = `<option value="">-- Select Session Year --</option>` +
+                res.data.map(i => `<option value="${i.id}">${i.name} (Active)</option>`).join('');
+            $('#add_session_year_id, #edit_session_year_id').html(html);
+        });
+
+        setTimeout(initSelect2, 500);
     };
 
-    const loadCourses = (sessionId, target, disableInactive = false) => {
+    // ===== Load Courses =====
+    const loadCourses = (sessionId, target, disableInactive = false, onlyActive = false) => {
         if (!sessionId) {
             $(target).prop('disabled', true).html('<option value="">-- Select Course --</option>');
             if ($(target).data('select2')) $(target).trigger('change.select2');
             return;
         }
+
         $.get("{{ route('education.course.SessionWise') }}", { session_year_id: sessionId }, res => {
-            console.log(res);
-            
+            let courses = res.data;
+           
+        
+            if (onlyActive) {
+                courses = courses.filter(c => c.is_active == 1);
+            }
+
             const html = `<option value="">-- Select Course --</option>` +
-                res.data.map(c => {
-                    const status = c.is_active == 1 ? ' (Active)' : ' (Inactive)';
+                courses.map(c => {
+                    const status = c.is_active ? ' (Active)' : ' (Inactive)';
                     const disabled = disableInactive && c.is_active == 0 ? ' disabled' : '';
                     return `<option value="${c.id}"${disabled}>${c.course_name}${status}</option>`;
                 }).join('');
+
             $(target).html(html).prop('disabled', false);
             if ($(target).data('select2')) $(target).trigger('change.select2');
         });
     };
 
-    // Load session years (no disable for filter, disable inactive for add/edit)
-    loadSessionYears('#filter_session_year', false);
-    loadSessionYears('#add_session_year_id', true);
-    loadSessionYears('#edit_session_year_id', true);
+    loadSessionYears();
 
-    // Filter: no disable
+    // ===== Filter dropdowns =====
     $(document).on('change', '#filter_session_year', function () {
         loadCourses(this.value, '#filter_course_id', false);
         $('#classTable').DataTable().ajax.reload();
     });
     $(document).on('change', '#filter_course_id', () => $('#classTable').DataTable().ajax.reload());
 
-    // Add modal: disable inactive
+    // ===== Add modal =====
     $(document).on('change', '#add_session_year_id', function () {
-        loadCourses(this.value, '#add_course_id', true);
+        // show only active courses
+        loadCourses(this.value, '#add_course_id', false, true);
     });
 
-    // Edit modal: disable inactive
+    // ===== Edit modal =====
     $(document).on('change', '#edit_session_year_id', function () {
+        // show both active/inactive but inactive disabled
         loadCourses(this.value, '#edit_course_id', true);
     });
 
+    // ===== DataTable =====
     const table = $('#classTable').DataTable({
         processing: true,
         serverSide: true,
@@ -211,6 +232,7 @@ $(function () {
         ]
     });
 
+    // ===== Add Form =====
     $('#addClassForm').on('submit', function (e) {
         e.preventDefault();
         $.post("{{ route('education.class.store') }}", $(this).serialize())
@@ -232,6 +254,7 @@ $(function () {
             });
     });
 
+    // ===== Edit =====
     $(document).on('click', '.editClass', function () {
         const id = $(this).data('id');
         $.get("{{ route('education.class.edit', ':id') }}".replace(':id', id), d => {
@@ -243,22 +266,19 @@ $(function () {
             $('#edit_session_year_id').val(d.session_year_id);
             if ($('#edit_session_year_id').data('select2')) $('#edit_session_year_id').trigger('change.select2');
 
-            // Load courses with inactive disabled
             loadCourses(d.session_year_id, '#edit_course_id', true);
-            setTimeout(() => {
-                $('#edit_course_id').val(d.course_id).trigger('change.select2');
-            }, 100);
+            setTimeout(() => $('#edit_course_id').val(d.course_id).trigger('change.select2'), 200);
 
             $('#editClassModal').modal('show');
         });
     });
 
+    // ===== Update =====
     $('#editClassForm').on('submit', function (e) {
         e.preventDefault();
         const id = $('#edit_class_id').val();
         $.post("{{ route('education.class.update', ':id') }}".replace(':id', id), $(this).serialize())
             .done(res => {
-                $('#add_session_year_id').val('').trigger('change');
                 $('#editClassModal').modal('hide');
                 table.ajax.reload();
                 Swal.fire('Success', res.message, 'success');
@@ -271,6 +291,7 @@ $(function () {
             });
     });
 
+    // ===== Delete =====
     $(document).on('click', '.deleteClass', function () {
         const id = $(this).data('id');
         Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true })
@@ -280,11 +301,15 @@ $(function () {
                         url: "{{ route('education.class.delete', ':id') }}".replace(':id', id),
                         type: 'DELETE',
                         data: { _token: "{{ csrf_token() }}" },
-                        success: () => { table.ajax.reload(); Swal.fire('Deleted', '', 'success'); }
+                        success: () => {
+                            table.ajax.reload();
+                            Swal.fire('Deleted', '', 'success');
+                        }
                     });
                 }
             });
     });
+
 });
 </script>
 @endsection

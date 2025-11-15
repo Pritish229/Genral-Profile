@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Students;
 
 use Carbon\Carbon;
-use App\Models\Student;
-use App\Models\Employee;
+use App\Models\Student\Student;
+use App\Models\Student\StudentProfile;
 use Illuminate\Http\Request;
-use App\Models\StudentProfile;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Validator;

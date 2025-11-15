@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Education;
 
-use App\Models\Course;
-use App\Models\SessionYear;
+use App\Models\Education\SessionYear;
 use Illuminate\Http\Request;
+use App\Models\Education\Course;
 use App\Http\Controllers\Controller;
 
 class CourseController extends Controller
@@ -23,21 +23,25 @@ class CourseController extends Controller
         }
 
         return datatables()->of($query)
-            ->addColumn('course_image', function($row){
-                $src = $row->course_image ? asset('storage/'.$row->course_image) : asset('no-image.png');
-                return '<img src="'.$src.'" width="45" height="45" class="rounded border">';
+            ->addColumn('course_image', function ($row) {
+                $src = $row->course_image ? asset('storage/' . $row->course_image) : asset('no-image.png');
+                return '<img src="' . $src . '" width="45" height="45" class="rounded border">';
             })
             ->addColumn('session_year', fn($row) => $row->sessionYear->name)
-            ->addColumn('is_active', fn($row) =>
+            ->addColumn(
+                'is_active',
+                fn($row) =>
                 $row->is_active
                     ? '<span class="badge bg-success">Active</span>'
                     : '<span class="badge bg-secondary">Inactive</span>'
             )
-            ->addColumn('action', fn($row) =>
+            ->addColumn(
+                'action',
+                fn($row) =>
                 '<button class="btn btn-sm btn-primary editCourse" data-id="' . $row->id . '"> <i class="fas fa-edit"></i> Edit</button>
                  <button class="btn btn-sm btn-danger deleteCourse" data-id="' . $row->id . '"><i class="fas fa-trash"></i> Delete</button>'
             )
-            ->rawColumns(['course_image','is_active', 'action'])
+            ->rawColumns(['course_image', 'is_active', 'action'])
             ->make(true);
     }
 
@@ -69,7 +73,7 @@ class CourseController extends Controller
     public function edit($id)
     {
         $course = Course::findOrFail($id);
-        $course->course_image_url = $course->course_image ? asset('storage/'.$course->course_image) : null;
+        $course->course_image_url = $course->course_image ? asset('storage/' . $course->course_image) : null;
         return response()->json($course);
     }
 
@@ -89,8 +93,8 @@ class CourseController extends Controller
         $data['is_active'] = $request->filled('is_active') ? 1 : 0;
 
         if ($request->hasFile('course_image')) {
-            if ($course->course_image && file_exists(public_path('storage/'.$course->course_image))) {
-                unlink(public_path('storage/'.$course->course_image));
+            if ($course->course_image && file_exists(public_path('storage/' . $course->course_image))) {
+                unlink(public_path('storage/' . $course->course_image));
             }
             $data['course_image'] = $request->course_image->store('courses', 'public');
         }
@@ -106,7 +110,7 @@ class CourseController extends Controller
         return response()->json(['status' => true, 'message' => 'Course Deleted Successfully']);
     }
 
-    public function listSessionWise(Request $request)
+    public function SessionWiseCourselist(Request $request)
     {
         $query = Course::whereNull('deleted_at')->orderBy('course_name');
 
@@ -115,7 +119,14 @@ class CourseController extends Controller
         }
 
         $courses = $query->get();
+        $activeCourses = $courses->where('is_active', 1)->values();
+        $inactiveCourses = $courses->where('is_active', 0)->values();
 
-        return response()->json(['status' => true, 'data' => $courses]);
+        return response()->json([
+            'status' => true,
+            'active' => $activeCourses,
+            'inactive' => $inactiveCourses,
+            'data' => $courses
+        ]);
     }
 }

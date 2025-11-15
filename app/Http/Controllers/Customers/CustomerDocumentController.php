@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Customers;
 
 use Carbon\Carbon;
-use App\Models\Customer;
+use App\Models\Customer\Customer;
+use App\Models\Customer\CustomerDocument;
+use App\Models\Customer\CustomerBusinessProfile;
 use Illuminate\Http\Request;
-use App\Models\CustomerDocument;
 use App\Http\Controllers\Controller;
-use App\Models\CustomerBusinessProfile;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerDocumentController extends Controller

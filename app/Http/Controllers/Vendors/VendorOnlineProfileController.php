@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Vendors;
 
-use App\Models\Vendor;
+use App\Models\Vendor\Vendor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\VendorBusinessProfile;
-use App\Models\VendorOnlineProfile;
+use App\Models\Vendor\VendorBusinessProfile;
+use App\Models\Vendor\VendorOnlineProfile;
 
 class VendorOnlineProfileController extends Controller
 {

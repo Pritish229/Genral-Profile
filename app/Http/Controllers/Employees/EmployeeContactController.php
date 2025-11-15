@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Employees;
 
-use App\Models\Employee;
+use App\Models\Employee\Employee;
 use Illuminate\Http\Request;
-use App\Models\EmployeeContact;
+use App\Models\Employee\EmployeeContact;
 use App\Http\Controllers\Controller;
 
 class EmployeeContactController extends Controller

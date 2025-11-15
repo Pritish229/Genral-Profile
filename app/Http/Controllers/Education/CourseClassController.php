@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Education;
 
-use App\Models\Course;
-use App\Models\CourseClass;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Education\Course;
 use App\Http\Controllers\Controller;
+use App\Models\Education\CourseClass;
 
 class CourseClassController extends Controller
 {
@@ -114,11 +114,28 @@ class CourseClassController extends Controller
 
     public function getCoursesBySessionYear(Request $request)
     {
-        $sessionYearId = $request->session_year_id;
-        $course_id = $request->course_id;
-        $courses = CourseClass::where('session_year_id', $sessionYearId)
-        ->where('course_id', $course_id)
-        ->get();
-        return response()->json(['status' => true, 'data' => $courses]);
+        $query = CourseClass::query();
+
+        // Optional filters
+        if ($request->filled('session_year_id')) {
+            $query->where('session_year_id', $request->session_year_id);
+        }
+
+        if ($request->filled('course_id')) {
+            $query->where('course_id', $request->course_id);
+        }
+
+        $query->with(['sessionYear', 'course']);
+
+        $allClasses = $query->get();
+        $activeClasses = $allClasses->where('is_active', 1)->values();
+        $inactiveClasses = $allClasses->where('is_active', 0)->values();
+
+        return response()->json([
+            'status' => true,
+            'active' => $activeClasses,
+            'inactive' => $inactiveClasses,
+            'data' => $allClasses
+        ]);
     }
 }

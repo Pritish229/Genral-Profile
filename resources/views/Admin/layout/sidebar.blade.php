@@ -66,7 +66,7 @@
                     </ul>
                 </li>
 
-                <!-- Customers -->
+
                 <li class="{{ in_array(Route::currentRouteName(), ['customers.create','customers.List']) ? 'mm-active' : '' }}">
                     <a href="javascript: void(0);" class="has-arrow">
                         <i class="fas fa-id-card-alt" style="color: #545a6d;font-size: 0.99rem;"></i>
@@ -82,8 +82,7 @@
                     </ul>
                 </li>
 
-                <!-- Education -->
-                 <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index',]) ? 'mm-active' : '' }}">
+                <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index',]) ? 'mm-active' : '' }}">
                     <a href="javascript: void(0);" class="has-arrow">
                         <i class="fas fa-graduation-cap" style="color: #545a6d;font-size: 0.99rem;"></i>
                         <span data-key="t-authentication">Education</span>
@@ -104,8 +103,29 @@
                         <li class="{{ in_array(Route::currentRouteName(), ['education.chapter.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.chapter.index') }}"><span>Chapter Master</span></a>
                         </li>
-                        
+                        <li class="{{ in_array(Route::currentRouteName(), ['education.section.index']) ? 'active' : '' }}">
+                            <a href="{{ route('education.section.index') }}"><span>Section Master</span></a>
+                        </li>
+
                     </ul>
+
+                </li>
+                <li class="{{ in_array(Route::currentRouteName(), ['fee.feemaster.index',]) ? 'mm-active' : '' }}">
+                    <a href="javascript: void(0);" class="has-arrow">
+                        <i class="fas fa-wallet" style="color: #545a6d;font-size: 0.99rem;"></i>
+                        <span data-key="t-authentication">Fee Management</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li class="{{ in_array(Route::currentRouteName(), ['fee.feemaster.index']) ? 'active' : '' }}">
+                            <a href="{{ route('fee.feemaster.index') }}"><span>Fee Master</span></a>
+                        </li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['coursefee.index']) ? 'active' : '' }}">
+                            <a href="{{ route('coursefee.index') }}"><span>Corse Fee</span></a>
+                        </li>
+
+
+                    </ul>
+
                 </li>
             </ul>
         </div>

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Customers;
 
-use App\Models\Customer;
+use App\Models\Customer\Customer;
+use App\Models\Customer\CustomerMedia;
+use App\Models\Customer\CustomerBusinessProfile;
 use Illuminate\Http\Request;
-use App\Models\CustomerMedia;
 use App\Http\Controllers\Controller;
-use App\Models\CustomerBusinessProfile;
 use Illuminate\Support\Facades\Storage;
 
 class CustomerMediaController extends Controller

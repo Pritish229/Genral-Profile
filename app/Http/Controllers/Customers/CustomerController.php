@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Customers;
 
-use App\Models\Customer;
+use App\Models\Customer\Customer;
+use App\Models\Customer\CustomerContact;
+use App\Models\Customer\CustomerIndividualProfile;
 use Illuminate\Http\Request;
-use App\Models\CustomerContact;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
-use App\Models\CustomerIndividualProfile;
 
 class CustomerController extends Controller
 {

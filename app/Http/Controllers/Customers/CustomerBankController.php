@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Customers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
-use App\Models\CustomerPaymentAccount;
-use App\Models\CustomerBusinessProfile;
+use App\Models\Customer\Customer;
+use App\Models\Customer\CustomerPaymentAccount;
+use App\Models\Customer\CustomerBusinessProfile;
 use Illuminate\Http\Request;
 
 class CustomerBankController extends Controller

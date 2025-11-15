@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Customers;
 
-use App\Models\Customer;
+use App\Models\Customer\Customer;
+use App\Models\Customer\CustomerBusinessProfile;
+use App\Models\Customer\CustomerIndividualProfile;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\CustomerBusinessProfile;
 use Yajra\DataTables\Facades\DataTables;
-use App\Models\CustomerIndividualProfile;
 
 class CustomerProfileController extends Controller
 {

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Students;
 
-use App\Models\Student;
-use App\Models\StudentMedia;
+use App\Models\Student\Student;
+use App\Models\Student\StudentMedia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;

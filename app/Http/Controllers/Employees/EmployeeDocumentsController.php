@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Employees;
 
 use Carbon\Carbon;
-use App\Models\Employee;
 use Illuminate\Http\Request;
-use App\Models\EmployeeDocument;
+use App\Models\Employee\Employee;
+use App\Models\Employee\EmployeeDocument;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 

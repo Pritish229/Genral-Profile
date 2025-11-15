@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Employees;
 
-use App\Models\Employee;
+use App\Models\Employee\Employee;
 use Illuminate\Http\Request;
-use App\Models\EmployeeAddress;
 use App\Http\Controllers\Controller;
+use App\Models\Employee\EmployeeAddress;
 
 class EmployeeAddressController extends Controller
 {

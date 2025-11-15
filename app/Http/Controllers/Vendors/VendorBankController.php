@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Vendors;
 
-use App\Models\Vendor;
 use Illuminate\Http\Request;
+use App\Models\Vendor\Vendor;
 use App\Http\Controllers\Controller;
-use App\Models\VendorPaymentAccount;
-use App\Models\VendorBusinessProfile;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\Vendor\VendorPaymentAccount;
+use App\Models\Vendor\VendorBusinessProfile;
 
 class VendorBankController extends Controller
 {

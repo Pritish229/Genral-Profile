@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Students;
 
-use App\Models\Student;
+use App\Models\Student\Student;
+use App\Models\Student\StudentContact;
 use Illuminate\Http\Request;
-use App\Models\StudentContact;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 

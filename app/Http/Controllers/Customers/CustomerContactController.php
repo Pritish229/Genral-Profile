@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Customers;
 
-use App\Models\Customer;
 use Illuminate\Http\Request;
-use App\Models\CustomerContact;
+use App\Models\Customer\Customer;
+use App\Models\Customer\CustomerBusinessProfile;
+use App\Models\Customer\CustomerContact;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\CustomerBusinessProfile;
 
 class CustomerContactController extends Controller
 {

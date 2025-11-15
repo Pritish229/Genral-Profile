@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Customers;
 
-use App\Models\Customer;
+use App\Models\Customer\Customer;
+use App\Models\Customer\CustomerOnilneProfile;
+use App\Models\Customer\CustomerBusinessProfile;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\CustomerOnilneProfile;
-use App\Models\CustomerBusinessProfile;
 
 class CustomerOnlineProfileController extends Controller
 {

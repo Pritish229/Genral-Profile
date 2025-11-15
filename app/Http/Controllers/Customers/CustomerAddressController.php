@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Customers;
 
-use App\Models\Customer;
 use Illuminate\Http\Request;
-use App\Models\CustomerAddress;
+use App\Models\Customer\Customer;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\CustomerBusinessProfile;
+use App\Models\Customer\CustomerAddress;
+use App\Models\Customer\CustomerBusinessProfile;
 
 class CustomerAddressController extends Controller
 {

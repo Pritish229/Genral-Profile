@@ -125,52 +125,31 @@
         };
 
         const loadSessionYears = () => {
-            $.get("{{ route('education.sessionyear.list') }}", d => {
-                // Step 1: Filter & sort data
-                const activeYears = [];
-                const inactiveYears = [];
-
-                d.data.forEach(i => {
-                    const option = {
-                        id: i.id,
-                        name: i.name,
-                        is_active: i.is_active
-                    };
-
-                    if (i.is_active == 1) {
-                        activeYears.push(option);
-                    } else {
-                        inactiveYears.push(option);
-                    }
+            $.get("{{ route('education.sessionyear.active') }}", res => {
+                let options = `<option value="">-- Select Session Year --</option>`;
+                res.data.forEach(i => {
+                    options += `<option value="${i.id}">${i.name} (Active)</option>`;
                 });
-
-                // Step 2: Sort each group by name (e.g., "2024-2025")
-                const sortByName = (a, b) => a.name.localeCompare(b.name, undefined, {
-                    numeric: true
-                });
-
-                activeYears.sort(sortByName);
-                inactiveYears.sort(sortByName);
-                const sortedData = [...activeYears, ...inactiveYears];
-
-                let addOptions = `<option value="">-- Select Session Year --</option>`;
-                let filterOptions = `<option value="">-- Select Session Year --</option>`;
-
-                sortedData.forEach(i => {
-                    const status = i.is_active ? "(Active)" : "(Inactive)";
-                    const disabled = i.is_active ? "" : "disabled";
-
-                    const optionHtml = `<option value="${i.id}" ${disabled}>${i.name} ${status}</option>`;
-
-                    addOptions += optionHtml;
-                    filterOptions += optionHtml.replace('disabled', ''); // Filter shows all
-                });
-
-                $('#add_session_year_id').html(addOptions);
-                $('#filter_session_year').html(filterOptions);
-
-                initSelect2();
+                $('#add_session_year_id').html(options);
             });
+            $.get("{{ route('education.sessionyear.list') }}", res => {
+                let options = `<option value="">-- Select Session Year --</option>`;
+                res.data.forEach(i => {
+                    const status = i.is_active ? '(Active)' : '(Inactive)';
+                    options += `<option value="${i.id}">${i.name} ${status}</option>`;
+                });
+                $('#filter_session_year').html(options);
+            });
+
+            setTimeout(() => {
+                $('#add_session_year_id').select2({
+                    width: "100%",
+                    dropdownParent: $('#addCourseModal')
+                });
+                $('#filter_session_year').select2({
+                    width: "100%"
+                });
+            }, 500);
         };
         loadSessionYears();
 

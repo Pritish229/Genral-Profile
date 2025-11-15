@@ -2,17 +2,13 @@
 
 namespace App\Http\Controllers\Students;
 
-use App\Models\Student;
-use App\Models\StudentMedia;
 use Illuminate\Http\Request;
-use App\Models\StudentAddress;
-use App\Models\StudentContact;
-use App\Models\StudentProfile;
-use App\Models\StudentDocument;
+use App\Models\Student\Student;
+use App\Models\Student\StudentAddress;
+use App\Models\Student\StudentContact;
+use App\Models\Student\StudentProfile;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Models\StudentPaymentAccount;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller

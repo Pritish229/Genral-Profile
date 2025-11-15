@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Education;
 
-use App\Models\Course;
-use App\Models\Subject;
-use App\Models\CourseClass;
 use Illuminate\Http\Request;
+use App\Models\Education\Course;
 use Yajra\DataTables\DataTables;
+use App\Models\Education\Subject;
 use App\Http\Controllers\Controller;
+use App\Models\Education\CourseClass;
 
 class SubjectController extends Controller
 {
@@ -88,6 +88,10 @@ class SubjectController extends Controller
             'course_class_id'  => $subject->course_class_id,
             'subject_name'     => $subject->subject_name,
             'subject_code'     => $subject->subject_code,
+            'has_practicals'  => $subject->has_practicals,
+            'theory_mark'      => $subject->theory_mark,
+            'practical_mark'   => $subject->practical_mark,
+            'full_mark'        => $subject->full_mark,
             'is_active'        => $subject->is_active,
             'courses'          => $courses,
             'classes'          => $classes,
@@ -100,10 +104,23 @@ class SubjectController extends Controller
             'subject_name'  => 'required|string|max:255',
             'subject_code'  => 'nullable|string|max:100',
             'is_active'     => 'sometimes|boolean',
+            'has_practicals' => 'sometimes|boolean',
+            'theory_mark'   => 'sometimes|integer|min:0',
+            'practical_mark' => 'sometimes|integer|min:0',
+            'full_mark'     => 'sometimes|integer|min:0',
         ]);
 
         $subject = Subject::findOrFail($id);
-        $data = $request->only(['subject_name', 'subject_code']);
+        $data = $request->only(
+            [
+                'subject_name',
+                'subject_code',
+                'has_practicals',
+                'theory_mark',
+                'practical_mark',
+                'full_mark'
+            ]
+        );
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         $subject->update($data);
@@ -119,13 +136,27 @@ class SubjectController extends Controller
 
     public function listSubjectsByClass(Request $request)
     {
+        // Validate input safely
         $request->validate([
             'course_class_id' => 'required|exists:course_classes,id',
         ]);
 
-        $subjects = Subject::where('course_class_id', $request->course_class_id)
-            ->get();
+        // Base query
+        $query = Subject::with(['courseClass.course', 'courseClass.sessionYear'])
+            ->where('course_class_id', $request->course_class_id)
+            ->orderBy('subject_name');
 
-        return response()->json(['status' => true, 'data' => $subjects]);
+        // Fetch all subjects for this class
+        $subjects = $query->get();
+
+        // Separate active & inactive for clarity
+        $activeSubjects = $subjects->where('is_active', 1)->values();
+        $inactiveSubjects = $subjects->where('is_active', 0)->values();
+
+        return response()->json([
+            'status' => true,
+            'active' => $activeSubjects,
+            'inactive' => $inactiveSubjects,
+        ]);
     }
 }

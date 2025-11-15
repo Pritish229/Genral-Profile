@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Employees;
 
 use Carbon\Carbon;
-use App\Models\Employee;
+use App\Models\Employee\Employee;
+use App\Models\Employee\EmployeeProfile;
 use Illuminate\Http\Request;
-use App\Models\EmployeeProfile;
 use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Education;
 
-use App\Models\SessionYear;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Education\SessionYear;
 
 class SessionYearController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         return view('Admin.Education.SessionYear.index');
     }
@@ -21,26 +21,36 @@ class SessionYearController extends Controller
             return datatables()->of($query)
                 ->addIndexColumn()
                 ->addColumn('is_active', function ($row) {
-                    return $row->is_active ? '<span class="badge bg-success">Active</span>' :
-                        '<span class="badge bg-secondary">Inactive</span>';
+                    return $row->is_active
+                        ? '<span class="badge bg-success">Active</span>'
+                        : '<span class="badge bg-secondary">Inactive</span>';
                 })
                 ->editColumn('start_date', function ($row) {
-                    return $row->start_date ? \Carbon\Carbon::parse($row->start_date)->format('d M Y') : '';
+                    return $row->start_date
+                        ? \Carbon\Carbon::parse($row->start_date)->format('d M Y')
+                        : '';
                 })
                 ->editColumn('end_date', function ($row) {
-                    return $row->end_date ? \Carbon\Carbon::parse($row->end_date)->format('d M Y') : '';
+                    return $row->end_date
+                        ? \Carbon\Carbon::parse($row->end_date)->format('d M Y')
+                        : '';
                 })
                 ->addColumn('action', function ($row) {
                     return '
-                <button class="btn btn-sm btn-primary editSessionYear" data-id="' . $row->id . '"> <i class="fas fa-edit"></i> Edit</button>
-                <button class="btn btn-sm btn-danger deleteSessionYear" data-id="' . $row->id . '"><i class="fas fa-trash"></i> Delete</button>
-            ';
+                        <button class="btn btn-sm btn-primary editSessionYear" data-id="' . $row->id . '">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger deleteSessionYear" data-id="' . $row->id . '">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    ';
                 })
                 ->rawColumns(['is_active', 'action'])
                 ->make(true);
         }
         return view('Admin.Education.SessionYear.index');
     }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -67,37 +77,25 @@ class SessionYearController extends Controller
     public function edit($id)
     {
         $data = SessionYear::findOrFail($id);
-        return response()->json([
-            'status' => true,
-            'data' => $data
-        ]);
+        return response()->json(['status' => true, 'data' => $data]);
     }
 
     public function show($id)
     {
         $sessionYear = SessionYear::findOrFail($id);
-        return response()->json([
-            'status' => true,
-            'data' => $sessionYear
-        ]);
+        return response()->json(['status' => true, 'data' => $sessionYear]);
     }
 
     public function fatch($id)
     {
         $sessionYear = SessionYear::findOrFail($id);
-        return response()->json([
-            'status' => true,
-            'data' => $sessionYear
-        ]);
+        return response()->json(['status' => true, 'data' => $sessionYear]);
     }
 
     public function list(Request $request)
     {
-        $selectedId = $request->selected_id;
-
         $query = SessionYear::whereNull('deleted_at');
         $sessionYears = $query->get();
-
         return response()->json(['status' => true, 'data' => $sessionYears]);
     }
 
@@ -134,7 +132,6 @@ class SessionYearController extends Controller
         ]);
     }
 
-    // Optional: Restore deleted
     public function restore($id)
     {
         SessionYear::withTrashed()->find($id)->restore();
@@ -147,10 +144,37 @@ class SessionYearController extends Controller
         return response()->json(['status' => true, 'data' => $sessionYears]);
     }
 
-    // Optional: Permanently Delete
     public function forceDelete($id)
     {
         SessionYear::withTrashed()->find($id)->forceDelete();
         return response()->json(['status' => true, 'message' => 'Session Year Permanently Deleted']);
+    }
+
+    /**
+     * 🟢 Fetch all Active Session Years
+     */
+    public function activeSessions()
+    {
+        $activeSessions = SessionYear::where('is_active', 1)->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Active Sessions Fetched Successfully',
+            'data' => $activeSessions
+        ]);
+    }
+
+    /**
+     * ⚪ Fetch all Inactive Session Years
+     */
+    public function inactiveSessions()
+    {
+        $inactiveSessions = SessionYear::where('is_active', 0)->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Inactive Sessions Fetched Successfully',
+            'data' => $inactiveSessions
+        ]);
     }
 }
