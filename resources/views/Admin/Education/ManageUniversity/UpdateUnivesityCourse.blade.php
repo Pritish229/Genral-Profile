@@ -142,7 +142,7 @@ $(function() {
                     <div class="course-meta d-flex gap-2 mt-1">
                         <input type="number" class="form-control form-control-sm update-duration"
                             data-id="${node.course_id}" value="${node.duration ?? ''}"
-                            min="1" placeholder="Yr">
+                            min="1" placeholder="Year Duration">
 
                         <input type="number" class="form-control form-control-sm update-semester"
                             data-id="${node.course_id}" value="${node.semesters ?? ''}"
