@@ -13,21 +13,22 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->string('tenet_id')->nullable();
-            $table->string('tenet_name')->nullable();
-            $table->string('university_id')->nullable();
-            $table->string('university_name')->nullable();
-            $table->string('emp_id')->nullable();
-            $table->foreignId('session_year_id')->constrained('session_years')->onDelete('cascade');
             $table->string('course_name');
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->string('parent_name')->nullable();
             $table->string('course_code')->unique();
-            $table->string('course_image')->nullable();
-            $table->boolean('is_active')->default(false);
+
+            // true = course has children (not selectable for duration)
+            // false = this is child or standalone (needs duration at assignment level)
+            $table->enum('is_parent', ['true', 'false'])->default('false');
+            $table->boolean('is_active')->default(true);
             $table->text('description')->nullable();
             $table->timestamps();
-            $table->timestamp('deleted_at', 6)->nullable();
+            $table->softDeletes();
         });
     }
+
 
     /**
      * Reverse the migrations.

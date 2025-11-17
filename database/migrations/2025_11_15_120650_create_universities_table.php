@@ -14,9 +14,9 @@ return new class extends Migration
             $table->string('city');
             $table->string('district');
             $table->string('state');
-            $table->string('phone_no');
+            $table->string('phone_no')->unique();
             $table->string('alternate_no')->nullable();
-            $table->string('email_id');
+            $table->string('email_id')->unique();
             $table->string('alt_email_id')->nullable();
             $table->string('org_logo')->nullable();
             $table->text('address');

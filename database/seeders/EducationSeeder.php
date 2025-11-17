@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
-use App\Models\SessionYear;
-use App\Models\Course;
-use App\Models\CourseClass;
-use App\Models\Subject;
-use App\Models\SubjectChapters;
-use App\Models\ClassSection;
+use Illuminate\Database\Seeder;
+use App\Models\Education\Course;
+use App\Models\Education\Subject;
+use App\Models\Education\CourseClass;
+use App\Models\Education\SessionYear;
+use App\Models\Education\ClassSection;
+use App\Models\Education\SubjectChapters;
 
 class EducationSeeder extends Seeder
 {

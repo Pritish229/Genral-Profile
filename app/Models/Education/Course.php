@@ -2,34 +2,48 @@
 
 namespace App\Models\Education;
 
-
-use App\Models\SessionYear;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Education\UniversityCourse;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Course extends Model
 {
-    use HasFactory , SoftDeletes;
+    use HasFactory, SoftDeletes;
+
     protected $table = 'courses';
+
     protected $fillable = [
-        'tenet_id',
-        'tenet_name',
-        'university_id',
-        'university_name',
-        'emp_id',
-        'session_year_id',
         'course_name',
+        'parent_id',
         'course_code',
-        'course_image',
+        'is_parent',
         'is_active',
         'description',
     ];
 
-    public function sessionYear()
+    protected $casts = [
+        'is_parent' => 'string',  // expected: 'true' or 'false'
+        'is_active' => 'boolean',
+    ];
+
+    public function parent()
     {
-        return $this->belongsTo(SessionYear::class);
+        return $this->belongsTo(Course::class, 'parent_id');
     }
 
-   
+    public function children()
+    {
+        return $this->hasMany(Course::class, 'parent_id');
+    }
+
+    public function universityCourses()
+    {
+        return $this->hasMany(UniversityCourse::class, 'university_id');
+    }
+
+    public function getIsParentAttribute()
+    {
+        return $this->children()->count() > 0 ? 'true' : 'false';
+    }
 }

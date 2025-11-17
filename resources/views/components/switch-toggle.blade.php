@@ -16,6 +16,7 @@
 <style>
 .switch-toggle {
     position: relative;
+    margin-top:4px;
     width: 55px;
     height: 26px;
     display: inline-block;

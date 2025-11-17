@@ -11,5 +11,17 @@ class University extends Model
     use HasFactory , SoftDeletes;
     protected $table = 'universities';
 
-     protected $fillable = [];
+     protected $fillable = [
+        'org_name',
+        'city',
+        'district',
+        'state',
+        'phone_no',
+        'alternate_no',
+        'email_id',
+        'alt_email_id',
+        'org_logo',
+        'address',
+        'website_url'
+     ];
 }

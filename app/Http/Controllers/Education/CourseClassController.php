@@ -28,7 +28,6 @@ class CourseClassController extends Controller
         }
 
         return datatables()->of($query)
-            ->addIndexColumn()
             ->addColumn('session_year', fn($row) => $row->sessionYear->name)
             ->addColumn('class_name', fn($row) => $row->class_name)
             ->addColumn('course_name', fn($row) => $row->course->course_name)

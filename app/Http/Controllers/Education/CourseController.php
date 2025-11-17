@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Education;
 
-use App\Models\Education\SessionYear;
 use Illuminate\Http\Request;
 use App\Models\Education\Course;
 use App\Http\Controllers\Controller;
+use App\Models\Education\University;
+use App\Models\Education\UniversityCourse;
 
 class CourseController extends Controller
 {
@@ -16,64 +17,67 @@ class CourseController extends Controller
 
     public function paginate(Request $request)
     {
-        $query = Course::with('sessionYear')->orderBy('id', 'desc');
-
-        if ($request->session_year_id) {
-            $query->where('session_year_id', $request->session_year_id);
-        }
+        $query = Course::with('parent')->orderBy('id', 'desc');
 
         return datatables()->of($query)
-            ->addColumn('course_image', function ($row) {
-                $src = $row->course_image ? asset('storage/' . $row->course_image) : asset('no-image.png');
-                return '<img src="' . $src . '" width="45" height="45" class="rounded border">';
+            ->addColumn('parent', function ($row) {
+                return $row->parent ? $row->parent->course_name : '—';
             })
-            ->addColumn('session_year', fn($row) => $row->sessionYear->name)
-            ->addColumn(
-                'is_active',
-                fn($row) =>
-                $row->is_active
+            ->addColumn('is_active', function ($row) {
+                return $row->is_active
                     ? '<span class="badge bg-success">Active</span>'
-                    : '<span class="badge bg-secondary">Inactive</span>'
-            )
-            ->addColumn(
-                'action',
-                fn($row) =>
-                '<button class="btn btn-sm btn-primary editCourse" data-id="' . $row->id . '"> <i class="fas fa-edit"></i> Edit</button>
-                 <button class="btn btn-sm btn-danger deleteCourse" data-id="' . $row->id . '"><i class="fas fa-trash"></i> Delete</button>'
-            )
-            ->rawColumns(['course_image', 'is_active', 'action'])
+                    : '<span class="badge bg-secondary">Inactive</span>';
+            })
+            ->addColumn('action', function ($row) {
+                return '
+                    <button class="btn btn-sm btn-primary editCourse" data-id="' . $row->id . '">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger deleteCourse" data-id="' . $row->id . '">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ';
+            })
+            ->rawColumns(['is_active', 'action'])
             ->make(true);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'session_year_id' => 'required|exists:session_years,id',
+            'parent_id'   => 'nullable|exists:courses,id',
             'course_name' => 'required|string|max:255',
-            'course_code' => 'nullable|string|max:100',
-            'course_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'course_code' => 'nullable|string|max:100|unique:courses,course_code',
             'description' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
+            'is_active'   => 'nullable|boolean',
+            'is_parent'   => 'required|in:true,false'
         ]);
 
-        $data = $request->except('course_image');
-        $data['tenet_id'] = 1;
-        $data['emp_id'] = 1;
-        $data['is_active'] = $request->filled('is_active') ? 1 : 0;
+        $data = $request->only([
+            'parent_id',
+            'course_name',
+            'course_code',
+            'description',
+            'is_parent'
+        ]);
 
-        if ($request->hasFile('course_image')) {
-            $data['course_image'] = $request->course_image->store('courses', 'public');
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->is_parent === "true") {
+            $data['parent_id'] = null;
         }
 
         Course::create($data);
 
-        return response()->json(['status' => true, 'message' => 'Course Added Successfully']);
+        return response()->json([
+            'status'  => true,
+            'message' => 'Course Added Successfully'
+        ]);
     }
 
     public function edit($id)
     {
-        $course = Course::findOrFail($id);
-        $course->course_image_url = $course->course_image ? asset('storage/' . $course->course_image) : null;
+        $course = Course::with('parent')->findOrFail($id);
         return response()->json($course);
     }
 
@@ -82,51 +86,72 @@ class CourseController extends Controller
         $course = Course::findOrFail($id);
 
         $request->validate([
+            'parent_id'   => 'nullable|exists:courses,id|not_in:' . $id,
             'course_name' => 'required|string|max:255',
-            'course_code' => 'nullable|string|max:100',
-            'course_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'course_code' => 'nullable|string|max:100|unique:courses,course_code,' . $id,
             'description' => 'nullable|string',
-            'is_active' => 'nullable|boolean',
+            'is_active'   => 'nullable|boolean',
+            'is_parent'   => 'required|in:true,false'
         ]);
 
-        $data = $request->except('course_image');
-        $data['is_active'] = $request->filled('is_active') ? 1 : 0;
+        $data = $request->only([
+            'parent_id',
+            'course_name',
+            'course_code',
+            'description',
+            'is_parent'
+        ]);
 
-        if ($request->hasFile('course_image')) {
-            if ($course->course_image && file_exists(public_path('storage/' . $course->course_image))) {
-                unlink(public_path('storage/' . $course->course_image));
-            }
-            $data['course_image'] = $request->course_image->store('courses', 'public');
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->is_parent === "true") {
+            $data['parent_id'] = null;
         }
 
         $course->update($data);
 
-        return response()->json(['status' => true, 'message' => 'Course Updated Successfully']);
+        return response()->json([
+            'status'  => true,
+            'message' => 'Course Updated Successfully'
+        ]);
     }
 
     public function destroy($id)
     {
         Course::findOrFail($id)->delete();
-        return response()->json(['status' => true, 'message' => 'Course Deleted Successfully']);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Course Deleted Successfully'
+        ]);
     }
 
-    public function SessionWiseCourselist(Request $request)
+    public function listAll()
     {
-        $query = Course::whereNull('deleted_at')->orderBy('course_name');
+        return response()->json([
+            'status' => true,
+            'data'   => Course::orderBy('course_name')->get()
+        ]);
+    }
 
-        if ($request->session_year_id) {
-            $query->where('session_year_id', $request->session_year_id);
-        }
+    public function parentCourses()
+    {
+        return response()->json([
+            'status' => true,
+            'data'   => Course::where('is_parent', true)->get()
+        ]);
+    }
 
-        $courses = $query->get();
-        $activeCourses = $courses->where('is_active', 1)->values();
-        $inactiveCourses = $courses->where('is_active', 0)->values();
+    public function show($id)
+    {
+        $university = University::findOrFail($id);
+
+        $assigned = UniversityCourse::where('university_id', $id)
+            ->get(['course_id']);
 
         return response()->json([
             'status' => true,
-            'active' => $activeCourses,
-            'inactive' => $inactiveCourses,
-            'data' => $courses
+            'university_courses' => $assigned
         ]);
     }
 }

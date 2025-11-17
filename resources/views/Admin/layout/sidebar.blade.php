@@ -88,12 +88,16 @@
                         <span data-key="t-authentication">Education</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
-                        <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index']) ? 'active' : '' }}">
-                            <a href="{{ route('education.sessionyear.index') }}"><span>Session Master</span></a>
+                        <li class="{{ in_array(Route::currentRouteName(), ['education.university.index']) ? 'active' : '' }}">
+                            <a href="{{ route('education.university.index') }}"><span>University Master</span></a>
                         </li>
                         <li class="{{ in_array(Route::currentRouteName(), ['education.course.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.course.index') }}"><span>Course Master</span></a>
                         </li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index']) ? 'active' : '' }}">
+                            <a href="{{ route('education.sessionyear.index') }}"><span>Session Master</span></a>
+                        </li>
+                        
                         <li class="{{ in_array(Route::currentRouteName(), ['education.class.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.class.index') }}"><span>Class Master</span></a>
                         </li>
