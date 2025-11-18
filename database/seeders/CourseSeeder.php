@@ -9,7 +9,6 @@ class CourseSeeder extends Seeder
 {
     public function run(): void
     {
-       
         $bca = Course::create([
             'course_name' => 'BCA',
             'course_code' => 'BCA',
@@ -90,7 +89,6 @@ class CourseSeeder extends Seeder
             ]);
         }
 
-    
         $independent = [
             ['BBA', 'BBA'],
             ['BSc Computer Science', 'BSC-CS'],

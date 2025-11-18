@@ -13,6 +13,19 @@ return new class extends Migration
     {
         Schema::create('university_colleges', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('university_id');
+            $table->foreign('university_id')->references('id')->on('universities')->onDelete('cascade');
+            $table->string('org_name');
+            $table->string('city');
+            $table->string('district');
+            $table->string('state');
+            $table->string('phone_no')->unique();
+            $table->string('alternate_no')->nullable();
+            $table->string('email_id')->unique();
+            $table->string('alt_email_id')->nullable();
+            $table->string('org_logo')->nullable();
+            $table->text('address');
+            $table->text('website_url')->nullable();
             $table->timestamps();
         });
     }

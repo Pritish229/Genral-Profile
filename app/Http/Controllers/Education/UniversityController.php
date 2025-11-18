@@ -7,6 +7,7 @@ use Yajra\DataTables\DataTables;
 use App\Http\Controllers\Controller;
 use App\Models\Education\University;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Education\UniversityCollege;
 
 class UniversityController extends Controller
 {
@@ -47,26 +48,73 @@ class UniversityController extends Controller
 
     public function list(Request $request)
     {
-        if ($request->ajax()) {
-            $data = University::orderBy('id', 'DESC');
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('logo', function ($row) {
-                    $url = $row->org_logo
-                        ? asset('storage/' . $row->org_logo)
-                        : asset('no-image.png');
-                    return '<img src="' . $url . '" width="50" height="50" class="rounded">';
-                })
-                ->addColumn('action', function ($row) {
-                    $manageUrl = route('education.universitycourse.index', $row->id);
-                    return '
-                    <button class="btn btn-sm btn-primary editBtn" data-id="' . $row->id . '">Edit</button>
-                    <a href="' . $manageUrl . '" class="btn btn-sm btn-success">Manage Course</a>';
-                })
-                ->rawColumns(['logo', 'action'])
-                ->make(true);
+        $query = UniversityCollege::with('university');
+
+        // Search
+        if ($request->search['value']) {
+            $search = $request->search['value'];
+            $query->where(function ($q) use ($search) {
+                $q->where('org_name', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('district', 'like', "%{$search}%")
+                    ->orWhere('state', 'like', "%{$search}%")
+                    ->orWhere('email_id', 'like', "%{$search}%")
+                    ->orWhere('phone_no', 'like', "%{$search}%");
+            });
         }
+
+        $total = UniversityCollege::count();
+        $filtered = $query->count();
+
+        // Skip ordering on columns not in DB
+        $skipOrderColumns = ['DT_RowIndex', 'logo', 'action', 'university.org_name'];
+
+        $orderColumnIndex = $request->order[0]['column'];
+        $orderDirection = $request->order[0]['dir'];
+        $orderColumn = $request->columns[$orderColumnIndex]['data'];
+
+        if (!in_array($orderColumn, $skipOrderColumns)) {
+            $query->orderBy($orderColumn, $orderDirection);
+        }
+
+        // Pagination
+        $colleges = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+
+        // Format data
+        $data = [];
+        foreach ($colleges as $index => $row) {
+            $data[] = [
+                'DT_RowIndex' => $request->start + $index + 1,
+                'logo' => $row->org_logo
+                    ? '<img src="' . asset("storage/" . $row->org_logo) . '" width="40" class="rounded"/>'
+                    : '',
+                'university' => [
+                    'org_name' => $row->university?->org_name ?? 'N/A'
+                ],
+                'org_name' => $row->org_name,
+                'city' => $row->city,
+                'district' => $row->district,
+                'state' => $row->state,
+                'email_id' => $row->email_id,
+                'phone_no' => $row->phone_no,
+                'action' => '
+                <button class="btn btn-sm btn-info editBtn" data-id="' . $row->id . '">Edit</button>
+                <button class="btn btn-sm btn-danger deleteBtn" data-id="' . $row->id . '">Delete</button>
+            ',
+            ];
+        }
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data
+        ]);
     }
+
 
     public function show($id)
     {
@@ -108,5 +156,11 @@ class UniversityController extends Controller
             'status' => true,
             'message' => 'University updated successfully!'
         ]);
+    }
+
+    public function allUniversities()
+    {
+        $universities = University::get();
+        return response()->json($universities);
     }
 }

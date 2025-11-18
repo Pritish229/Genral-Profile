@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\FeeManagement;
 
-use App\Http\Controllers\Controller;
-use App\Models\FeeMaster;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Education\FeeMaster;
 
 class FeeMasterController extends Controller
 {
@@ -17,38 +17,36 @@ class FeeMasterController extends Controller
     {
         $query = FeeMaster::query();
 
-     
-        if ($req->search['value']) {
-            $search = $req->search['value'];
-            $query->where('fee_name', 'LIKE', "%$search%");
+        if (!empty($req->search['value'])) {
+            $query->where('fee_name', 'like', "%{$req->search['value']}%");
         }
 
         $total = $query->count();
-        $sortableColumns = ['fee_name', 'id']; 
 
-        if ($req->sort_column && in_array($req->sort_column, $sortableColumns)) {
+        $sortable = ['fee_name', 'id'];
+        if (!empty($req->sort_column) && in_array($req->sort_column, $sortable)) {
             $query->orderBy($req->sort_column, $req->sort_dir);
         } else {
-            $query->orderBy('id', 'DESC'); 
+            $query->orderBy('id', 'DESC');
         }
-        $data = $query->skip($req->start)->take($req->length)->get();
 
-        $startIndex = $req->start + 1;
+        $data = $query->skip($req->start)->take($req->length)->get();
+        $i = $req->start + 1;
 
         return response()->json([
             'draw' => $req->draw,
             'recordsTotal' => $total,
             'recordsFiltered' => $total,
 
-            'data' => $data->map(function ($row) use (&$startIndex) {
+            'data' => $data->map(function ($row) use (&$i) {
                 return [
-                    'DT_RowIndex' => $startIndex++, 
+                    'DT_RowIndex' => $i++,
                     'fee_name' => $row->fee_name,
-
+                    'fee_type' => $row->fee_type == '1' ? 'Addon' : 'Deduct',
                     'action' => "
-                    <button class='btn btn-sm btn-info editFee' data-id='{$row->id}'>Edit</button>
-                    <button class='btn btn-sm btn-danger deleteFee' data-id='{$row->id}'>Delete</button>
-                ",
+                        <button class='btn btn-sm btn-info editFee' data-id='{$row->id}'>Edit</button>
+                        <button class='btn btn-sm btn-danger deleteFee' data-id='{$row->id}'>Delete</button>
+                    "
                 ];
             })
         ]);
@@ -58,44 +56,41 @@ class FeeMasterController extends Controller
     {
         $req->validate([
             'fee_name' => 'required|string|max:100',
+            'fee_type' => 'required|in:0,1'
         ]);
 
         FeeMaster::create([
-            'fee_name' => $req->fee_name
+            'fee_name' => $req->fee_name,
+            'fee_type' => $req->fee_type,
+            'status' => '1'
         ]);
 
-        return response()->json(['status' => 'success', 'message' => 'Fee created successfully!']);
+        return response()->json(['status' => 'success', 'message' => 'Fee created successfully']);
     }
-
-    public function feelist(){
-        $data =  FeeMaster::all();
-        return response()->json(['data' => $data]);
-    }
-
 
     public function edit($id)
     {
         return response()->json(['data' => FeeMaster::findOrFail($id)]);
     }
 
-
     public function update(Request $req, $id)
     {
         $req->validate([
             'fee_name' => 'required|string|max:100',
+            'fee_type' => 'required|in:0,1'
         ]);
 
         FeeMaster::findOrFail($id)->update([
-            'fee_name' => $req->fee_name
+            'fee_name' => $req->fee_name,
+            'fee_type' => $req->fee_type,
         ]);
 
-        return response()->json(['status' => 'success', 'message' => 'Fee updated!']);
+        return response()->json(['status' => 'success', 'message' => 'Fee updated']);
     }
 
     public function delete($id)
     {
         FeeMaster::findOrFail($id)->delete();
-
-        return response()->json(['status' => 'success', 'message' => 'Fee deleted!']);
+        return response()->json(['status' => 'success', 'message' => 'Fee deleted']);
     }
 }

@@ -40,6 +40,7 @@ use App\Http\Controllers\Employees\EmployeePrimaryController;
 use App\Http\Controllers\Students\StudentDocumentsController;
 use App\Http\Controllers\Customers\CustomerDocumentController;
 use App\Http\Controllers\Education\UniversityCourseController;
+use App\Http\Controllers\Education\UniversityCollegeController;
 use App\Http\Controllers\Employees\EmployeeDocumentsController;
 use App\Http\Controllers\Vendors\VendorOnlineProfileController;
 use App\Http\Controllers\Vendors\VendorBusinessProfileController;
@@ -498,6 +499,7 @@ Route::prefix('education/')->group(function () {
     Route::get('university/master', [UniversityController::class, 'index'])->name('education.university.index');
     Route::post('university/master', [UniversityController::class, 'store'])->name('education.university.store');
     Route::get('university/master/list', [UniversityController::class, 'list'])->name('education.university.list');
+    Route::get('university/master/allUniversities', [UniversityController::class, 'allUniversities'])->name('education.university.allUniversities');
     Route::get('university/master/show/{id}', [UniversityController::class, 'show'])->name('education.university.show');
     Route::post('university/master/update/{id}', [UniversityController::class, 'update'])->name('education.university.update');
 
@@ -511,6 +513,15 @@ Route::prefix('education/')->group(function () {
         ->name('education.universitycourse.update');
     Route::post('/university-course/update-active', [UniversityCourseController::class, 'updateActive'])
         ->name('education.universitycourse.updateActive');
+
+    Route::get('university-colleges', [UniversityCollegeController::class, 'index'])->name('education.college.index');
+    Route::get('university-colleges/create', [UniversityCollegeController::class, 'create'])->name('education.college.create');
+    Route::post('university-colleges', [UniversityCollegeController::class, 'store'])->name('education.college.store');
+    Route::get('university-colleges/{college}/edit', [UniversityCollegeController::class, 'edit'])->name('education.college.edit');
+    Route::post('university-colleges/{college}', [UniversityCollegeController::class, 'update'])->name('education.college.update');
+    Route::delete('university-colleges/{college}', [UniversityCollegeController::class, 'destroy'])->name('education.college.destroy');
+    Route::get('university-colleges/list', [UniversityCollegeController::class, 'list'])
+        ->name('education.college.list');
 
     Route::get('/session-years', [SessionYearController::class, 'index'])->name('education.sessionyear.index');
     Route::get('/session-years/Pagenate', [SessionYearController::class, 'sessionPaginate'])->name('education.sessionyear.sessionPaginate');

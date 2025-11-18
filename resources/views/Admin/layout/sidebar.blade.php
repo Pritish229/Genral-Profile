@@ -94,6 +94,9 @@
                         <li class="{{ in_array(Route::currentRouteName(), ['education.course.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.course.index') }}"><span>Course Master</span></a>
                         </li>
+                        <li class="{{ in_array(Route::currentRouteName(), ['education.college.index']) ? 'active' : '' }}">
+                            <a href="{{ route('education.college.index') }}"><span>College Master</span></a>
+                        </li>
                         <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.sessionyear.index') }}"><span>Session Master</span></a>
                         </li>
