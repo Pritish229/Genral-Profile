@@ -21,14 +21,11 @@ return new class extends Migration
             $table->string('org_logo')->nullable();
             $table->text('address');
             $table->text('website_url')->nullable();
-            $table->timestamp('deleted_at', 6)->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('universities');

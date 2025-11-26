@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Education;
 use Illuminate\Http\Request;
 use App\Models\Education\Course;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\Education\University;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Education\UniversityCourse;
 
 class UniversityCourseController extends Controller
@@ -17,157 +15,160 @@ class UniversityCourseController extends Controller
     {
         $university = University::findOrFail($id);
 
-        return view('Admin.Education.ManageUniversity.UniversityCourse', compact('university'));
-    }
-
-
-    // public function viewCourse(University $university, UniversityCourse $course)
-    // {
-    //     return view('Admin.Education.ManageUniversity.UpdateUnivesityCourse', [
-    //         'university' => $university,
-    //         'assignedCourse' => $course
-    //     ]);
-    // }
-
-    public function assignedTreeView(University $university)
-    {
-        return view('Admin.Education.ManageUniversity.UpdateUnivesityCourse', [
+        return view('Admin.Education.ManageUniversity.UniversityCourse', [
             'university' => $university,
+            'university_id' => $university->id
         ]);
     }
 
-    public function store(Request $request, University $university)
+    public function paginate(Request $request)
+    {
+        $universityId = $request->input('university_id'); // This will now work
+
+        $query = UniversityCourse::where('university_id', $universityId)
+            ->orderBy('id', 'asc');
+
+        return datatables()->of($query)
+            ->addColumn('parent', fn($row) => $row->parent_course_name ?: '—')
+            ->addColumn('course_code', fn($row) => $row->course_code)
+            ->addColumn('duration', fn($row) => $row->duration_in_years ? $row->duration_in_years . ' Years' : '—')
+            ->addColumn('type', fn($row) => $row->is_parent ? '<span class="badge bg-primary">Parent</span>' : '<span class="badge bg-info">Child</span>')
+            ->addColumn('status', fn($row) => $row->is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>')
+            ->addColumn('action', fn($row) => '<button class="btn btn-sm btn-danger deleteUC" data-id="' . $row->id . '"><i class="fas fa-trash"></i></button>')
+            ->rawColumns(['type', 'status', 'action'])
+            ->make(true);
+    }
+
+    public function assign(Request $request)
     {
         $request->validate([
-            'university_id' => 'required|exists:universities,id',
-            'course_ids'    => 'required|array|min:1',
-            'course_ids.*'  => 'integer|exists:courses,id',
-            'is_parent'     => 'required|array',
+            'university_id'      => 'required|exists:universities,id',
+            'parent_course_id'   => 'required|exists:courses,id',
+            'child_course_ids'   => 'required|array'
         ]);
 
-        $courseIds = $request->course_ids ?? [];
-        $durations = $request->input('duration', []);
-        $semesters = $request->input('semesters', []);
-        $actives   = $request->input('is_active', []);
-        $isParentInput = $request->input('is_parent', []);
+        $universityId = $request->university_id;
+        $parentId     = $request->parent_course_id;
+        $childIds     = $request->child_course_ids;
 
-        $courses = Course::with('parent')
-            ->whereIn('id', $courseIds)
-            ->get()
-            ->keyBy('id');
+        $parent = Course::findOrFail($parentId);
 
-        $existing = UniversityCourse::where('university_id', $university->id)
+        $existing = UniversityCourse::where('university_id', $universityId)
             ->pluck('course_id')
             ->toArray();
 
-        foreach ($courseIds as $cid) {
-            if (in_array($cid, $existing)) {
-                return response()->json([
-                    'status'     => false,
-                    'error_type' => 'duplicate',
-                    'message'    => "Course '{$courses[$cid]->course_name}' is already assigned."
-                ], 422);
-            }
+        if (!in_array($parentId, $existing)) {
+            UniversityCourse::create([
+                'university_id'        => $universityId,
+                'course_id'            => $parentId,
+                'parent_course_id'     => null,
+                'course_name'          => $parent->course_name,
+                'course_code'          => $parent->course_code,
+                'duration_in_years'    => $parent->course_duration,
+                'parent_course_name'   => null,
+                'is_parent'            => 1,
+                'is_active'            => 1
+            ]);
         }
 
-        foreach ($courseIds as $cid) {
-            $course = $courses->get($cid);
-            if (!$course) continue;
+        foreach ($childIds as $cid) {
+            if (in_array($cid, $existing)) {
+                continue;
+            }
 
-            $isParent = isset($isParentInput[$cid]) && $isParentInput[$cid] == "1"
-                ? 'true'
-                : 'false';
-
-            $duration = $durations[$cid] ?? null;
-            $semester = $semesters[$cid] ?? null;
-            $isActive = isset($actives[$cid]) ? 1 : 0;
-
-            if ($isParent === "false") {
-                // Validation for child/single courses
-                if (!$duration || $duration <= 0) {
-                    return response()->json([
-                        'status'  => false,
-                        'message' => "Duration is required for '{$course->course_name}'."
-                    ], 422);
-                }
-
-                if (!$semester || $semester <= 0) {
-                    $semester = null;
-                }
-            } else {
-                // Parent courses → duration & semester MUST be null
-                $duration = null;
-                $semester = null;
-                $isActive = 1;
+            $child = Course::find($cid);
+            if (!$child) {
+                continue;
             }
 
             UniversityCourse::create([
-                'university_id'     => $university->id,
-                'course_id'         => $cid,
-                'parent_course_id'  => $course->parent_id,
-                'course_name'       => $course->course_name,
-                'course_code'       => $course->course_code,
-                'parent_name'       => $course->parent?->course_name,
-                'duration_in_years' => $duration,
-                'total_semesters'   => $semester,
-                'is_active'         => $isActive,
-                'is_parent'         => $isParent,
+                'university_id'        => $universityId,
+                'course_id'            => $cid,
+                'parent_course_id'     => $parentId,
+                'course_name'          => $child->course_name,
+                'course_code'          => $child->course_code,
+                'duration_in_years'    => $child->course_duration,
+                'parent_course_name'   => $parent->course_name,
+                'is_parent'            => 0,
+                'is_active'            => 1
             ]);
-
-            // Update parent course to mark it as a parent
-            if ($course->parent_id) {
-                UniversityCourse::where('university_id', $university->id)
-                    ->where('course_id', $course->parent_id)
-                    ->update(['is_parent' => 'true']);
-            }
         }
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Courses assigned successfully'
-        ]);
+        return response()->json(['status' => true]);
     }
 
 
-
-    public function assignedList(University $university)
+    protected function attachCourse(University $university, Course $course, ?Course $parent = null, bool $asParent = false)
     {
-        $assigned = UniversityCourse::where('university_id', $university->id)
-            ->whereNull('deleted_at')
-            ->get()
-            ->keyBy('course_id');
+        UniversityCourse::updateOrCreate(
+            [
+                'university_id' => $university->id,
+                'course_id'     => $course->id,
+            ],
+            [
+                'course_name'         => $course->course_name,
+                'course_code'         => $course->course_code,
+                'parent_course_id'    => $parent ? $parent->id : null,
+                'parent_course_name'  => $parent ? $parent->course_name : null,
+                'duration_in_years'   => $course->course_duration,
+                'is_parent'           => $asParent ? 1 : 0,
+                'is_active'           => 1,
+            ]
+        );
+    }
 
-        if ($assigned->isEmpty()) {
-            return response()->json([
-                'status'   => true,
-                'assigned' => []
-            ]);
+    public function edit($id)
+    {
+        $row = UniversityCourse::findOrFail($id);
+
+        return response()->json($row);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $row = UniversityCourse::findOrFail($id);
+
+        $request->validate([
+            'course_name'       => 'nullable|string|max:255',
+            'course_code'       => 'nullable|string|max:100',
+            'duration_in_years' => 'nullable|integer|min:1',
+            'is_active'         => 'nullable|boolean',
+        ]);
+
+        $data = $request->only([
+            'course_name',
+            'course_code',
+            'duration_in_years',
+        ]);
+
+        if ($request->has('is_active')) {
+            $data['is_active'] = $request->boolean('is_active');
         }
 
-        $assignedIds = $assigned->keys()->toArray();
+        $row->update($data);
 
-        $parentCourses = Course::with('children')
-            ->whereIn('id', $assignedIds)
-            ->whereNull('parent_id')
-            ->get();
+        return response()->json(['status' => true]);
+    }
 
-        $result = $parentCourses->map(function ($course) use ($assigned) {
+    public function destroy($id)
+    {
+        DB::transaction(function () use ($id) {
+            $uc = UniversityCourse::findOrFail($id);
 
-            return $this->buildTreeNode($course, $assigned);
+            if (!$uc->parent_course_id) { // it's a parent
+                UniversityCourse::where('university_id', $uc->university_id)
+                    ->where('parent_course_id', $uc->course_id)
+                    ->delete();
+            }
+
+            $uc->delete();
         });
 
-        return response()->json([
-            'status'   => true,
-            'assigned' => $result->values()
-        ]);
+        return response()->json(['status' => true]);
     }
 
-
-    public function delete(Request $request, $universityId, $id)
+    public function restore(Request $request, $universityId, $id)
     {
-        // Debugging
-        Log::info("Delete Request: university_id={$universityId}, id={$id}");
-
         $course = UniversityCourse::withTrashed()
             ->where('university_id', $universityId)
             ->where('course_id', $id)
@@ -177,140 +178,67 @@ class UniversityCourseController extends Controller
             return response()->json(['status' => false, 'message' => 'Record not found'], 404);
         }
 
+        if (!$course->trashed()) {
+            return response()->json(['status' => false, 'message' => 'Record is not deleted'], 400);
+        }
 
+        // Restore the main record
+        $course->restore();
+
+        // If parent course was deleted, restore all child courses
         if ($course->is_parent === "true") {
-            UniversityCourse::where('university_id', $course->university_id)->where('parent_course_id', $course->course_id)
-                ->delete();
-            UniversityCourse::wherewhere('university_id', $course->university_id)->where('course_id', $course->course_id)->delete();
-        }
-
-        // Delete the main record
-        $course->delete();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Course deleted successfully'
-        ]);
-    }
-
-    public function update(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'university_id' => 'required|exists:universities,id',
-            'updates'       => 'required|array',
-            'updates.*.duration' => 'nullable|integer|min:1',
-            'updates.*.semester' => 'nullable|integer|min:0',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status'  => false,
-                'message' => $validator->errors()->first(),
-            ], 422);
-        }
-
-        $universityId = $request->university_id;
-        $updates = $request->updates;
-
-        foreach ($updates as $courseId => $data) {
-            $record = UniversityCourse::where('course_id', $courseId)
-                ->where('university_id', $universityId)
-                ->first();
-
-            if (!$record) continue;
-
-            $duration = $data['duration'] ?? null;
-            $semester = $data['semester'] ?? null;
-
-            if ($record->is_parent === "false" && (!$duration || $duration <= 0)) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => "Duration required for {$record->course_name}",
-                ], 422);
-            }
-
-            $record->update([
-                'duration_in_years' => $duration,
-                'total_semesters'   => $semester ?: null,
-            ]);
-        }
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'Courses updated successfully',
-        ]);
-    }
-
-
-    public function updateActive(Request $request)
-    {
-        $record = UniversityCourse::where('course_id', $request->id)
-            ->where('university_id', $request->university_id)
-            ->first();
-
-        if (!$record) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Record not found'
-            ], 404);
-        }
-
-        $isActive = $request->is_active ? 1 : 0;
-
-        // Update the parent course's active status
-        $record->update(['is_active' => $isActive]);
-
-        // If the course is a parent and is being deactivated, deactivate all child courses
-        if ($record->is_parent === "true" && $isActive === 0) {
-            UniversityCourse::where('university_id', $record->university_id)
-                ->where('parent_course_id', $record->course_id)
-                ->update(['is_active' => 0]);
+            UniversityCourse::withTrashed()
+                ->where('university_id', $course->university_id)
+                ->where('parent_course_id', $course->course_id)
+                ->restore();
         }
 
         return response()->json([
             'status' => true,
-            'message' => 'Status updated'
+            'message' => 'Course restored successfully'
         ]);
     }
 
-
-
-    private function buildTreeNode($course, $assigned)
+    public function getDeletedCourses(University $university)
     {
-        $record = $assigned[$course->id] ?? null;
+        $deleted = UniversityCourse::onlyTrashed()
+            ->where('university_id', $university->id)
+            ->get();
 
-        $node = [
-            'course_id'   => $course->id,
-            'course_name' => $course->course_name,
-            'duration'    => $record->duration_in_years,
-            'semesters'   => $record->total_semesters,
-            'is_active'   => $record->is_active,
-            'is_parent'   => $record->is_parent,
-            'children'    => []
-        ];
+        return response()->json([
+            'status' => true,
+            'deleted' => $deleted
+        ]);
+    }
 
-        // Children only if assigned
-        if ($course->children && $course->children->count()) {
+    public function getUniversityCourses($universityId)
+    {
 
-            $children = $course->children->filter(function ($child) use ($assigned) {
-                return isset($assigned[$child->id]);
-            });
+        $courses = Course::whereHas('universities', function ($q) use ($universityId) {
+            $q->where('universities.id', $universityId);
+        })
+            ->with('children')
+            ->whereNull('parent_id')
+            ->get();
 
-            $node['children'] = $children->map(function ($child) use ($assigned) {
+        return response()->json([
+            'status' => true,
+            'data'   => $courses
+        ]);
+    }
 
-                $rec = $assigned[$child->id];
+    public function childCourses($universityId, $course_id)
+    {
+        $courses = Course::whereHas('universities', function ($q) use ($universityId) {
+            $q->where('universities.id', $universityId);
+        })
+            ->with('children')
+            ->where('parent_id', $course_id)
+            ->get();
 
-                return [
-                    'course_id'   => $child->id,
-                    'course_name' => $child->course_name,
-                    'duration'    => $rec->duration_in_years,
-                    'semesters'   => $rec->total_semesters,
-                    'is_active'   => $rec->is_active,
-                    'is_parent'   => 'false',
-                ];
-            })->values();
-        }
-
-        return $node;
+        return response()->json([
+            'status' => true,
+            'data'   => $courses
+        ]);
     }
 }

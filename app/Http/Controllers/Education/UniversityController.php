@@ -68,6 +68,11 @@ class UniversityController extends Controller
         }
     }
 
+    public function allUniversities()
+    {
+        return University::orderBy('org_name', 'asc')->get();
+    }
+
     public function show($id)
     {
         $data = University::findOrFail($id);

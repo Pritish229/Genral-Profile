@@ -17,13 +17,15 @@ class Course extends Model
         'course_name',
         'parent_id',
         'course_code',
+        'course_duration',
+        'course_image',
         'is_parent',
         'is_active',
         'description',
     ];
 
     protected $casts = [
-        'is_parent' => 'string',  // expected: 'true' or 'false'
+        'is_parent' => 'boolean',
         'is_active' => 'boolean',
     ];
 
@@ -42,8 +44,13 @@ class Course extends Model
         return $this->hasMany(UniversityCourse::class, 'university_id');
     }
 
-    public function getIsParentAttribute()
+    public function universities()
     {
-        return $this->children()->count() > 0 ? 'true' : 'false';
+        return $this->belongsToMany(
+            University::class,
+            'university_courses',
+            'course_id',
+            'university_id'
+        );
     }
 }

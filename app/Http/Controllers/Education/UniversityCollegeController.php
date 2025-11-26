@@ -19,7 +19,7 @@ class UniversityCollegeController extends Controller
     {
         $query = UniversityCollege::with('university');
 
-        if ($request->search['value']) {
+        if (!empty($request->search['value'])) {
             $search = $request->search['value'];
             $query->where(function ($q) use ($search) {
                 $q->where('org_name', 'like', "%{$search}%")
@@ -31,10 +31,10 @@ class UniversityCollegeController extends Controller
             });
         }
 
-        $total = UniversityCollege::count();
-        $filtered = $query->count();
+        $totalRecords    = UniversityCollege::count();
+        $filteredRecords = (clone $query)->count();
 
-        $columnMap = [
+        $columns = [
             0 => null,
             1 => null,
             2 => 'university_id',
@@ -44,47 +44,43 @@ class UniversityCollegeController extends Controller
             6 => 'state',
             7 => 'email_id',
             8 => 'phone_no',
-            9 => null
+            9 => null,
         ];
 
-        $orderColumnIndex = $request->order[0]['column'];
-        $orderDirection = $request->order[0]['dir'];
-        $orderColumn = $columnMap[$orderColumnIndex] ?? null;
+        $orderColumn = $columns[$request->order[0]['column']] ?? null;
+        $orderDir    = $request->order[0]['dir'] === 'desc' ? 'desc' : 'asc';
 
         if ($orderColumn) {
-            $query->orderBy($orderColumn, $orderDirection);
+            $query->orderBy($orderColumn, $orderDir);
         }
 
-        $colleges = $query
-            ->skip($request->start)
-            ->take($request->length)
-            ->get();
+        $colleges = $query->skip($request->start)->take($request->length)->get();
 
-        $data = [];
-        foreach ($colleges as $index => $row) {
-            $data[] = [
-                'DT_RowIndex' => $request->start + $index + 1,
-                'logo' => $row->org_logo
-                    ? '<img src="' . asset("storage/" . $row->org_logo) . '" width="40" class="rounded"/>'
+        $data = $colleges->map(function ($row, $index) use ($request) {
+            return [
+                'DT_RowIndex'     => $request->start + $index + 1,
+                'logo'            => $row->org_logo
+                    ? '<img src="' . asset('storage/' . $row->org_logo) . '" width="40" class="rounded">'
                     : '',
                 'university_name' => $row->university?->org_name ?? 'N/A',
-                'org_name' => $row->org_name,
-                'city' => $row->city,
-                'district' => $row->district,
-                'state' => $row->state,
-                'email_id' => $row->email_id,
-                'phone_no' => $row->phone_no,
+                'org_name'        => $row->org_name ?? '',
+                'city'            => $row->city ?? '',
+                'district'        => $row->district ?? '',
+                'state'           => $row->state ?? '',
+                'email_id'        => $row->email_id ?? '',
+                'phone_no'        => $row->phone_no ?? '',
                 'action' =>
-                '<button class="btn btn-sm btn-info editBtn" data-id="' . $row->id . '">Edit</button>
-                     <button class="btn btn-sm btn-danger deleteBtn" data-id="' . $row->id . '">Delete</button>',
+                '<button class="btn btn-sm btn-info editBtn" data-id="' . $row->id . '">Edit</button> ' .
+                    '<a href="' . route('collegecourse.index', ['college' => $row->id , 'university' => $row->university_id]) . '" class="btn btn-sm btn-primary">Course</a> ' .
+                    '<button class="btn btn-sm btn-danger deleteBtn" data-id="' . $row->id . '">Delete</button>',
             ];
-        }
+        })->toArray();
 
         return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $total,
-            'recordsFiltered' => $filtered,
-            'data' => $data
+            'draw'            => (int) $request->draw,
+            'recordsTotal'    => $totalRecords,
+            'recordsFiltered' => $filteredRecords,
+            'data'            => $data,
         ]);
     }
 
@@ -98,15 +94,6 @@ class UniversityCollegeController extends Controller
         ]);
     }
 
-    public function create()
-    {
-        $universities = University::where('is_active', true)->get();
-
-        return response()->json([
-            'status' => true,
-            'universities' => $universities
-        ]);
-    }
 
     public function store(Request $request)
     {
@@ -207,4 +194,8 @@ class UniversityCollegeController extends Controller
             'message' => 'College deleted successfully.',
         ]);
     }
+
+
+
+
 }

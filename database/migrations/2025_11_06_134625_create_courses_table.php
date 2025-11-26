@@ -16,12 +16,10 @@ return new class extends Migration
             $table->string('course_name');
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->foreign('parent_id')->references('id')->on('courses')->onDelete('cascade');
-            $table->string('parent_name')->nullable();
-            $table->string('course_code')->unique();
-
-            // true = course has children (not selectable for duration)
-            // false = this is child or standalone (needs duration at assignment level)
-            $table->enum('is_parent', ['true', 'false'])->default('false');
+            $table->string('course_code')->nullable()->unique();
+            $table->integer('course_duration')->nullable();
+            $table->string('course_image')->nullable();
+            $table->boolean('is_parent')->default(false);
             $table->boolean('is_active')->default(true);
             $table->text('description')->nullable();
             $table->timestamps();
@@ -29,10 +27,6 @@ return new class extends Migration
         });
     }
 
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('courses');

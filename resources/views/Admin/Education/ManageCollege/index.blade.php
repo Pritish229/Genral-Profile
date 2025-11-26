@@ -166,38 +166,19 @@
 
                     <div class="modal-body">
                         <div class="row">
-
-                       
-
                             <div class="col-lg-12">
-                                <x-inputbox
-                                    id="edit_org_name"
-                                    name="org_name"
-                                    type="text"
-                                    label="College Name"
-                                    placeholder="Enter College Name"
+                                <x-inputbox id="edit_org_name" name="org_name" type="text" label="College Name" placeholder="Enter College Name" value=""
+                                    :required="true" />
+                            </div>
+
+                            <div class="col-lg-4">
+                                <x-inputbox id="edit_city" name="city" type="text" label="City" placeholder="Enter City Name"
                                     value=""
                                     :required="true" />
                             </div>
 
                             <div class="col-lg-4">
-                                <x-inputbox
-                                    id="edit_city"
-                                    name="city"
-                                    type="text"
-                                    label="City"
-                                    placeholder="Enter City Name"
-                                    value=""
-                                    :required="true" />
-                            </div>
-
-                            <div class="col-lg-4">
-                                <x-inputbox
-                                    id="edit_district"
-                                    name="district"
-                                    type="text"
-                                    label="District"
-                                    placeholder="Enter District Name"
+                                <x-inputbox id="edit_district" name="district" type="text" label="District" placeholder="Enter District Name"
                                     value=""
                                     :required="true" />
                             </div>
@@ -210,34 +191,17 @@
                             </div>
 
                             <div class="col-lg-6">
-                                <x-inputbox
-                                    id="edit_email_id"
-                                    name="email_id"
-                                    type="email"
-                                    label="Email"
-                                    placeholder="Enter Email Address"
-                                    value=""
+                                <x-inputbox id="edit_email_id" name="email_id" type="email" label="Email" placeholder="Enter Email Address" value=""
                                     :required="true" />
                             </div>
 
                             <div class="col-lg-6">
-                                <x-inputbox
-                                    id="edit_phone_no"
-                                    name="phone_no"
-                                    type="text"
-                                    label="Phone No"
-                                    placeholder="Enter Phone number"
-                                    value=""
+                                <x-inputbox id="edit_phone_no" name="phone_no" type="text" label="Phone No" placeholder="Enter Phone number" value=""
                                     :required="true" />
                             </div>
 
                             <div class="col-lg-12 mt-2">
-                                <x-textareabox
-                                    id="edit_address"
-                                    name="address"
-                                    label="Address"
-                                    placeholder="Enter Address"
-                                    value="" />
+                                <x-textareabox id="edit_address" name="address" label="Address" placeholder="Enter Address" value="" />
                             </div>
 
                             <div class="col-lg-12 mt-3">
@@ -246,13 +210,7 @@
                             </div>
 
                             <div class="col-lg-12">
-                                <x-inputbox
-                                    id="edit_website_url"
-                                    name="website_url"
-                                    type="text"
-                                    label="Website"
-                                    placeholder="Enter Website URL"
-                                    value="" />
+                                <x-inputbox id="edit_website_url" name="website_url" type="text" label="Website" placeholder="Enter Website URL" value="" />
                             </div>
 
                         </div>
@@ -312,7 +270,7 @@ $(document).ready(function() {
         }
     });
 
-    let states = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal"];
+    let states = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal"];
     states.forEach(s => {
         $('#state').append(`<option value="${s}">${s}</option>`);
         $('#edit_state').append(`<option value="${s}">${s}</option>`);
