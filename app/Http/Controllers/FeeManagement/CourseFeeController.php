@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Education\CourseFee;
 use App\Models\Education\FeeMaster;
 use App\Http\Controllers\Controller;
+use App\Models\Education\University;
+use App\Models\Fee\CollegeCourseFee;
+use App\Models\Education\CollegeCourse;
+use App\Models\Education\UniversityCollege;
 
 class CourseFeeController extends Controller
 {
@@ -13,173 +17,156 @@ class CourseFeeController extends Controller
     {
         return view('Admin.FeeManagement.CourseFees.index');
     }
-
-    public function paginate(Request $req)
+    public function manage()
     {
-        $baseQuery = CourseFee::query(); // for total count (no filters)
-        $total = $baseQuery->count();
+        return view('Admin.FeeManagement.CourseFees.ManageCourseFee');
+    }
 
-        $query = CourseFee::with(['sessionYear', 'course', 'courseClass', 'feeMaster']);
 
-        // Filters
-        if ($req->session_year_id) {
-            $query->where('session_year_id', $req->session_year_id);
-        }
-        if ($req->course_id) {
-            $query->where('course_id', $req->course_id);
-        }
-        if ($req->course_class_id) {
-            $query->where('course_class_id', $req->course_class_id);
-        }
+    public function store(Request $request)
+    {
+        $collegeId   = $request->college_id;
+        $childId     = $request->course_id;
+        $sessionName = $request->session_name;
 
-        // Search
-        if ($req->has('search') && !empty($req->search['value'])) {
-            $search = $req->search['value'];
-            $query->where(function ($q) use ($search) {
-                $q->where('fee_name', 'LIKE', "%$search%")
-                    ->orWhere('fee_amount', 'LIKE', "%$search%")
-                    ->orWhere('total_fee', 'LIKE', "%$search%");
-            });
-        }
+        $start = date('Y-m-d', strtotime($request->session_start_date));
+        $end   = date('Y-m-d', strtotime($request->session_end_date));
 
-        $filtered = $query->count(); // count AFTER filters
+        $fees = $request->fees;
 
-        // Sorting
-        $sortable = ['id', 'fee_amount', 'total_fee', 'feestype'];
-        if ($req->sort_column && in_array($req->sort_column, $sortable)) {
-            $query->orderBy($req->sort_column, $req->sort_dir);
-        } else {
-            $query->orderBy('id', 'DESC');
+        $childCourse = CollegeCourse::where('college_id', $collegeId)
+            ->where('course_id', $childId)
+            ->first();
+
+        if (!$childCourse) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Course not assigned to this college.'
+            ], 404);
         }
 
-        // Pagination
-        $data = $query->skip($req->start)->take($req->length)->get();
-        $startIndex = $req->start + 1;
+        $parentId   = $childCourse->parent_course_id;
+        $parentName = $childCourse->parent_course_name;
+
+        $childName  = $childCourse->course_name;
+        $duration   = $childCourse->duration_in_years;
+        $courseCode = $childCourse->course_code;
+
+        if ($parentId) {
+
+            $parentRow = CollegeCourseFee::where('college_id', $collegeId)
+                ->where('course_id', $parentId)
+                ->where('is_parent', 1)
+                ->where('session_name', $sessionName)
+                ->first();
+
+            if (!$parentRow) {
+
+                $parentCourse = CollegeCourse::where('college_id', $collegeId)
+                    ->where('course_id', $parentId)
+                    ->first();
+
+                CollegeCourseFee::create([
+                    'college_id'         => $collegeId,
+                    'parent_course_id'   => null,
+                    'parent_course_name' => null,
+                    'is_parent'          => 1,
+                    'course_id'          => $parentId,
+                    'course_name'        => $parentCourse->course_name,
+                    'course_code'        => $parentCourse->course_code,
+                    'duration_in_years'  => $parentCourse->duration_in_years,
+                    'fee_id'             => null,
+                    'fee_head'           => null,
+                    'fee_type'           => null,
+                    'collection_type'    => null,
+                    'times_in_year'      => null,
+                    'amount'             => null,
+                    'total_amount'       => null,
+                    'session_name'       => $sessionName,
+                    'session_start_date' => $start,
+                    'session_end_date'   => $end
+                ]);
+            }
+        }
+
+        foreach ($fees as $f) {
+
+            $exists = CollegeCourseFee::where('college_id', $collegeId)
+                ->where('course_id', $childId)
+                ->where('session_name', $sessionName)
+                ->where(function ($q) use ($f) {
+                    $q->where('fee_id', $f['fee_id'])
+                        ->orWhere('fee_head', $f['fee_head']);
+                })
+                ->first();
+
+            if ($exists) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $f['fee_head'] . ' already exists for this session.'
+                ], 409);
+            }
+
+            CollegeCourseFee::create([
+                'college_id'         => $collegeId,
+                'parent_course_id'   => $parentId,
+                'parent_course_name' => $parentName,
+                'is_parent'          => 0,
+                'course_id'          => $childId,
+                'course_name'        => $childName,
+                'course_code'        => $courseCode,
+                'duration_in_years'  => $duration,
+                'fee_id'             => $f['fee_id'],
+                'fee_head'           => $f['fee_head'],
+                'fee_type'           => $f['fee_type'] ?? 1,
+                'collection_type'    => $f['collection_type'] ?? 'mandatory',
+                'times_in_year'      => $f['times_in_year'],
+                'amount'             => $f['amount'],
+                'total_amount'       => $f['total_amount'],
+                'session_name'       => $sessionName,
+                'session_start_date' => $start,
+                'session_end_date'   => $end
+            ]);
+        }
 
         return response()->json([
-            'draw' => $req->draw,
-            'recordsTotal' => $total,        // fixed
-            'recordsFiltered' => $filtered,  // fixed
-
-            'data' => $data->map(function ($row) use (&$startIndex) {
-
-                $status = $row->status == 1
-                    ? "<span class='badge bg-success'>Active</span>"
-                    : "<span class='badge bg-danger'>Inactive</span>";
-
-                return [
-                    'DT_RowIndex' => $startIndex++,
-                    'session' => $row->sessionYear->name ?? '-',
-                    'course' => $row->course->course_name ?? '-',
-                    'class' => $row->courseClass->class_name ?? '-',
-                    'fee_name' => $row->fee_name ?? '-',
-
-                    // FIXED: convert enum number → readable text
-                    'feestype' => [
-                        '1' => 'Annual',
-                        '2' => 'Monthly',
-                        '3' => 'Other',
-                    ][$row->feestype] ?? 'N/A',
-
-                    'fee_amount' => $row->fee_amount,
-                    'total_fee' => $row->total_fee,
-                    'status' => $status,
-
-                    'action' => "
-                    <button class='btn btn-sm btn-info editCourseFee' data-id='{$row->id}'>Edit</button>
-                    <button class='btn btn-sm btn-danger deleteCourseFee' data-id='{$row->id}'>Delete</button>
-                    ",
-                ];
-            })
+            'status'  => true,
+            'message' => 'Fee details saved successfully.'
         ]);
     }
 
 
-    public function store(Request $req)
+    public function list(Request $request)
     {
-        $req->validate([
-            'session_year_id' => 'required',
-            'course_id' => 'required',
-            'course_class_id' => 'required',
-            'fee_master_id' => 'required|exists:fee_masters,id',
-            'fee_amount' => 'required|numeric',
-            'feestype' => 'required|in:0,1,2',
-            'status' => 'required|in:0,1',
-        ]);
+        $query = CollegeCourseFee::where('is_parent', 0);
 
-        // Fetch fee name from master
-        $feeMaster = FeeMaster::find($req->fee_master_id);
-        $feeName = $feeMaster->fee_name;
+        if ($request->college_id) {
+            $query->where('college_id', $request->college_id);
+        }
 
-        // Auto calculate times & total
-        $times = match ($req->feestype) {
-            '1' => 1,   // Annual
-            '2' => 12,  // Monthly
-            '3' => 1,   // Other
-            default => 1,
-        };
+        if ($request->parent_course_id) {
+            $query->where('parent_course_id', $request->parent_course_id);
+        }
 
-        $total = $times * $req->fee_amount;
-        $fee_name = FeeMaster::where('id', $req->fee_master_id)->first();
-        CourseFee::create([
-            'session_year_id' => $req->session_year_id,
-            'course_id' => $req->course_id,
-            'course_class_id' => $req->course_class_id,
-            'fee_master_id' => $req->fee_master_id,
-            'fee_name' => FeeMaster::find($req->fee_master_id)->fee_name,
-            'times_in_year' => $times,
-            'fee_amount' => $req->fee_amount,
-            'total_fee' => $total,
-            'feestype' => $req->feestype,
-            'status' => $req->status,
-            'is_active' => $req->status == "1" ? 1 : 0,
-        ]);
+        if ($request->course_id) {
+            $query->where('course_id', $request->course_id);
+        }
 
-        return response()->json(['status' => 'success', 'message' => 'Course Fee Added Successfully!']);
-    }
+        if ($request->session_name) {
+            $query->where('session_name', $request->session_name);
+        }
 
-    public function edit($id)
-    {
+        $data = $query->orderBy('course_id')->orderBy('fee_head')->get();
+
         return response()->json([
-            'data' => CourseFee::findOrFail($id)
+            'status' => true,
+            'data' => $data,
         ]);
     }
-
-    public function update(Request $req, $id)
+    public function sessions()
     {
-        $req->validate([
-            'fee_amount' => 'required|numeric',
-            'feestype' => 'required|in:0,1,2',
-            'status' => 'required|in:0,1',
-        ]);
+        $sessions = CollegeCourseFee::whereNotNull('session_name')->groupBy('session_name')->pluck('session_name');
 
-        $row = CourseFee::findOrFail($id);
-
-        // Auto calculate
-        $times = match ($req->feestype) {
-            '1' => 1,
-            '2' => 12,
-            '3' => 1,
-        };
-
-        $total = $times * $req->fee_amount;
-
-        $row->update([
-            'times_in_year' => $times,
-            'fee_amount' => $req->fee_amount,
-            'total_fee' => $total,
-            'feestype' => $req->feestype,
-            'status' => $req->status,
-            'is_active' => $req->status === "1" ? 1 : 0,
-        ]);
-
-        return response()->json(['status' => 'success', 'message' => 'Course Fee Updated!']);
-    }
-
-    public function delete($id)
-    {
-        CourseFee::findOrFail($id)->delete();
-
-        return response()->json(['status' => 'success', 'message' => 'Course Fee Deleted!']);
+        return response()->json($sessions);
     }
 }

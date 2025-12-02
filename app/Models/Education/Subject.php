@@ -29,8 +29,5 @@ class Subject extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
-    public function sessionYear()
-    {
-        return $this->belongsTo(SessionYear::class, 'session_year_id');
-    }
+    
 }

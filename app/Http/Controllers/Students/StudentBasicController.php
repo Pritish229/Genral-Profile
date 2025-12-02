@@ -211,4 +211,5 @@ class StudentBasicController extends Controller
             ->rawColumns(['avatar', 'actions']) // ✅ keep only one call
             ->make(true);
     }
+
 }

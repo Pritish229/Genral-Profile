@@ -1,251 +1,339 @@
 @extends('Admin.layout.app')
 
-@section('title', 'Assign College Course to Student')
+@section('title', 'College Student Enrollment')
 
 @section('content')
+
 <div class="page-content">
 
-    <x-breadcrumb
-        title="Assign College + Course + Add Student"
-        :links="['Home' => 'Admin.Dashboard', 'Assign Student' => '']" />
+    <x-breadcrumb title="College Student Enrollment"
+        :links="['Home' => 'Admin.Dashboard', 'College Student Enrollment' => '']" />
 
-    <div class="p-1">
-
-        {{-- FILTERS --}}
-        <div class="card p-3 mb-3">
-            <div class="row g-3">
-
-                <div class="col-md-3">
-                    <label class="form-label">University *</label>
-                    <select id="filter_university" class="form-select">
-                        <option value="">-- Select University --</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">College *</label>
-                    <select id="filter_college" class="form-select">
-                        <option value="">-- Select College --</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Course *</label>
-                    <select id="filter_course" class="form-select">
-                        <option value="">-- Select Course --</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Session Year *</label>
-                    <select id="filter_session_year" class="form-select">
-                        <option value="">-- Select Session Year --</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Semester / Class *</label>
-                    <select id="filter_sem_class" class="form-select">
-                        <option value="">-- Select Semester/Class --</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3 text-md-end">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
-                        + Add Student
-                    </button>
-                </div>
-
-            </div>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <label>Select University</label>
+            <select id="university_id" class="form-control select2"></select>
         </div>
 
-        {{-- TABLE --}}
-        <div class="card p-3">
-            <table class="table table-bordered" id="studentTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>University</th>
-                        <th>College</th>
-                        <th>Course</th>
-                        <th>Session</th>
-                        <th>Semester/Class</th>
-                        <th>Student Name</th>
-                        <th>Mobile</th>
-                        <th>Active</th>
-                        <th width="140">Actions</th>
-                    </tr>
-                </thead>
-            </table>
+        <div class="col-md-3 mb-3">
+            <label>Select College</label>
+            <select id="college_id" class="form-control select2"></select>
         </div>
 
+        <div class="col-md-3 mb-3">
+            <label>Select Parent Course</label>
+            <select id="parent_course_id" class="form-control select2"></select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label>Select Child Course</label>
+            <select id="child_course_id" class="form-control select2"></select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label>Select Session</label>
+            <select id="session_name" class="form-control select2"></select>
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="student_result_table" class="text-center border rounded bg-light p-2">
+        <div class="p-5">
+            <h4 class="fw-bold text-secondary mb-2">No Data Loaded</h4>
+            <p class="text-muted">Please select all filters to load students.</p>
+            <a href="{{route('education.coursestudent.assignedstudents')}}" class="btn btn-primary">View Assign Students</a>
+        </div>
+    </div>
+
+    <div class="mt-3 text-end">
+        <button id="assignStudentsBtn" class="btn btn-primary d-none">
+            Assign Selected Students
+        </button>
     </div>
 
 </div>
-
-{{-- ADD STUDENT MODAL --}}
-<div class="modal fade" id="addStudentModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <form id="addStudentForm">@csrf
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Student</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    {{-- Student Inputs --}}
-                    <div class="row g-3">
-
-                        <div class="col-md-4">
-                            <x-inputbox
-                                id="add_student_name"
-                                type="text"
-                                name="student_name"
-                                label="Student Name"
-                                placeholder="Enter Student Name"
-                                required="true"
-                            />
-                        </div>
-
-                        <div class="col-md-4">
-                            <x-inputbox
-                                id="add_mobile"
-                                type="text"
-                                name="mobile"
-                                label="Mobile Number"
-                                placeholder="Enter Mobile Number"
-                                required="true"
-                            />
-                        </div>
-
-                        <div class="col-md-4">
-                            <x-inputbox
-                                id="add_email"
-                                type="email"
-                                name="email"
-                                label="Email"
-                                placeholder="Enter Email"
-                            />
-                        </div>
-
-                        <div class="col-md-6">
-                            <x-inputbox
-                                id="add_father_name"
-                                type="text"
-                                name="father_name"
-                                label="Father Name"
-                                placeholder="Enter Father Name"
-                            />
-                        </div>
-
-                        <div class="col-md-6">
-                            <x-inputbox
-                                id="add_mother_name"
-                                type="text"
-                                name="mother_name"
-                                label="Mother Name"
-                                placeholder="Enter Mother Name"
-                            />
-                        </div>
-
-                        <div class="col-12">
-                            <x-switch-toggle
-                                id="add_is_active"
-                                name="is_active"
-                                :checked="true"
-                                label="Active"
-                            />
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary">Save Student</button>
-                </div>
-
-            </div>
-        </form>
-    </div>
-</div>
-
 @endsection
 
 @section('script')
-<script>
-$(function() {
 
-    // Enable Select2
-    const initSelect2 = () => {
-        $('select').each(function() {
-            if (!$(this).data('select2')) {
-                $(this).select2({
-                    width: "100%",
-                    dropdownParent:
-                        $(this).closest('.modal').length
-                        ? $(this).closest('.modal')
-                        : $('body')
-                });
+<style>
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.7s ease-out;
+}
+.spinner-border-sm {
+    margin-right: 6px;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+
+    function placeholderBox() {
+        return `
+            <div class="p-5 text-center border rounded bg-light">
+                <h4 class="fw-bold text-secondary mb-2">No Data Loaded</h4>
+                <p class="text-muted">Please select all filters to load students .</p>
+                <a href="{{route('education.coursestudent.assignedstudents')}}" class="btn btn-primary">View Assign Students</a>
+            </div>
+        `;
+    }
+
+    $('.select2').select2();
+
+    $('#university_id').select2({
+        placeholder: 'Select University',
+        ajax: {
+            url: '{{ route("education.university.allUniversities") }}',
+            dataType: 'json',
+            processResults: data => ({
+                results: data.map(u => ({ id: u.id, text: u.org_name }))
+            })
+        }
+    });
+
+    $('#university_id').on('change', function () {
+
+        $('#college_id').val(null).trigger('change');
+        $('#parent_course_id').val(null).trigger('change');
+        $('#child_course_id').val(null).trigger('change');
+        $('#session_name').val(null).trigger('change');
+        $('#student_result_table').html(placeholderBox());
+
+        let id = $(this).val();
+        if (!id) return;
+
+        $('#college_id').select2({
+            placeholder: 'Select College',
+            ajax: {
+                url: '{{ route("education.college.universitycolleges", ":id") }}'.replace(':id', id),
+                dataType: 'json',
+                processResults: data => ({
+                    results: data.data.map(c => ({ id: c.id, text: c.org_name }))
+                })
             }
         });
-    };
+    });
 
-    initSelect2();
+    $('#college_id').on('change', function () {
 
-    // Dummy Data
-    const loadUniversities = t => {
-        $(t).html(`
-            <option value="">-- Select --</option>
-            <option value="1">University A</option>
-            <option value="2">University B</option>
-        `).trigger('change');
-    };
+        $('#parent_course_id').val(null).trigger('change');
+        $('#child_course_id').val(null).trigger('change');
+        $('#session_name').val(null).trigger('change');
+        $('#student_result_table').html(placeholderBox());
 
-    const loadColleges = t => {
-        $(t).html(`
-            <option value="">-- Select --</option>
-            <option value="1">College of Engineering</option>
-            <option value="2">College of Science</option>
-        `).trigger('change');
-    };
+        let id = $(this).val();
+        if (!id) return;
 
-    const loadCourses = t => {
-        $(t).html(`
-            <option value="">-- Select --</option>
-            <option value="1">B.Tech</option>
-            <option value="2">B.Tech - CS</option>
-            <option value="3">MCA</option>
-        `).trigger('change');
-    };
+        $('#parent_course_id').select2({
+            placeholder: 'Select Parent Course',
+            ajax: {
+                url: '{{ route("education.collegecourse.parentCourses", ":id") }}'.replace(':id', id),
+                dataType: 'json',
+                processResults: data => ({
+                    results: data.data.map(pc => ({ id: pc.course_id, text: pc.course_name }))
+                })
+            }
+        });
+    });
 
-    const loadSessions = t => {
-        $(t).html(`
-            <option value="">-- Select --</option>
-            <option value="2024">2024-2025</option>
-            <option value="2025">2025-2026</option>
-        `).trigger('change');
-    };
+    $('#parent_course_id').on('change', function () {
 
-    const loadSemClasses = t => {
-        $(t).html(`
-            <option value="">-- Select --</option>
-            <option value="1">Semester 1</option>
-            <option value="2">Semester 2</option>
-            <option value="3">Class A</option>
-            <option value="4">Class B</option>
-        `).trigger('change');
-    };
+        $('#child_course_id').val(null).trigger('change');
+        $('#session_name').val(null).trigger('change');
+        $('#student_result_table').html(placeholderBox());
 
-    loadUniversities('#filter_university');
-    loadColleges('#filter_college');
-    loadCourses('#filter_course');
-    loadSessions('#filter_session_year');
-    loadSemClasses('#filter_sem_class');
+        let parentId = $(this).val();
+        let collegeId = $('#college_id').val();
+        if (!parentId || !collegeId) return;
+
+        $('#child_course_id').select2({
+            placeholder: 'Select Child Course',
+            ajax: {
+                url: '{{ route("education.collegecourse.childCourses", ["college"=>":cid","id"=>":pid"]) }}'
+                    .replace(':cid', collegeId)
+                    .replace(':pid', parentId),
+                dataType: 'json',
+                processResults: data => ({
+                    results: data.data.map(cc => ({ id: cc.course_id, text: cc.course_name }))
+                })
+            }
+        });
+    });
+
+    $('#child_course_id').on('change', function () {
+
+        $('#session_name').val(null).trigger('change');
+        $('#student_result_table').html(placeholderBox());
+
+        $('#session_name').select2({
+            placeholder: 'Select Session',
+            ajax: {
+                url: '{{ route("coursefee.sessions") }}',
+                dataType: 'json',
+                processResults: data => ({
+                    results: data.map(s => ({ id: s, text: s }))
+                })
+            }
+        });
+    });
+
+    $('#session_name').on('change', function () {
+
+        let college = $('#college_id').val();
+        let parent = $('#parent_course_id').val();
+        let child = $('#child_course_id').val();
+        let session = $(this).val();
+
+        if (!college || !parent || !child || !session) {
+            $('#student_result_table').html(placeholderBox());
+            return;
+        }
+
+        $.ajax({
+            url: "{{ route('education.coursestudent.getStudents') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                college_id: college,
+                parent_course_id: parent,
+                course_id: child,
+                session_name: session
+            },
+            success: function (res) {
+                renderStudents(res.data);
+            }
+        });
+    });
+
+    function renderStudents(data) {
+
+        if (!data || data.length === 0) {
+            $('#student_result_table').html(`
+                <div class="alert alert-warning text-center">No students found.</div>
+            `);
+            $('#assignStudentsBtn').addClass('d-none');
+            return;
+        }
+
+        let html = `
+            <div class="table-responsive m-3" id="tableWrapper">
+            <table class="table table-bordered" id="studentTable">
+            <thead class="bg-light">
+                <tr>
+                    <th><input type="checkbox" id="select_all"></th>
+                    <th>#</th>
+                    <th>Student UID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+
+        data.forEach((s, i) => {
+            html += `
+                <tr>
+                    <td><input type="checkbox" class="student_checkbox" data-id="${s.id}" data-name="${s.full_name}"></td>
+                    <td>${i + 1}</td>
+                    <td>${s.student_uid}</td>
+                    <td>${s.full_name ?? ''}</td>
+                    <td>${s.primary_email ?? ''}</td>
+                    <td>${s.primary_phone ?? ''}</td>
+                    <td>${s.status}</td>
+                </tr>
+            `;
+        });
+
+        html += `
+            </tbody>
+            </table>
+            </div>
+        `;
+
+        $('#student_result_table').html(html);
+        $('#assignStudentsBtn').removeClass('d-none');
+
+        $('#select_all').on('change', function () {
+            $('.student_checkbox').prop('checked', $(this).prop('checked'));
+        });
+    }
+
+    $('#assignStudentsBtn').on('click', function () {
+
+        let selected = [];
+
+        $('.student_checkbox:checked').each(function () {
+            selected.push({
+                id: $(this).data('id'),
+                name: $(this).data('name')
+            });
+        });
+
+        if (selected.length === 0) {
+            alert('Please select at least one student.');
+            return;
+        }
+
+        $('#assignStudentsBtn').prop('disabled', true).html(`
+            <span class="spinner-border spinner-border-sm"></span> Assigning...
+        `);
+
+        $('#studentTable input').prop('disabled', true);
+        $('.select2').prop('disabled', true);
+
+        $.ajax({
+            url: "{{ route('education.coursestudent.store') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                college_id: $('#college_id').val(),
+                course_id: $('#child_course_id').val(),
+                session_year_name: $('#session_name').val(),
+                session_start: "2024-07-01",
+                session_end: "2025-06-30",
+                students: selected
+            },
+            success: function (res) {
+
+                swal.fire({
+                    title: 'Success',
+                    text: res.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+
+                $('#tableWrapper').addClass('fade-out');
+
+                setTimeout(() => {
+                    resetAllUI();
+                }, 700);
+            }
+        });
+    });
+
+    function resetAllUI() {
+
+        $('#assignStudentsBtn')
+            .prop('disabled', false)
+            .addClass('d-none')
+            .html('Assign Selected Students');
+
+        $('.select2').prop('disabled', false);
+
+        $('#student_result_table').html(placeholderBox());
+
+        $('#university_id').val(null).trigger('change');
+        $('#college_id').val(null).trigger('change');
+        $('#parent_course_id').val(null).trigger('change');
+        $('#child_course_id').val(null).trigger('change');
+        $('#session_name').val(null).trigger('change');
+    }
 
 });
 </script>
+
 @endsection

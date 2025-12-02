@@ -18,8 +18,8 @@ class CollegeCourse extends Model
         'parent_course_id',
         'parent_course_name',
         'duration_in_years',
-        'starting_time',
-        'ending_time',
+        'starting_date',
+        'ending_date',
         'is_parent',
         'is_active'
     ];

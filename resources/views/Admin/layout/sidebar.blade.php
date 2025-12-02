@@ -101,11 +101,14 @@
                         <li class="{{ in_array(Route::currentRouteName(), ['education.coursestudent.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.coursestudent.index') }}"><span>College Students</span></a>
                         </li>
-                        <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index']) ? 'active' : '' }}">
+                        <!-- <li class="{{ in_array(Route::currentRouteName(), ['education.coursestudent.assignedstudents']) ? 'active' : '' }}">
+                            <a href="{{ route('education.coursestudent.assignedstudents') }}"><span>Assigned Students</span></a>
+                        </li> -->
+                        <!-- <li class="{{ in_array(Route::currentRouteName(), ['education.sessionyear.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.sessionyear.index') }}"><span>Session Master</span></a>
-                        </li>
+                        </li> -->
                         
-                        <li class="{{ in_array(Route::currentRouteName(), ['education.class.index']) ? 'active' : '' }}">
+                        <!-- <li class="{{ in_array(Route::currentRouteName(), ['education.class.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.class.index') }}"><span>Class Master</span></a>
                         </li>
                         <li class="{{ in_array(Route::currentRouteName(), ['education.subject.index']) ? 'active' : '' }}">
@@ -116,7 +119,7 @@
                         </li>
                         <li class="{{ in_array(Route::currentRouteName(), ['education.section.index']) ? 'active' : '' }}">
                             <a href="{{ route('education.section.index') }}"><span>Section Master</span></a>
-                        </li>
+                        </li> -->
 
                     </ul>
 
@@ -137,7 +140,7 @@
                             <a href="{{ route('fee.FeeSchdule.index') }}"><span>Fee Schdule </span></a>
                         </li>
                         <li class="{{ in_array(Route::currentRouteName(), ['coursefee.index']) ? 'active' : '' }}">
-                            <a href="{{ route('coursefee.index') }}"><span>Corse Fee</span></a>
+                            <a href="{{ route('coursefee.index') }}"><span>College Course Fee</span></a>
                         </li>
 
 

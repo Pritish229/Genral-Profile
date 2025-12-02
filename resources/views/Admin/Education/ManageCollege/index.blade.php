@@ -1,11 +1,11 @@
 @extends('Admin.layout.app')
 
-@section('title', 'University College Master')
+@section('title', 'College Master')
 
 @section('content')
 <div class="page-content">
 
-    <x-breadcrumb title="University College Master" :links="['Home' => 'Admin.Dashboard', 'College Master' => '']" />
+    <x-breadcrumb title="College Master" :links="['Home' => 'Admin.Dashboard', 'College Master' => '']" />
 
     <div class="d-flex justify-content-end p-2">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCollegeModal">
@@ -14,8 +14,8 @@
     </div>
 
     <div class="card p-2">
-        <table class="table table-bordered table-striped" id="collegeTable">
-            <thead>
+        <table class="table table-hover table-striped" id="collegeTable">
+            <thead class="table-light">
                 <tr>
                     <th>#</th>
                     <th>Logo</th>

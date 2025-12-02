@@ -52,6 +52,25 @@ class FeeMasterController extends Controller
         ]);
     }
 
+    public function feelist(Request $request)
+    {
+        $feeType = $request->fee_type;
+
+        $query = FeeMaster::query();
+
+        if ($feeType !== null) {
+            $query->where('fee_type', $feeType);
+        }
+
+        $fees = $query->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $fees
+        ]);
+    }
+
+
     public function store(Request $req)
     {
         $req->validate([

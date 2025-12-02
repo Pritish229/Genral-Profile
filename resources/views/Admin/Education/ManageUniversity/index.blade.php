@@ -14,8 +14,8 @@
     </div>
 
     <div class="card p-2">
-        <table class="table table-bordered table-striped" id="universityTable">
-            <thead>
+        <table class="table table-hover  table-striped" id="universityTable">
+            <thead class="table-light">
                 <tr>
                     <th>#</th>
                     <th>Logo</th>

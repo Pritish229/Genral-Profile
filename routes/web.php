@@ -26,6 +26,7 @@ use App\Http\Controllers\Employees\EmployeeBankController;
 use App\Http\Controllers\Vendors\VendorDocumentController;
 use App\Http\Controllers\Customers\CustomerMediaController;
 use App\Http\Controllers\Education\CollegeCourseController;
+use App\Http\Controllers\Education\CourseStudentController;
 use App\Http\Controllers\Employees\EmployeeMediaController;
 use App\Http\Controllers\FeeManagement\CourseFeeController;
 use App\Http\Controllers\FeeManagement\FeemasterController;
@@ -518,15 +519,25 @@ Route::prefix('education/')->group(function () {
     Route::post('university-colleges/{college}', [UniversityCollegeController::class, 'update'])->name('education.college.update');
     Route::delete('university-colleges/{college}', [UniversityCollegeController::class, 'destroy'])->name('education.college.destroy');
     Route::get('university-colleges/list', [UniversityCollegeController::class, 'list'])->name('education.college.list');
+    Route::get('university-colleges/allcolleges/{universityId}', [UniversityCollegeController::class, 'universitycolleges'])->name('education.college.universitycolleges');
 
 
     Route::get('college-courses/{college}/{university}', [CollegeCourseController::class, 'index'])->name('collegecourse.index');
-    Route::get('/college/list', [CollegeCourseController::class, 'listColleges'])->name('education.collegecourse.list');
-    Route::get('/college-course/list/{college}', [CollegeCourseController::class, 'getCollegeCourses'])->name('education.collegecourse.getCourses');
-    Route::post('/college-course/assign/{college}', [CollegeCourseController::class, 'assignCourses'])->name('education.collegecourse.assign');
-    Route::get('college-courses/Students', [CollegeCourseStudentController::class, 'index'])->name('education.coursestudent.index');
-
-
+    Route::post('/college-course/assign/{college}', [CollegeCourseController::class, 'store'])->name('education.collegecourse.store');
+    Route::get('/college-course/list/{college}', [CollegeCourseController::class, 'datatable'])->name('education.collegecourse.list');
+    Route::delete('/college-course/delete/{id}', [CollegeCourseController::class, 'delete'])->name('education.collegecourse.delete');
+    Route::get('/college-course/show/{id}', [CollegeCourseController::class, 'show'])->name('education.collegecourse.show');
+    Route::post('/college-course/update/{id}', [CollegeCourseController::class, 'update'])->name('education.collegecourse.update');
+    Route::get('/college-course/parent//{college}', [CollegeCourseController::class, 'parentCourses'])->name('education.collegecourse.parentCourses');
+    Route::get('/college-course/child/{college}/{id}', [CollegeCourseController::class, 'childCourses'])->name('education.collegecourse.childCourses');
+    
+    
+    Route::get('college-courses/Students', [CourseStudentController::class, 'index'])->name('education.coursestudent.index');
+    Route::get('college/courses/assigned/students', [CourseStudentController::class, 'studentassigned'])->name('education.coursestudent.assignedstudents');
+    Route::post('college-courses/students/list', [CourseStudentController::class, 'getnewStudents'])->name('education.coursestudent.getStudents');
+    Route::post('college-courses/students/store', [CourseStudentController::class, 'store'])->name('education.coursestudent.store');
+    Route::post('college-courses/students/yearwise', [CourseStudentController::class, 'getassignedStudents'])
+     ->name('education.coursestudent.yearwise');
 
     Route::get('/session-years', [SessionYearController::class, 'index'])->name('education.sessionyear.index');
     Route::get('/session-years/Pagenate', [SessionYearController::class, 'sessionPaginate'])->name('education.sessionyear.sessionPaginate');
@@ -596,12 +607,10 @@ Route::prefix('fees')->group(function () {
     Route::delete('/master/delete/{id}', [FeeMasterController::class, 'delete'])->name('fee.feemaster.delete');
 
     // COURSE FEE
-    Route::get('/', [CourseFeeController::class, 'index'])->name('coursefee.index');
-    Route::get('/course/paginate', [CourseFeeController::class, 'paginate'])->name('coursefee.paginate');
-    Route::get('/course/list', [CourseFeeController::class, 'list'])->name('coursefee.list');
+    Route::get('/college-course-fee', [CourseFeeController::class, 'index'])->name('coursefee.index');
+    Route::get('/college-course-fee/manage', [CourseFeeController::class, 'manage'])->name('coursefee.manage');
+    Route::get('/college-course-fee/list', [CourseFeeController::class, 'list'])->name('coursefee.list');
+    Route::get('/coursefee/sessions', [CourseFeeController::class, 'sessions'])->name('coursefee.sessions');
     Route::post('/course/store', [CourseFeeController::class, 'store'])->name('coursefee.store');
-    Route::get('/course/details/{id}', [CourseFeeController::class, 'details'])->name('coursefee.details');
-    Route::get('/course/edit/{id}', [CourseFeeController::class, 'edit'])->name('coursefee.edit');
-    Route::post('/course/update/{id}', [CourseFeeController::class, 'update'])->name('coursefee.update');
-    Route::delete('/course/delete/{id}', [CourseFeeController::class, 'delete'])->name('coursefee.delete');
+
 });

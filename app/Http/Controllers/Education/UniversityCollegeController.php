@@ -71,7 +71,7 @@ class UniversityCollegeController extends Controller
                 'phone_no'        => $row->phone_no ?? '',
                 'action' =>
                 '<button class="btn btn-sm btn-info editBtn" data-id="' . $row->id . '">Edit</button> ' .
-                    '<a href="' . route('collegecourse.index', ['college' => $row->id , 'university' => $row->university_id]) . '" class="btn btn-sm btn-primary">Course</a> ' .
+                    '<a href="' . route('collegecourse.index', ['college' => $row->id, 'university' => $row->university_id]) . '" class="btn btn-sm btn-primary">Course</a> ' .
                     '<button class="btn btn-sm btn-danger deleteBtn" data-id="' . $row->id . '">Delete</button>',
             ];
         })->toArray();
@@ -83,6 +83,7 @@ class UniversityCollegeController extends Controller
             'data'            => $data,
         ]);
     }
+
 
     public function listAll()
     {
@@ -195,7 +196,15 @@ class UniversityCollegeController extends Controller
         ]);
     }
 
+    public function universitycolleges($universityId)
+    {
+        $colleges = UniversityCollege::where('university_id', $universityId)
+            ->orderBy('org_name')
+            ->get();
 
-
-
+        return response()->json([
+            'status' => true,
+            'data' => $colleges
+        ]);
+    }
 }

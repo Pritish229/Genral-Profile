@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Education;
 
-use App\Http\Controllers\Controller;
-use App\Models\Education\CollegeCourse;
-use App\Models\Education\UniversityCollege;
-use App\Models\Education\Course;
-use App\Models\Education\UniversityCourse;
 use Illuminate\Http\Request;
+use App\Models\Education\Course;
+use Yajra\DataTables\DataTables;
+use App\Http\Controllers\Controller;
+use App\Models\Fee\CollegeCourseFee;
+use App\Models\Education\CollegeCourse;
+use App\Models\Education\UniversityCourse;
+use App\Models\Education\UniversityCollege;
 
 class CollegeCourseController extends Controller
 {
-    public function index($id , $university)
+    public function index($id, $university)
     {
-        return view('Admin.Education.CollegeCourse.index', ['college' => $id , 'university'=> $university]);
+        return view('Admin.Education.CollegeCourse.index', ['college' => $id, 'university' => $university]);
     }
 
     public function listColleges()
@@ -26,169 +28,284 @@ class CollegeCourseController extends Controller
         ]);
     }
 
-    public function getCollegeCourses($collegeId)
+    public function store(Request $request)
     {
-        $college = UniversityCollege::with('university')->findOrFail($collegeId);
-        $universityId = $college->university_id;
+        $collegeId = $request->college_id;
 
-        // Get ALL assigned course IDs for this college (both parent programs and year-wise)
-        $assignedCourseIds = CollegeCourse::where('college_id', $collegeId)
-            ->pluck('course_id')
-            ->toArray();
+        $parentId = $request->parent_course_id;
+        $parentName = $request->parent_course_name;
 
-        // Also get parent_course_id mappings for year-wise assignments
-        $assignedYearMappings = CollegeCourse::where('college_id', $collegeId)
-            ->whereNotNull('parent_course_id')
-            ->get()
-            ->keyBy('course_id'); // key = year course ID → has parent_course_id
+        $childId = $request->course_id;
+        $childName = $request->course_name;
 
-        // Load root courses (parent programs) for this university + their children
-        $courses = Course::whereHas('universities', fn($q) => $q->where('universities.id', $universityId))
-            ->whereNull('parent_id')
-            ->with('children')
-            ->get()
-            ->map(function ($parentCourse) use ($assignedCourseIds, $assignedYearMappings) {
+        $duration = $request->duration_in_years;
+        $courseCode = $request->course_code;
 
-                // Is the PARENT program itself assigned? (i.e. whole MCA assigned, not just years)
-                $parentIsAssigned = in_array($parentCourse->id, $assignedCourseIds);
+        $sessionName = $request->session_name;
+        $start = $request->session_start_date;
+        $end = $request->session_end_date;
 
-                // Attach flag to parent
-                $parentCourse->is_assigned = $parentIsAssigned;
+        $fees = $request->fees;
 
-                // Process children (year-wise courses like 1st Year, 2nd Year)
-                $children = $parentCourse->children->map(function ($child) use ($assignedCourseIds, $assignedYearMappings, $parentCourse) {
+        $parentRow = CollegeCourse::where('college_id', $collegeId)
+            ->where('course_id', $parentId)
+            ->where('is_parent', 1)
+            ->where('session_name', $sessionName)
+            ->first();
 
-                    // Is this specific year assigned to this college?
-                    $isAssigned = in_array($child->id, $assignedCourseIds);
+        if (!$parentRow) {
+            $parentRow = CollegeCourseFee::create([
+                'college_id'          => $collegeId,
 
-                    // Optional: attach parent info for frontend clarity
-                    $child->parent_course_id = $parentCourse->id;
-                    $child->is_assigned = $isAssigned;
+                'parent_course_id'     => $parentId,
+                'parent_course_name'   => $parentName,
+                'is_parent'            => 1,
 
-                    return $child;
-                });
+                'course_id'            => $parentId,
+                'course_name'          => $parentName,
+                'course_code'          => $courseCode,
+                'duration_in_years'    => $duration,
 
-                // Replace original children with modified ones (with is_assigned flag)
-                $parentCourse->children = $children;
+                'fee_id'               => null,
+                'fee_head'             => null,
+                'fee_type'             => null,
+                'collection_type'      => null,
+                'times_in_year'        => null,
+                'amount'               => null,
+                'total_amount'         => null,
 
-                return $parentCourse;
-            });
+                'session_name'         => $sessionName,
+                'session_start_date'   => $start,
+                'session_end_date'     => $end,
+            ]);
+        }
+
+        foreach ($fees as $f) {
+
+            $duplicate = CollegeCourseFee::where('college_id', $collegeId)
+                ->where('course_id', $childId)
+                ->where('session_name', $sessionName)
+                ->where('fee_id', $f['fee_id'])
+                ->first();
+
+            if ($duplicate) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $f['fee_head'] . ' already exists for this course & session.'
+                ], 409);
+            }
+
+            $duplicateByHead = CollegeCourseFee::where('college_id', $collegeId)
+                ->where('course_id', $childId)
+                ->where('session_name', $sessionName)
+                ->where('fee_head', $f['fee_head'])
+                ->first();
+
+            if ($duplicateByHead) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $f['fee_head'] . ' already exists in this course & session.'
+                ], 409);
+            }
+
+            CollegeCourseFee::create([
+
+                'college_id'          => $collegeId,
+
+                'parent_course_id'     => $parentId,
+                'parent_course_name'   => $parentName,
+                'is_parent'            => 0,
+
+                'course_id'            => $childId,
+                'course_name'          => $childName,
+                'course_code'          => $courseCode,
+                'duration_in_years'    => $duration,
+
+                'fee_id'               => $f['fee_id'],
+                'fee_head'             => $f['fee_head'],
+                'fee_type'             => 1,
+                'collection_type'      => $f['collection_type'],
+
+                'times_in_year'        => $f['times_in_year'],
+                'amount'               => $f['amount'],
+                'total_amount'         => $f['total_amount'],
+
+                'session_name'         => $sessionName,
+                'session_start_date'   => $start,
+                'session_end_date'     => $end,
+            ]);
+        }
 
         return response()->json([
             'status' => true,
-            'data'   => $courses
+            'message' => 'Fee details saved successfully.'
         ]);
     }
 
 
-    public function assignCourses(Request $request, $collegeId)
+    public function datatable(Request $request, $collegeId)
     {
-        $college = UniversityCollege::findOrFail($collegeId);
+        $query = CollegeCourse::where('college_id', $collegeId)
+            ->orderByRaw("CASE WHEN parent_course_id IS NULL THEN 0 ELSE 1 END")
+            ->orderBy('parent_course_id')
+            ->orderBy('course_name');
 
-        $request->validate([
-            'course_ids' => 'required|array',
-            'course_ids.*' => 'exists:courses,id'
-        ]);
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn("group", function ($row) {
+                return $row->parent_course_id ? 'child' : 'parent';
+            })
+            ->addColumn("parent_id", function ($row) {
+                return $row->parent_course_id;
+            })
+            ->addColumn("arrow", function ($row) {
+                return $row->parent_course_id
+                    ? ''
+                    : '<i class="fas fa-chevron-right toggle-arrow" data-id="' . $row->id . '" style="cursor:pointer"></i>';
+            })
+            ->editColumn('course_name', function ($row) {
+                $badge = $row->is_parent
+                    ? '<span class="badge bg-info ms-2">Parent</span>'
+                    : '<span class="badge bg-secondary ms-2">Child</span>';
 
-        $now = now();
-        $universityId = $college->university_id;
+                return $row->course_name . ' ' . $badge;
+            })
+            ->editColumn('duration_in_years', function ($row) {
+                $y = $row->duration_in_years;
+                return $y . ' ' . ($y == 1 ? 'Year' : 'Years');
+            })
 
-        // Get all current parent course IDs for this college
-        $existingParentIds = CollegeCourse::where('college_id', $collegeId)
-            ->where('is_parent', 1)
-            ->pluck('course_id')
-            ->toArray();
+            /* ------- START DATE COLUMN ------- */
+            ->addColumn('starting_date', function ($row) {
+                return $row->starting_date
+                    ? '<i class="fas fa-calendar-alt me-1 text-primary"></i>' . date('d M Y', strtotime($row->starting_date))
+                    : '-';
+            })
 
-        // Track which parent courses we need to create
-        $parentsToCreate = [];
+            /* ------- END DATE COLUMN ------- */
+            ->addColumn('ending_date', function ($row) {
+                return $row->ending_date
+                    ? '<i class="fas fa-calendar-alt me-1 text-primary"></i>' . date('d M Y', strtotime($row->ending_date))
+                    : '-';
+            })
 
-        foreach ($request->course_ids as $courseId) {
-            $course = Course::find($courseId);
+            ->editColumn('is_active', function ($row) {
+                return $row->is_active
+                    ? '<span class="badge bg-success toggleStatus" data-id="' . $row->id . '">Active</span>'
+                    : '<span class="badge bg-danger toggleStatus" data-id="' . $row->id . '">Inactive</span>';
+            })
+            ->addColumn('action', function ($row) {
+                return '
+                <button class="btn btn-primary btn-sm editCourse me-1" data-id="' . $row->id . '">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-danger btn-sm deleteCourse" data-id="' . $row->id . '">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            ';
+            })
+            ->rawColumns(['course_name', 'starting_date', 'ending_date', 'is_active', 'arrow', 'action'])
+            ->make(true);
+    }
 
-            // If it's a child course (has parent_id) → we need its parent
-            if ($course->parent_id) {
-                $parentCourseId = $course->parent_id;
-                $parentCourse = Course::find($parentCourseId);
 
-                // If parent doesn't exist yet → mark it for creation
-                if (!in_array($parentCourseId, $existingParentIds) && !in_array($parentCourseId, $parentsToCreate)) {
-                    $parentsToCreate[] = $parentCourseId;
 
-                    // Create parent entry
-                    CollegeCourse::create([
-                        'university_id'      => $universityId,
-                        'college_id'         => $collegeId,
-                        'course_id'          => $parentCourse->id,
-                        'course_name'        => $parentCourse->course_name,
-                        'course_code'        => $parentCourse->course_code,
-                        'parent_course_id'   => null,
-                        'duration_in_years'  => $parentCourse->course_duration,
-                        'starting_time'      => $now,
-                        'is_parent'          => 1,
-                        'is_active'          => 1,
-                    ]);
 
-                    $existingParentIds[] = $parentCourseId; // mark as now exists
-                }
 
-                CollegeCourse::create([
-                    'university_id'      => $universityId,
-                    'college_id'         => $collegeId,
-                    'course_id'          => $course->id,
-                    'course_name'        => $parentCourse->course_name . " - " . $course->course_name,
-                    'course_code'        => $parentCourse->course_code,
-                    'parent_course_id'   => $parentCourse->id,
-                    'parent_course_name' => $parentCourse->course_name,
-                    'duration_in_years'  => 1,
-                    'starting_time'      => $now->copy()->addYears($course->course_name === '1st Year' ? 0 : 1),
-                    'is_parent'          => 0,
-                    'is_active'          => 1,
-                ]);
-            }
-            else {
-                if (!in_array($course->id, $existingParentIds)) {
-                    CollegeCourse::create([
-                        'university_id'      => $universityId,
-                        'college_id'         => $collegeId,
-                        'course_id'          => $course->id,
-                        'course_name'        => $course->course_name,
-                        'course_code'        => $course->course_code,
-                        'parent_course_id'   => null,
-                        'duration_in_years'  => $course->course_duration,
-                        'starting_time'      => $now,
-                        'is_parent'          => 1,
-                        'is_active'          => 1,
-                    ]);
 
-                    $existingParentIds[] = $course->id;
-                }
+    public function show($id)
+    {
+        $row = CollegeCourse::find($id);
 
-                if ($course->course_duration > 1) {
-                    foreach ($course->children as $child) {
-                        CollegeCourse::updateOrCreate(
-                            [
-                                'college_id'       => $collegeId,
-                                'course_id'        => $child->id,
-                                'parent_course_id' => $course->id,
-                            ],
-                            [
-                                'university_id'      => $universityId,
-                                'course_name'        => $course->course_name . " - " . $child->course_name,
-                                'course_code'        => $course->course_code,
-                                'duration_in_years'  => 1,
-                                'starting_time'      => $now->copy()->addYears($child->course_name === '1st Year' ? 0 : 1),
-                                'is_parent'          => 0,
-                                'is_active'          => 1,
-                            ]
-                        );
-                    }
-                }
-            }
+        if (!$row) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Record not found.'
+            ]);
         }
 
         return response()->json([
-            'status'  => true,
-            'message' => 'Courses assigned successfully!'
+            'status' => true,
+            'data' => $row
+        ]);
+    }
+
+
+    public function delete($id)
+    {
+        $row = CollegeCourse::find($id);
+
+        if (!$row) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Record not found.'
+            ]);
+        }
+
+        // If this is a parent → delete all children
+        if ($row->is_parent) {
+            CollegeCourse::where('parent_course_id', $row->course_id)
+                ->where('college_id', $row->college_id)
+                ->delete();
+        }
+
+        $row->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Deleted successfully.'
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $row = CollegeCourse::find($id);
+
+        $row->starting_date = $request->starting_date;
+        $row->ending_date = $request->ending_date;
+        $row->is_active = $request->status;
+        $row->save();
+
+        // If parent → update all children
+        if ($row->is_parent) {
+            CollegeCourse::where('parent_course_id', $row->course_id)
+                ->where('college_id', $row->college_id)
+                ->update([
+                    'starting_date' => $request->starting_date,
+                    'ending_date'      => $request->ending_date,
+                    'is_active'     => $request->status
+                ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Course updated successfully.'
+        ]);
+    }
+
+    public function parentCourses($college)
+    {
+        $courses = CollegeCourse::where('college_id', $college)
+            ->whereNull('parent_course_id')
+            ->orderBy('course_name')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $courses
+        ]);
+    }
+
+    public function childCourses($collegeId, $parentCourseId)
+    {
+        $courses = CollegeCourse::where('college_id', $collegeId)
+            ->where('parent_course_id', $parentCourseId)
+            ->orderBy('course_name')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $courses
         ]);
     }
 }
