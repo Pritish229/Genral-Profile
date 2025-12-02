@@ -112,4 +112,6 @@ class FeeMasterController extends Controller
         FeeMaster::findOrFail($id)->delete();
         return response()->json(['status' => 'success', 'message' => 'Fee deleted']);
     }
+
+  
 }

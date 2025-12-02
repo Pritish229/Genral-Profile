@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Student\Student;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Fee\StudentCourseFee;
 use App\Models\Student\StudentProfile;
 use App\Models\Education\CollegeCourse;
 use App\Models\Education\StudentCourse;
@@ -24,81 +25,81 @@ class CourseStudentController extends Controller
 
     public function store(Request $request)
     {
-        $collegeId   = $request->college_id;
-        $childId     = $request->course_id;
-        $sessionYear = $request->session_year_name;
+        return DB::transaction(function () use ($request) {
+            $collegeId   = $request->college_id;
+            $childId     = $request->course_id;
+            $sessionYear = $request->session_year_name;
 
-        $child = CollegeCourse::where('college_id', $collegeId)
-            ->where('course_id', $childId)
-            ->first();
+            $child = CollegeCourse::where('college_id', $collegeId)
+                ->where('course_id', $childId)
+                ->first();
 
-        if (!$child) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Course not assigned to this college.'
-            ], 404);
-        }
-
-        // 🚫 PREVENT ASSIGNING A STUDENT TWICE IN ANY COURSE
-        foreach ($request->students as $student) {
-            if (StudentCourse::where('student_id', $student['id'])->exists()) {
+            if (!$child) {
                 return response()->json([
                     'status' => false,
-                    'message' => "{$student['name']} is already enrolled in another course."
-                ], 422);
+                    'message' => 'Course not assigned to this college.'
+                ], 404);
             }
-        }
 
-        // CREATE PARENT ROW IF NOT EXISTS
-        if ($child->parent_course_id) {
+            foreach ($request->students as $student) {
+                if (StudentCourse::where('student_id', $student['id'])->exists()) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => "{$student['name']} is already enrolled in another course."
+                    ], 422);
+                }
+            }
 
-            $parentExists = StudentCourse::where('college_id', $collegeId)
-                ->where('course_id', $child->parent_course_id)
-                ->where('is_parent', 1)
-                ->where('session_year_name', $sessionYear)
-                ->exists();
-
-            if (!$parentExists) {
-                $parent = CollegeCourse::where('college_id', $collegeId)
+            if ($child->parent_course_id) {
+                $parentExists = StudentCourse::where('college_id', $collegeId)
                     ->where('course_id', $child->parent_course_id)
-                    ->first();
+                    ->where('is_parent', 1)
+                    ->where('session_year_name', $sessionYear)
+                    ->lockForUpdate()
+                    ->exists();
 
+                if (!$parentExists) {
+                    $parent = CollegeCourse::where('college_id', $collegeId)
+                        ->where('course_id', $child->parent_course_id)
+                        ->first();
+
+                    StudentCourse::create([
+                        'college_id'         => $collegeId,
+                        'course_id'          => $parent->course_id,
+                        'course_name'        => $parent->course_name,
+                        'is_parent'          => 1,
+                        'student_id'         => null,
+                        'student_name'       => null,
+                        'session_year_name'  => $sessionYear,
+                        'session_start'      => $request->session_start,
+                        'session_end'        => $request->session_end
+                    ]);
+                }
+            }
+
+            foreach ($request->students as $student) {
                 StudentCourse::create([
                     'college_id'         => $collegeId,
-                    'course_id'          => $parent->course_id,
-                    'course_name'        => $parent->course_name,
-                    'is_parent'          => 1,
-                    'student_id'         => null,
-                    'student_name'       => null,
+                    'course_id'          => $child->course_id,
+                    'course_name'        => $child->course_name,
+                    'parent_course_id'   => $child->parent_course_id,
+                    'parent_course_name' => $child->parent_course_name,
+                    'is_parent'          => 0,
+                    'student_id'         => $student['id'],
+                    'student_name'       => $student['name'],
                     'session_year_name'  => $sessionYear,
                     'session_start'      => $request->session_start,
                     'session_end'        => $request->session_end
                 ]);
             }
-        }
 
-        // ASSIGN CHILD COURSE STUDENTS
-        foreach ($request->students as $student) {
-            StudentCourse::create([
-                'college_id'         => $collegeId,
-                'course_id'          => $child->course_id,
-                'course_name'        => $child->course_name,
-                'parent_course_id'   => $child->parent_course_id,
-                'parent_course_name' => $child->parent_course_name,
-                'is_parent'          => 0,
-                'student_id'         => $student['id'],
-                'student_name'       => $student['name'],
-                'session_year_name'  => $sessionYear,
-                'session_start'      => $request->session_start,
-                'session_end'        => $request->session_end
+            return response()->json([
+                'status' => true,
+                'message' => 'Course Assigned to Selected Students'
             ]);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Course Assigned to Selected Students'
-        ]);
+        });
     }
+
 
 
     public function getnewStudents(Request $request)
@@ -127,23 +128,14 @@ class CourseStudentController extends Controller
     }
 
 
-    // -------------------------------------------------------------
-    // 3️⃣ GET STUDENTS NOT ENROLLED IN ANY COURSE (GLOBAL FILTER)
-    // -------------------------------------------------------------
-    public function getassignedStudents(Request $request)
+
+    public function getYearwiseDataTable(Request $request)
     {
         $collegeId = $request->college_id;
-        $courseId  = $request->course_id;   // child course
+        $courseId  = $request->course_id;
         $session   = $request->session_name;
 
-        if (!$collegeId || !$courseId || !$session) {
-            return response()->json([
-                "data" => [],
-                "message" => "Missing parameters"
-            ]);
-        }
-
-        $students = StudentCourse::select(
+        $query = StudentCourse::select(
             'students.id',
             'students.student_uid',
             'student_courses.student_name as full_name',
@@ -153,13 +145,47 @@ class CourseStudentController extends Controller
         )
             ->join('students', 'students.id', '=', 'student_courses.student_id')
             ->where('student_courses.college_id', $collegeId)
-            ->where('student_courses.course_id', $courseId)     // child course
+            ->where('student_courses.course_id', $courseId)
             ->where('student_courses.session_year_name', $session)
-            ->whereNotNull('student_courses.student_id')
-            ->get();
+            ->whereNotNull('student_courses.student_id');
 
-        return response()->json([
-            "data" => $students
-        ]);
+        return datatables()->of($query)
+            ->addIndexColumn()
+            ->addColumn('action', function ($row) use ($courseId, $collegeId, $session) {
+
+                // Check if student already has assigned fees
+                $alreadyAssigned = StudentCourseFee::where('student_id', $row->id)
+                    ->where('course_id', $courseId)
+                    ->where('session_one_name', $session)
+                    ->exists();
+
+                $assignUrl = route("fee.studentfee.index", [
+                    "student_id"        => $row->id,
+                    "course_id"         => $courseId,
+                    "college_id"        => $collegeId,
+                    "session_year_name" => $session
+                ]);
+
+                $viewUrl = route("fee.studentfee.view", [
+                    "student_id"        => $row->id,
+                    "course_id"         => $courseId,
+                    "college_id"        => $collegeId,
+                    "session_year_name" => $session
+                ]);
+
+                $btns = '';
+
+                // Show Assign button ONLY if no data assigned
+                if (!$alreadyAssigned) {
+                    $btns .= '<a href="' . $assignUrl . '" class="btn btn-sm btn-primary me-1">Assign Fee</a>';
+                }
+
+                // Always show View button
+                $btns .= '<a href="' . $viewUrl . '" class="btn btn-sm btn-success">View Fee</a>';
+
+                return $btns;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
     }
 }

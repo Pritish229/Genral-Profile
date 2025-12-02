@@ -530,14 +530,14 @@ Route::prefix('education/')->group(function () {
     Route::post('/college-course/update/{id}', [CollegeCourseController::class, 'update'])->name('education.collegecourse.update');
     Route::get('/college-course/parent//{college}', [CollegeCourseController::class, 'parentCourses'])->name('education.collegecourse.parentCourses');
     Route::get('/college-course/child/{college}/{id}', [CollegeCourseController::class, 'childCourses'])->name('education.collegecourse.childCourses');
-    
-    
+
+
     Route::get('college-courses/Students', [CourseStudentController::class, 'index'])->name('education.coursestudent.index');
     Route::get('college/courses/assigned/students', [CourseStudentController::class, 'studentassigned'])->name('education.coursestudent.assignedstudents');
     Route::post('college-courses/students/list', [CourseStudentController::class, 'getnewStudents'])->name('education.coursestudent.getStudents');
     Route::post('college-courses/students/store', [CourseStudentController::class, 'store'])->name('education.coursestudent.store');
-    Route::post('college-courses/students/yearwise', [CourseStudentController::class, 'getassignedStudents'])
-     ->name('education.coursestudent.yearwise');
+    Route::post('college-courses/students/yearwise/datatable', [CourseStudentController::class, 'getYearwiseDataTable'])
+        ->name('education.coursestudent.yearwise.datatable');
 
     Route::get('/session-years', [SessionYearController::class, 'index'])->name('education.sessionyear.index');
     Route::get('/session-years/Pagenate', [SessionYearController::class, 'sessionPaginate'])->name('education.sessionyear.sessionPaginate');
@@ -596,6 +596,11 @@ Route::prefix('fees')->group(function () {
 
 
     Route::get('Students-Fees', [StudentFeeController::class, 'index'])->name('fee.studentfee.index');
+    Route::post('Students-Fees/store', [StudentFeeController::class, 'store'])->name('fee.studentfee.store');
+    Route::get('/Student-Fee/view',[StudentFeeController::class, 'viewPage'])->name('fee.studentfee.view');
+    Route::get('/Student-Fee/viewfees',[StudentFeeController::class, 'viewfees'])->name('fee.studentfee.viewfees');
+
+
     Route::get('Students-Fees/Schdule', [FeeSchduleController::class, 'index'])->name('fee.FeeSchdule.index');
     // FEE MASTER
     Route::get('/master', [FeeMasterController::class, 'index'])->name('fee.feemaster.index');
@@ -612,5 +617,4 @@ Route::prefix('fees')->group(function () {
     Route::get('/college-course-fee/list', [CourseFeeController::class, 'list'])->name('coursefee.list');
     Route::get('/coursefee/sessions', [CourseFeeController::class, 'sessions'])->name('coursefee.sessions');
     Route::post('/course/store', [CourseFeeController::class, 'store'])->name('coursefee.store');
-
 });

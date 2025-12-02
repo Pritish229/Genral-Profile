@@ -40,11 +40,24 @@
 
     <hr>
 
-    <div id="student_result_table" class="text-center border rounded bg-light p-2">
-        <div class="p-5">
+    <div id="student_result_table" class="">
+        <table id="studentsTable" class="table table-bordered table-striped w-100 d-none">
+            <thead class="bg-light">
+                <tr>
+                    <th>#</th>
+                    <th>Student UID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+        </table>
+
+        <div id="placeholder_box" class="p-5 text-center border rounded bg-light">
             <h4 class="fw-bold text-secondary mb-2">No Data Loaded</h4>
             <p class="text-muted">Please select all filters to load year-wise students.</p>
-            
         </div>
     </div>
 
@@ -57,113 +70,93 @@
 <script>
 $(document).ready(function () {
 
-    function placeholderBox() {
-        return `
-            <div class="p-5 text-center border rounded bg-light">
-                <h4 class="fw-bold text-secondary mb-2">No Data Loaded</h4>
-                <p class="text-muted">Please select all filters to load year-wise students.</p>
-            </div>
-        `;
-    }
-
     $('.select2').select2();
 
-    // -----------------------
-    // UNIVERSITY
-    // -----------------------
+    let table = null;
+
+    function showPlaceholder() {
+        $('#studentsTable').addClass('d-none');
+        $('#placeholder_box').removeClass('d-none');
+    }
+
+    function showTable() {
+        $('#studentsTable').removeClass('d-none');
+        $('#placeholder_box').addClass('d-none');
+    }
+
     $('#university_id').select2({
         placeholder: 'Select University',
         ajax: {
             url: '{{ route("education.university.allUniversities") }}',
             dataType: 'json',
             processResults: data => ({
-                results: data.map(u => ({
-                    id: u.id,
-                    text: u.org_name
-                }))
+                results: data.map(u => ({ id: u.id, text: u.org_name }))
             })
         }
     });
 
-    // -----------------------
-    // UNIVERSITY → COLLEGE
-    // -----------------------
     $('#university_id').on('change', function () {
-        $('#college_id,#parent_course_id,#child_course_id,#session_name')
-            .empty().trigger('change');
-        $('#student_result_table').html(placeholderBox());
+        resetFilters(['#college_id','#parent_course_id','#child_course_id','#session_name']);
+        showPlaceholder();
 
         let id = $(this).val();
-
         $('#college_id').select2({
             placeholder: 'Select College',
             ajax: {
                 url: '{{ route("education.college.universitycolleges", ":id") }}'.replace(':id', id),
                 dataType: 'json',
                 processResults: data => ({
-                    results: data.data.map(c => ({
-                        id: c.id,
-                        text: c.org_name
-                    }))
+                    results: data.data.map(c => ({ id: c.id, text: c.org_name }))
                 })
             }
         });
     });
 
-    // -----------------------
-    // COLLEGE → PARENT COURSE
-    // -----------------------
+    function resetFilters(list) {
+        list.forEach(x => $(x).empty().trigger('change'));
+    }
+
     $('#college_id').on('change', function () {
-        $('#parent_course_id,#child_course_id,#session_name').empty().trigger('change');
-        $('#student_result_table').html(placeholderBox());
+        resetFilters(['#parent_course_id','#child_course_id','#session_name']);
+        showPlaceholder();
 
         let id = $(this).val();
-
         $('#parent_course_id').select2({
             placeholder: 'Select Parent Course',
             ajax: {
                 url: '{{ route("education.collegecourse.parentCourses", ":id") }}'.replace(':id', id),
                 dataType: 'json',
                 processResults: data => ({
-                    results: data.data.map(pc => ({
-                        id: pc.course_id,
-                        text: pc.course_name
-                    }))
+                    results: data.data.map(pc => ({ id: pc.course_id, text: pc.course_name }))
                 })
             }
         });
     });
 
-    // -----------------------
-    // PARENT → CHILD COURSE
-    // -----------------------
     $('#parent_course_id').on('change', function () {
-        $('#child_course_id,#session_name').empty().trigger('change');
-        $('#student_result_table').html(placeholderBox());
+        resetFilters(['#child_course_id','#session_name']);
+        showPlaceholder();
 
-        let pid = $(this).val();
-        let cid = $('#college_id').val();
+        let pc = $(this).val();
+        let college = $('#college_id').val();
 
         $('#child_course_id').select2({
             placeholder: 'Select Child Course',
             ajax: {
                 url: '{{ route("education.collegecourse.childCourses", ["college"=>":cid","id"=>":pid"]) }}'
-                        .replace(':cid', cid)
-                        .replace(':pid', pid),
+                    .replace(':cid', college)
+                    .replace(':pid', pc),
                 dataType: 'json',
                 processResults: data => ({
-                    results: data.data.map(cc => ({
-                        id: cc.course_id,
-                        text: cc.course_name
-                    }))
+                    results: data.data.map(cc => ({ id: cc.course_id, text: cc.course_name }))
                 })
             }
         });
     });
 
     $('#child_course_id').on('change', function () {
-        $('#session_name').empty().trigger('change');
-        $('#student_result_table').html(placeholderBox());
+        resetFilters(['#session_name']);
+        showPlaceholder();
 
         $('#session_name').select2({
             placeholder: 'Select Session',
@@ -171,86 +164,57 @@ $(document).ready(function () {
                 url: '{{ route("coursefee.sessions") }}',
                 dataType: 'json',
                 processResults: data => ({
-                    results: data.map(s => ({
-                        id: s,
-                        text: s
-                    }))
+                    results: data.map(s => ({ id: s, text: s }))
                 })
             }
         });
     });
 
     $('#session_name').on('change', function () {
-
         let college = $('#college_id').val();
-        let child = $('#child_course_id').val();
-        let session = $(this).val();
+        let course  = $('#child_course_id').val();
+        let session = $('#session_name').val();
 
-        if (!college || !child || !session) {
-            $('#student_result_table').html(placeholderBox());
+        if (!college || !course || !session) {
+            showPlaceholder();
             return;
         }
 
-        $.ajax({
-            url: "{{ route('education.coursestudent.yearwise') }}",
-            type: "POST",
-            data: {
-                college_id: college,
-                course_id: child,
-                session_name: session
-            },
-            success: function(res) {
-                renderStudents(res.data);
-            }
-        });
-
+        showTable();
+        loadDataTable(college, course, session);
     });
 
-    function renderStudents(data) {
+    function loadDataTable(college, course, session) {
 
-        if (!data || data.length === 0) {
-            $('#student_result_table').html(`
-                <div class="alert alert-warning text-center">No students found for this year.</div>
-            `);
-            return;
+        if (table !== null) {
+            table.destroy();
+            $('#studentsTable tbody').empty();
         }
 
-        let html = `
-            <div class="table-responsive m-3">
-            <table class="table table-bordered">
-            <thead class="bg-light">
-                <tr>
-                    <th>#</th>
-                    <th>Student UID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-        `;
-
-        data.forEach((s, i) => {
-            html += `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${s.student_uid}</td>
-                    <td>${s.full_name}</td>
-                    <td>${s.primary_email}</td>
-                    <td>${s.primary_phone}</td>
-                    <td>${s.status}</td>
-                </tr>
-            `;
+        table = $('#studentsTable').DataTable({
+            processing: true,
+            serverSide: true,
+            searching: true,
+            ajax: {
+                url: "{{ route('education.coursestudent.yearwise.datatable') }}",
+                type: "POST",
+                data: {
+                    college_id: college,
+                    course_id: course,
+                    session_name: session,
+                    _token: "{{ csrf_token() }}"
+                }
+            },
+            columns: [
+                { data: 'DT_RowIndex', name:'DT_RowIndex', orderable:false, searchable:false },
+                { data: 'student_uid', name:'student_uid' },
+                { data: 'full_name', name:'full_name' },
+                { data: 'primary_email', name:'primary_email' },
+                { data: 'primary_phone', name:'primary_phone' },
+                { data: 'status', name:'status' },
+                { data: 'action', name:'action', orderable:false, searchable:false }
+            ]
         });
-
-        html += `
-            </tbody>
-            </table>
-            </div>
-        `;
-
-        $('#student_result_table').html(html);
     }
 
 });
