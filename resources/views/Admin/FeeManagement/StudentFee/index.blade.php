@@ -10,7 +10,7 @@
         :links="['Home' => 'Admin.Dashboard', 'Assign Fee' => '']" />
 
     <div class="card shadow-sm">
-        
+
         <div class="card-body">
 
             <div class="row mb-4 rounded bg-light">
@@ -159,70 +159,70 @@
 @section('script')
 
 <script>
-let deductFeeOptions = [];
+    let deductFeeOptions = [];
 
-$(document).ready(function () {
-    loadDeductMasters();
-    calculateTotal();
-});
-
-function loadDeductMasters() {
-    $.ajax({
-        url: "{{ route('fee.feemaster.list') }}",
-        type: "GET",
-        data: { fee_type: 0 },
-        success: function(res) {
-            deductFeeOptions = res.data || [];
-        }
-    });
-}
-
-function calculateTotal() {
-    let grand = 0;
-
-    $('#feeTable tbody tr').each(function() {
-        let chk = $(this).find('.fee-check');
-        let isChecked = chk.is(':checked') || chk.is(':disabled');
-        let amount = parseFloat($(this).find('.amount-input').val()) || 0;
-        let times = parseInt($(this).find('td:nth-child(4)').text());
-        let total = isChecked ? amount * times : 0;
-
-        $(this).find('.row-total').text(total.toFixed(2));
-        grand += total;
+    $(document).ready(function() {
+        loadDeductMasters();
+        calculateTotal();
     });
 
-    $('#deductFeeTable tbody tr').each(function() {
-        let amount = parseFloat($(this).find('.deduct-amount').val()) || 0;
-        let total = -amount;
-        $(this).find('.deduct-total').text(total.toFixed(2));
-        grand += total;
-    });
-
-    $('#customFeeTable tbody tr').each(function() {
-        let amount = parseFloat($(this).find('.custom-amount').val()) || 0;
-        let type = $(this).find('.custom-type').val();
-        let total = type === 'add' ? amount : -amount;
-        $(this).find('.custom-total').text(total.toFixed(2));
-        grand += total;
-    });
-
-    $('#grandTotal').text(grand.toFixed(2));
-}
-
-$(document).on('input change', '.deduct-amount, .custom-amount, .custom-type', calculateTotal);
-$(document).on('change', '.fee-check', calculateTotal);
-
-$('#addDeductFee').click(function() {
-
-    if (deductFeeOptions.length === 0) {
-        Swal.fire("No deduct master fees found", "", "warning");
-        return;
+    function loadDeductMasters() {
+        $.ajax({
+            url: "{{ route('fee.feemaster.list') }}",
+            type: "GET",
+            data: {
+                fee_type: 0
+            },
+            success: function(res) {
+                deductFeeOptions = res.data || [];
+            }
+        });
     }
 
-    let options = deductFeeOptions.map(f => `<option value="${f.id}">${f.fee_name}</option>`).join('');
-    let index = $('#deductFeeTable tbody tr').length + 1;
+    function calculateTotal() {
+        let grand = 0;
 
-    $('#deductFeeTable tbody').append(`
+        $('#feeTable tbody tr').each(function() {
+            let chk = $(this).find('.fee-check');
+            let isChecked = chk.is(':checked') || chk.is(':disabled');
+            let amount = parseFloat($(this).find('.amount-input').val()) || 0;
+            let times = parseInt($(this).find('td:nth-child(4)').text());
+            let total = isChecked ? amount * times : 0;
+            $(this).find('.row-total').text(total.toFixed(2));
+            grand += total;
+        });
+
+        $('#deductFeeTable tbody tr').each(function() {
+            let amount = parseFloat($(this).find('.deduct-amount').val()) || 0;
+            let total = -amount;
+            $(this).find('.deduct-total').text(total.toFixed(2));
+            grand += total;
+        });
+
+        $('#customFeeTable tbody tr').each(function() {
+            let amount = parseFloat($(this).find('.custom-amount').val()) || 0;
+            let type = $(this).find('.custom-type').val();
+            let total = type === 'add' ? amount : -amount;
+            $(this).find('.custom-total').text(total.toFixed(2));
+            grand += total;
+        });
+
+        $('#grandTotal').text(grand.toFixed(2));
+    }
+
+    $(document).on('input change', '.deduct-amount, .custom-amount, .custom-type', calculateTotal);
+    $(document).on('change', '.fee-check', calculateTotal);
+
+    $('#addDeductFee').click(function() {
+        if (deductFeeOptions.length === 0) {
+            Swal.fire("No deduct master fees found", "", "warning");
+            return;
+        }
+
+        let options = deductFeeOptions.map(f => `<option value="${f.id}">${f.fee_name}</option>`).join('');
+        let index = $('#deductFeeTable tbody tr').length + 1;
+
+        $('#deductFeeTable tbody').append(`
         <tr>
             <td>${index}</td>
             <td><select class="form-select deduct-type">${options}</select></td>
@@ -231,12 +231,12 @@ $('#addDeductFee').click(function() {
             <td><button class="btn btn-danger btn-sm remove-row">X</button></td>
         </tr>
     `);
-});
+    });
 
-$('#addCustomFee').click(function() {
-    let index = $('#customFeeTable tbody tr').length + 1;
+    $('#addCustomFee').click(function() {
+        let index = $('#customFeeTable tbody tr').length + 1;
 
-    $('#customFeeTable tbody').append(`
+        $('#customFeeTable tbody').append(`
         <tr>
             <td>${index}</td>
             <td><input type="text" class="form-control custom-name"></td>
@@ -251,122 +251,141 @@ $('#addCustomFee').click(function() {
             <td><button class="btn btn-danger btn-sm remove-row">X</button></td>
         </tr>
     `);
-});
-
-$(document).on('click', '.remove-row', function() {
-    $(this).closest('tr').remove();
-    calculateTotal();
-});
-
-$('#submitFees').click(function () {
-
-    $('#submitFees').prop('disabled', true).text('Processing...');
-    $('input, select, button').prop('disabled', true);
-
-    let fees = [];
-
-    $('#feeTable tbody tr').each(function() {
-        let chk = $(this).find('.fee-check');
-        if (chk.is(':checked') || chk.is(':disabled')) {
-
-            let text = $(this).find('td:nth-child(3)').text();
-            let type = text.includes('+') ? 1 : 0;
-            let collection = $(this).data('collection') === 'mandatory' ? 'mandatory' : 'optional';
-
-            fees.push({
-                fee_id: $(this).data('fee-id'),
-                fee_head: $(this).find('td:nth-child(2)').text(),
-                fee_type: type,
-                collection_type: collection,
-                amount: parseFloat($(this).find('.amount-input').val()),
-                times: parseInt($(this).find('td:nth-child(4)').text())
-            });
-        }
     });
 
-    $('#deductFeeTable tbody tr').each(function() {
-        let amount = parseFloat($(this).find('.deduct-amount').val());
-        if (amount > 0) {
-            let id = $(this).find('.deduct-type').val();
-            let name = $(this).find('.deduct-type option:selected').text();
-
-            fees.push({
-                fee_id: id,
-                fee_head: name,
-                fee_type: 0,
-                collection_type: 'optional',
-                amount: amount,
-                times: 1
-            });
-        }
+    $(document).on('click', '.remove-row', function() {
+        $(this).closest('tr').remove();
+        calculateTotal();
     });
 
-    $('#customFeeTable tbody tr').each(function() {
-        let name = $(this).find('.custom-name').val();
-        let amount = parseFloat($(this).find('.custom-amount').val());
-        if (name && amount > 0) {
-            let type = $(this).find('.custom-type').val() === 'add' ? 1 : 0;
-            fees.push({
-                fee_id: null,
-                fee_head: name,
-                fee_type: type,
-                collection_type: 'optional',
-                amount: amount,
-                times: 1
-            });
-        }
+    $('#submitFees').click(function() {
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Once submitted, you cannot edit these fees.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, submit",
+            cancelButtonText: "Cancel"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                processSubmit();
+            }
+        });
+
     });
 
-    $.ajax({
-        url: "{{ route('fee.studentfee.store') }}",
-        type: "POST",
-        data: {
-            _token: "{{ csrf_token() }}",
-            student_id: "{{ $student->student_id ?? $student->id }}",
-            student_name: "{{ $student->full_name }}",
-            college_id: "{{ $course->college_id }}",
-            course_id: "{{ $course->course_id }}",
-            session_year_name: "{{ $session }}",
-            fees: fees
-        },
-        success: function(res) {
+    function processSubmit() {
 
-            if (res.status) {
-                Swal.fire({
-                    icon: "success",
-                    title: "Success",
-                    text: "Fees assigned successfully!"
-                }).then(() => {
-                    resetForm();
+        $('#submitFees').prop('disabled', true).text('Processing...');
+        $('input, select, button').prop('disabled', true);
+
+        let fees = [];
+
+        $('#feeTable tbody tr').each(function() {
+            let chk = $(this).find('.fee-check');
+            if (chk.is(':checked') || chk.is(':disabled')) {
+                let text = $(this).find('td:nth-child(3)').text();
+                let type = text.includes('+') ? 1 : 0;
+                let collection = $(this).data('collection') === 'mandatory' ? 'mandatory' : 'optional';
+
+                fees.push({
+                    fee_id: $(this).data('fee-id'),
+                    fee_head: $(this).find('td:nth-child(2)').text(),
+                    fee_type: type,
+                    collection_type: collection,
+                    amount: parseFloat($(this).find('.amount-input').val()),
+                    times: parseInt($(this).find('td:nth-child(4)').text())
                 });
-            } else {
-                Swal.fire("Error", res.message || "Something went wrong", "error");
+            }
+        });
+
+        $('#deductFeeTable tbody tr').each(function() {
+            let amount = parseFloat($(this).find('.deduct-amount').val());
+            if (amount > 0) {
+                let id = $(this).find('.deduct-type').val();
+                let name = $(this).find('.deduct-type option:selected').text();
+
+                fees.push({
+                    fee_id: id,
+                    fee_head: name,
+                    fee_type: 0,
+                    collection_type: 'optional',
+                    amount: amount,
+                    times: 1
+                });
+            }
+        });
+
+        $('#customFeeTable tbody tr').each(function() {
+            let name = $(this).find('.custom-name').val();
+            let amount = parseFloat($(this).find('.custom-amount').val());
+            if (name && amount > 0) {
+                let type = $(this).find('.custom-type').val() === 'add' ? 1 : 0;
+                fees.push({
+                    fee_id: null,
+                    fee_head: name,
+                    fee_type: type,
+                    collection_type: 'optional',
+                    amount: amount,
+                    times: 1
+                });
+            }
+        });
+
+        $.ajax({
+            url: "{{ route('fee.studentfee.store') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                student_id: "{{ $student->student_id ?? $student->id }}",
+                student_name: "{{ $student->full_name }}",
+                college_id: "{{ $course->college_id }}",
+                course_id: "{{ $course->course_id }}",
+                session_year_name: "{{ $session }}",
+                fees: fees
+            },
+            success: function(res) {
+                if (res.status) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: "Fees assigned successfully!"
+                    }).then(() => {
+
+                        let redirectUrl = "{{ route('fee.FeeSchdule.index') }}" +
+                            `?student_id={{ $student->student_id ?? $student->id }}` +
+                            `&course_id={{ $course->course_id }}` +
+                            `&session_year_name={{ $session }}`;
+
+                        // window.location.href = redirectUrl;
+                    });
+                } else {
+                    Swal.fire("Error", res.message || "Something went wrong", "error");
+                    restoreUI();
+                }
+            },
+            error: function() {
+                Swal.fire("Error", "Server error", "error");
                 restoreUI();
             }
-        },
-        error: function() {
-            Swal.fire("Error", "Server error", "error");
-            restoreUI();
-        }
-    });
-});
+        });
+    }
 
-function resetForm() {
-    $('#deductFeeTable tbody').empty();
-    $('#customFeeTable tbody').empty();
-    $('#feeTable .fee-check').prop('checked', false);
-    $('#grandTotal').text("0.00");
+    function resetForm() {
+        $('#deductFeeTable tbody').empty();
+        $('#customFeeTable tbody').empty();
+        $('#feeTable .fee-check').prop('checked', false);
+        $('#grandTotal').text("0.00");
+        $('input, select, button').prop('disabled', false);
+        $('#submitFees').text("Submit Fees");
+        calculateTotal();
+    }
 
-    $('input, select, button').prop('disabled', false);
-    $('#submitFees').text("Submit Fees");
-
-    calculateTotal();
-}
-
-function restoreUI() {
-    $('input, select, button').prop('disabled', false);
-    $('#submitFees').text("Submit Fees");
-}
+    function restoreUI() {
+        $('input, select, button').prop('disabled', false);
+        $('#submitFees').text("Submit Fees");
+    }
 </script>
 
 

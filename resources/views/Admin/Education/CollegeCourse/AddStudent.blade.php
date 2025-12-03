@@ -58,166 +58,187 @@
 @section('script')
 
 <style>
-.fade-out {
-    opacity: 0;
-    transition: opacity 0.7s ease-out;
-}
-.spinner-border-sm {
-    margin-right: 6px;
-}
+    .fade-out {
+        opacity: 0;
+        transition: opacity 0.7s ease-out;
+    }
+
+    .spinner-border-sm {
+        margin-right: 6px;
+    }
 </style>
 
 <script>
-$(document).ready(function () {
+    $(document).ready(function() {
 
-    function placeholderBox() {
-        return `
+        function placeholderBox() {
+            return `
             <div class="p-5 text-center border rounded bg-light">
                 <h4 class="fw-bold text-secondary mb-2">No Data Loaded</h4>
                 <p class="text-muted">Please select all filters to load students .</p>
                 <a href="{{route('education.coursestudent.assignedstudents')}}" class="btn btn-primary">View Assign Students</a>
             </div>
         `;
-    }
-
-    $('.select2').select2();
-
-    $('#university_id').select2({
-        placeholder: 'Select University',
-        ajax: {
-            url: '{{ route("education.university.allUniversities") }}',
-            dataType: 'json',
-            processResults: data => ({
-                results: data.map(u => ({ id: u.id, text: u.org_name }))
-            })
         }
-    });
 
-    $('#university_id').on('change', function () {
+        $('.select2').select2();
 
-        $('#college_id').val(null).trigger('change');
-        $('#parent_course_id').val(null).trigger('change');
-        $('#child_course_id').val(null).trigger('change');
-        $('#session_name').val(null).trigger('change');
-        $('#student_result_table').html(placeholderBox());
-
-        let id = $(this).val();
-        if (!id) return;
-
-        $('#college_id').select2({
-            placeholder: 'Select College',
+        $('#university_id').select2({
+            placeholder: 'Select University',
             ajax: {
-                url: '{{ route("education.college.universitycolleges", ":id") }}'.replace(':id', id),
+                url: '{{ route("education.university.allUniversities") }}',
                 dataType: 'json',
                 processResults: data => ({
-                    results: data.data.map(c => ({ id: c.id, text: c.org_name }))
+                    results: data.map(u => ({
+                        id: u.id,
+                        text: u.org_name
+                    }))
                 })
             }
         });
-    });
 
-    $('#college_id').on('change', function () {
+        $('#university_id').on('change', function() {
 
-        $('#parent_course_id').val(null).trigger('change');
-        $('#child_course_id').val(null).trigger('change');
-        $('#session_name').val(null).trigger('change');
-        $('#student_result_table').html(placeholderBox());
-
-        let id = $(this).val();
-        if (!id) return;
-
-        $('#parent_course_id').select2({
-            placeholder: 'Select Parent Course',
-            ajax: {
-                url: '{{ route("education.collegecourse.parentCourses", ":id") }}'.replace(':id', id),
-                dataType: 'json',
-                processResults: data => ({
-                    results: data.data.map(pc => ({ id: pc.course_id, text: pc.course_name }))
-                })
-            }
-        });
-    });
-
-    $('#parent_course_id').on('change', function () {
-
-        $('#child_course_id').val(null).trigger('change');
-        $('#session_name').val(null).trigger('change');
-        $('#student_result_table').html(placeholderBox());
-
-        let parentId = $(this).val();
-        let collegeId = $('#college_id').val();
-        if (!parentId || !collegeId) return;
-
-        $('#child_course_id').select2({
-            placeholder: 'Select Child Course',
-            ajax: {
-                url: '{{ route("education.collegecourse.childCourses", ["college"=>":cid","id"=>":pid"]) }}'
-                    .replace(':cid', collegeId)
-                    .replace(':pid', parentId),
-                dataType: 'json',
-                processResults: data => ({
-                    results: data.data.map(cc => ({ id: cc.course_id, text: cc.course_name }))
-                })
-            }
-        });
-    });
-
-    $('#child_course_id').on('change', function () {
-
-        $('#session_name').val(null).trigger('change');
-        $('#student_result_table').html(placeholderBox());
-
-        $('#session_name').select2({
-            placeholder: 'Select Session',
-            ajax: {
-                url: '{{ route("coursefee.sessions") }}',
-                dataType: 'json',
-                processResults: data => ({
-                    results: data.map(s => ({ id: s, text: s }))
-                })
-            }
-        });
-    });
-
-    $('#session_name').on('change', function () {
-
-        let college = $('#college_id').val();
-        let parent = $('#parent_course_id').val();
-        let child = $('#child_course_id').val();
-        let session = $(this).val();
-
-        if (!college || !parent || !child || !session) {
+            $('#college_id').val(null).trigger('change');
+            $('#parent_course_id').val(null).trigger('change');
+            $('#child_course_id').val(null).trigger('change');
+            $('#session_name').val(null).trigger('change');
             $('#student_result_table').html(placeholderBox());
-            return;
-        }
 
-        $.ajax({
-            url: "{{ route('education.coursestudent.getStudents') }}",
-            type: "POST",
-            data: {
-                _token: "{{ csrf_token() }}",
-                college_id: college,
-                parent_course_id: parent,
-                course_id: child,
-                session_name: session
-            },
-            success: function (res) {
-                renderStudents(res.data);
-            }
+            let id = $(this).val();
+            if (!id) return;
+
+            $('#college_id').select2({
+                placeholder: 'Select College',
+                ajax: {
+                    url: '{{ route("education.college.universitycolleges", ":id") }}'.replace(':id', id),
+                    dataType: 'json',
+                    processResults: data => ({
+                        results: data.data.map(c => ({
+                            id: c.id,
+                            text: c.org_name
+                        }))
+                    })
+                }
+            });
         });
-    });
 
-    function renderStudents(data) {
+        $('#college_id').on('change', function() {
 
-        if (!data || data.length === 0) {
-            $('#student_result_table').html(`
+            $('#parent_course_id').val(null).trigger('change');
+            $('#child_course_id').val(null).trigger('change');
+            $('#session_name').val(null).trigger('change');
+            $('#student_result_table').html(placeholderBox());
+
+            let id = $(this).val();
+            if (!id) return;
+
+            $('#parent_course_id').select2({
+                placeholder: 'Select Parent Course',
+                ajax: {
+                    url: '{{ route("education.collegecourse.parentCourses", ":id") }}'.replace(':id', id),
+                    dataType: 'json',
+                    processResults: data => ({
+                        results: data.data.map(pc => ({
+                            id: pc.course_id,
+                            text: pc.course_name
+                        }))
+                    })
+                }
+            });
+        });
+
+        $('#parent_course_id').on('change', function() {
+
+            $('#child_course_id').val(null).trigger('change');
+            $('#session_name').val(null).trigger('change');
+            $('#student_result_table').html(placeholderBox());
+
+            let parentId = $(this).val();
+            let collegeId = $('#college_id').val();
+            if (!parentId || !collegeId) return;
+
+            $('#child_course_id').select2({
+                placeholder: 'Select Child Course',
+                ajax: {
+                    url: '{{ route("education.collegecourse.childCourses", ["college"=>":cid","id"=>":pid"]) }}'
+                        .replace(':cid', collegeId)
+                        .replace(':pid', parentId),
+                    dataType: 'json',
+                    processResults: data => ({
+                        results: data.data.map(cc => ({
+                            id: cc.course_id,
+                            text: cc.course_name
+                        }))
+                    })
+                }
+            });
+        });
+
+        $('#child_course_id').on('change', function() {
+
+            $('#session_name').val(null).trigger('change');
+            $('#student_result_table').html(placeholderBox());
+
+            $('#session_name').select2({
+                placeholder: 'Select Session',
+                ajax: {
+                    url: '{{ route("coursefee.sessions") }}',
+                    dataType: 'json',
+                    processResults: function(data) {
+
+                        console.log("Session API Response:", data); // 🔥 LOG THE DATA HERE
+
+                        return {
+                            results: (data.sessions || []).map(s => ({
+                                id: s,
+                                text: s
+                            }))
+                        };
+                    }
+                }
+            });
+        });
+
+        $('#session_name').on('change', function() {
+
+            let college = $('#college_id').val();
+            let parent = $('#parent_course_id').val();
+            let child = $('#child_course_id').val();
+            let session = $(this).val();
+
+            if (!college || !parent || !child || !session) {
+                $('#student_result_table').html(placeholderBox());
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('education.coursestudent.getStudents') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    college_id: college,
+                    parent_course_id: parent,
+                    course_id: child,
+                    session_name: session
+                },
+                success: function(res) {
+                    renderStudents(res.data);
+                }
+            });
+        });
+
+        function renderStudents(data) {
+
+            if (!data || data.length === 0) {
+                $('#student_result_table').html(`
                 <div class="alert alert-warning text-center">No students found.</div>
             `);
-            $('#assignStudentsBtn').addClass('d-none');
-            return;
-        }
+                $('#assignStudentsBtn').addClass('d-none');
+                return;
+            }
 
-        let html = `
+            let html = `
             <div class="table-responsive m-3" id="tableWrapper">
             <table class="table table-bordered" id="studentTable">
             <thead class="bg-light">
@@ -234,8 +255,8 @@ $(document).ready(function () {
             <tbody>
         `;
 
-        data.forEach((s, i) => {
-            html += `
+            data.forEach((s, i) => {
+                html += `
                 <tr>
                     <td><input type="checkbox" class="student_checkbox" data-id="${s.id}" data-name="${s.full_name}"></td>
                     <td>${i + 1}</td>
@@ -246,94 +267,94 @@ $(document).ready(function () {
                     <td>${s.status}</td>
                 </tr>
             `;
-        });
+            });
 
-        html += `
+            html += `
             </tbody>
             </table>
             </div>
         `;
 
-        $('#student_result_table').html(html);
-        $('#assignStudentsBtn').removeClass('d-none');
+            $('#student_result_table').html(html);
+            $('#assignStudentsBtn').removeClass('d-none');
 
-        $('#select_all').on('change', function () {
-            $('.student_checkbox').prop('checked', $(this).prop('checked'));
-        });
-    }
-
-    $('#assignStudentsBtn').on('click', function () {
-
-        let selected = [];
-
-        $('.student_checkbox:checked').each(function () {
-            selected.push({
-                id: $(this).data('id'),
-                name: $(this).data('name')
+            $('#select_all').on('change', function() {
+                $('.student_checkbox').prop('checked', $(this).prop('checked'));
             });
-        });
-
-        if (selected.length === 0) {
-            alert('Please select at least one student.');
-            return;
         }
 
-        $('#assignStudentsBtn').prop('disabled', true).html(`
+        $('#assignStudentsBtn').on('click', function() {
+
+            let selected = [];
+
+            $('.student_checkbox:checked').each(function() {
+                selected.push({
+                    id: $(this).data('id'),
+                    name: $(this).data('name')
+                });
+            });
+
+            if (selected.length === 0) {
+                alert('Please select at least one student.');
+                return;
+            }
+
+            $('#assignStudentsBtn').prop('disabled', true).html(`
             <span class="spinner-border spinner-border-sm"></span> Assigning...
         `);
 
-        $('#studentTable input').prop('disabled', true);
-        $('.select2').prop('disabled', true);
+            $('#studentTable input').prop('disabled', true);
+            $('.select2').prop('disabled', true);
 
-        $.ajax({
-            url: "{{ route('education.coursestudent.store') }}",
-            type: "POST",
-            data: {
-                _token: "{{ csrf_token() }}",
-                college_id: $('#college_id').val(),
-                course_id: $('#child_course_id').val(),
-                session_year_name: $('#session_name').val(),
-                session_start: "2024-07-01",
-                session_end: "2025-06-30",
-                students: selected
-            },
-            success: function (res) {
+            $.ajax({
+                url: "{{ route('education.coursestudent.store') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    college_id: $('#college_id').val(),
+                    course_id: $('#child_course_id').val(),
+                    session_year_name: $('#session_name').val(),
+                    session_start: "2024-07-01",
+                    session_end: "2025-06-30",
+                    students: selected
+                },
+                success: function(res) {
 
-                swal.fire({
-                    title: 'Success',
-                    text: res.message,
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                });
+                    swal.fire({
+                        title: 'Success',
+                        text: res.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
 
-                $('#tableWrapper').addClass('fade-out');
+                    $('#tableWrapper').addClass('fade-out');
 
-                setTimeout(() => {
-                    resetAllUI();
-                }, 700);
-            }
+                    setTimeout(() => {
+                        resetAllUI();
+                    }, 700);
+                }
+            });
         });
+
+        function resetAllUI() {
+
+            $('#assignStudentsBtn')
+                .prop('disabled', false)
+                .addClass('d-none')
+                .html('Assign Selected Students');
+
+            $('.select2').prop('disabled', false);
+
+            $('#student_result_table').html(placeholderBox());
+
+            $('#university_id').val(null).trigger('change');
+            $('#college_id').val(null).trigger('change');
+            $('#parent_course_id').val(null).trigger('change');
+            $('#child_course_id').val(null).trigger('change');
+            $('#session_name').val(null).trigger('change');
+        }
+
     });
-
-    function resetAllUI() {
-
-        $('#assignStudentsBtn')
-            .prop('disabled', false)
-            .addClass('d-none')
-            .html('Assign Selected Students');
-
-        $('.select2').prop('disabled', false);
-
-        $('#student_result_table').html(placeholderBox());
-
-        $('#university_id').val(null).trigger('change');
-        $('#college_id').val(null).trigger('change');
-        $('#parent_course_id').val(null).trigger('change');
-        $('#child_course_id').val(null).trigger('change');
-        $('#session_name').val(null).trigger('change');
-    }
-
-});
 </script>
 
 @endsection

@@ -12,9 +12,12 @@ use App\Models\Education\CollegeCourse;
 use App\Models\Education\StudentCourse;
 use App\Models\Fee\CollegeCourseFee;
 use App\Models\Fee\StudentCourseFee;
+use App\Models\Fee\StudentFeeInstallment;
 
 class StudentFeeController extends Controller
 {
+
+
     public function index(Request $request)
     {
         $request->validate([
@@ -25,7 +28,6 @@ class StudentFeeController extends Controller
         ]);
 
         $student = StudentProfile::where('student_id', $request->student_id)->first();
-
         if (!$student) {
             $student = Student::findOrFail($request->student_id);
             $student->full_name = $student->student_uid;
@@ -65,7 +67,6 @@ class StudentFeeController extends Controller
             'course_id'         => 'required|integer',
             'session_year_name' => 'required|string',
             'fees'              => 'required|array|min:1',
-
             'fees.*.fee_head'        => 'required|string',
             'fees.*.fee_type'        => 'required|in:0,1',
             'fees.*.collection_type' => 'required|in:mandatory,optional',
@@ -82,10 +83,12 @@ class StudentFeeController extends Controller
             $session     = (string) $request->session_year_name;
             $fees        = $request->fees;
 
+            // Load course
             $course = CollegeCourse::where('college_id', $collegeId)
                 ->where('course_id', $courseId)
                 ->firstOrFail();
 
+            // Parent must exist
             if (!$course->parent_course_id) {
                 return response()->json([
                     'status'  => false,
@@ -93,10 +96,15 @@ class StudentFeeController extends Controller
                 ], 422);
             }
 
+            // Load parent course
             $parent = CollegeCourse::where('college_id', $collegeId)
                 ->where('course_id', $course->parent_course_id)
                 ->firstOrFail();
 
+            /**
+             * CREATE STUDENT COURSE RECORDS
+             */
+            // Parent course record
             StudentCourse::firstOrCreate(
                 [
                     'student_id'        => $studentId,
@@ -117,6 +125,7 @@ class StudentFeeController extends Controller
                 ]
             );
 
+            // Child course record
             StudentCourse::firstOrCreate(
                 [
                     'student_id'        => $studentId,
@@ -137,10 +146,13 @@ class StudentFeeController extends Controller
                 ]
             );
 
+            /**
+             * CREATE PARENT FEE HEADER (One Empty Row)
+             */
             StudentCourseFee::firstOrCreate(
                 [
                     'student_id'       => $studentId,
-                    'course_id'        => $course->course_id,
+                    'course_id'        => $parent->course_id,   // FIXED
                     'session_one_name' => $session,
                     'is_parent'        => 1
                 ],
@@ -151,7 +163,7 @@ class StudentFeeController extends Controller
                     'parent_course_id'   => null,
                     'parent_course_name' => null,
                     'is_parent'          => 1,
-                    'duration_in_years'  => $course->duration_in_years,
+                    'duration_in_years'  => $parent->duration_in_years,
                     'student_name'       => $studentName,
                     'fee_id'             => null,
                     'fee_head'           => null,
@@ -162,13 +174,16 @@ class StudentFeeController extends Controller
                 ]
             );
 
+            /**
+             * CALCULATE TOTAL DUE
+             */
+            $total = 0;
+
             foreach ($fees as $fee) {
 
-                $feeHead     = (string) $fee['fee_head'];
-                $feeType     = (int) $fee['fee_type']; // 0 or 1
-                $feeAmount   = (float) $fee['amount'];
-                $feeTimes    = (int) $fee['times'];
-                $collection  = (string) $fee['collection_type'];
+                $feeHead   = $fee['fee_head'];
+                $feeAmount = $fee['amount'];
+                $feeTimes  = $fee['times'];
 
                 $exists = StudentCourseFee::where('student_id', $studentId)
                     ->where('course_id', $course->course_id)
@@ -183,28 +198,74 @@ class StudentFeeController extends Controller
                     ], 409);
                 }
 
+                $total += ($feeAmount * $feeTimes);
+            }
+
+            /**
+             * CREATE INSTALLMENT HEADERS
+             */
+            // Parent
+            $this->createInstallment(
+                $studentId,
+                $parent->course_id,
+                $session,
+                $collegeId,
+                $parent->course_name,
+                $parent->course_code,
+                null,
+                null,
+                1,
+                null,
+                null,
+                $studentName
+            );
+
+            // Child
+            $this->createInstallment(
+                $studentId,
+                $course->course_id,
+                $session,
+                $collegeId,
+                $course->course_name,
+                $course->course_code,
+                $parent->course_id,
+                $parent->course_name,
+                0,
+                $total,
+                $total,
+                $studentName
+            );
+
+            /**
+             * INSERT REAL FEES (with correct fee_type)
+             */
+            foreach ($fees as $fee) {
+
+                $feeHead     = $fee['fee_head'];
+                $feeType     = $fee['fee_type'];  // EXACTLY WHAT PAYLOAD SENT
+                $feeAmount   = $fee['amount'];
+                $feeTimes    = $fee['times'];
+                $collection  = $fee['collection_type'];
+                $lineAmount  = $feeAmount * $feeTimes;
+
                 StudentCourseFee::create([
                     'college_id'         => $collegeId,
                     'course_id'          => $course->course_id,
                     'course_name'        => $course->course_name,
                     'course_code'        => $course->course_code,
-
                     'parent_course_id'   => $parent->course_id,
                     'parent_course_name' => $parent->course_name,
                     'is_parent'          => 0,
                     'duration_in_years'  => $course->duration_in_years,
-
                     'student_id'         => $studentId,
                     'student_name'       => $studentName,
-
                     'fee_id'             => $fee['fee_id'] ?? null,
                     'fee_head'           => $feeHead,
-                    'fee_type'           => (string) $feeType,  // 👈 FIXED
+                    'fee_type'           => $feeType,   // SAVED WITHOUT CHANGE
                     'collection_type'    => $collection,
-
                     'times_in_year'      => $feeTimes,
                     'session_one_name'   => $session,
-                    'session_one_amount' => $feeAmount * $feeTimes,
+                    'session_one_amount' => $lineAmount,
                 ]);
             }
 
@@ -213,6 +274,50 @@ class StudentFeeController extends Controller
                 'message' => 'Fees assigned successfully.'
             ]);
         });
+    }
+
+    private function createInstallment(
+        int $studentId,
+        int $courseId,
+        string $session,
+        int $collegeId,
+        string $courseName,
+        ?string $courseCode,
+        ?int $parentCourseId,
+        ?string $parentCourseName,
+        int $isParent,
+        ?float $totalDue,
+        ?float $balanceDue,
+        string $studentName
+    ): bool {
+
+        try {
+            StudentFeeInstallment::updateOrCreate(
+                [
+                    'student_id'        => $studentId,
+                    'course_id'         => $courseId,
+                    'session_year_name' => $session,
+                    'is_parent'         => $isParent
+                ],
+                [
+                    'college_id'         => $collegeId,
+                    'course_name'        => $courseName,
+                    'course_code'        => $courseCode,
+                    'parent_course_id'   => $parentCourseId,
+                    'parent_course_name' => $parentCourseName,
+                    'total_due'          => $totalDue,
+                    'balance_due'        => $balanceDue,
+                    'installment_amount' => null,
+                    'installment_no'     => null,
+                    'installment_title'  => null,
+                    'due_date'           => null,
+                    'student_name'       => $studentName
+                ]
+            );
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     public function viewPage(Request $request)
@@ -231,6 +336,7 @@ class StudentFeeController extends Controller
             'session_year_name' => $request->session_year_name,
         ]);
     }
+
     public function viewfees(Request $request)
     {
         $request->validate([
@@ -241,7 +347,6 @@ class StudentFeeController extends Controller
         ]);
 
         $student = StudentProfile::where('student_id', $request->student_id)->first();
-
         if (!$student) {
             $student = Student::findOrFail($request->student_id);
             $student->full_name = $student->student_uid;

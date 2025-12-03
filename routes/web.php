@@ -47,10 +47,12 @@ use App\Http\Controllers\Education\UniversityCourseController;
 use App\Http\Controllers\Education\UniversityCollegeController;
 use App\Http\Controllers\Employees\EmployeeDocumentsController;
 use App\Http\Controllers\Vendors\VendorOnlineProfileController;
+use App\Http\Controllers\FeeManagement\StudentPaymentController;
 use App\Http\Controllers\Vendors\VendorBusinessProfileController;
 use App\Http\Controllers\Education\CollegeCourseStudentController;
 use App\Http\Controllers\Customers\CustomerOnlineProfileController;
 use App\Http\Controllers\Customers\CustomerBusinessProfileController;
+use App\Http\Controllers\FeeManagement\StudentFeeInstallmentController;
 
 Route::get('/', [DashboardController::class, 'dashBoardPage'])->name('Admin.Dashboard');
 Route::get('/storage-link', function () {
@@ -597,11 +599,19 @@ Route::prefix('fees')->group(function () {
 
     Route::get('Students-Fees', [StudentFeeController::class, 'index'])->name('fee.studentfee.index');
     Route::post('Students-Fees/store', [StudentFeeController::class, 'store'])->name('fee.studentfee.store');
-    Route::get('/Student-Fee/view',[StudentFeeController::class, 'viewPage'])->name('fee.studentfee.view');
-    Route::get('/Student-Fee/viewfees',[StudentFeeController::class, 'viewfees'])->name('fee.studentfee.viewfees');
+    Route::get('/Student-Fee/view', [StudentFeeController::class, 'viewPage'])->name('fee.studentfee.view');
+    Route::get('/Student-Fee/viewfees', [StudentFeeController::class, 'viewfees'])->name('fee.studentfee.viewfees');
 
 
-    Route::get('Students-Fees/Schdule', [FeeSchduleController::class, 'index'])->name('fee.FeeSchdule.index');
+    Route::get('Students-Fees/Schdule', [StudentFeeInstallmentController::class, 'index'])->name('fee.FeeSchdule.index');
+    Route::post('/Student-Fee/installments/store', [StudentFeeInstallmentController::class, 'store'])->name('fee.installment.store');
+    Route::get('/Student-Fee/installments/list', [StudentFeeInstallmentController::class, 'list'])->name('fee.installment.list');
+    Route::get('/installment/summary', [StudentFeeInstallmentController::class, 'summary'])->name('fee.installment.summary');
+    Route::post('/installment/delete', [StudentFeeInstallmentController::class, 'delete'])->name('fee.installment.delete');
+
+
+    Route::get('Studentfee/payment', [StudentPaymentController::class, 'index'])->name('fee.payment.index');
+
     // FEE MASTER
     Route::get('/master', [FeeMasterController::class, 'index'])->name('fee.feemaster.index');
     Route::get('/master/paginate', [FeeMasterController::class, 'paginate'])->name('fee.feemaster.paginate');

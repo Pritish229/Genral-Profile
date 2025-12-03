@@ -159,15 +159,23 @@ $(document).ready(function () {
         showPlaceholder();
 
         $('#session_name').select2({
-            placeholder: 'Select Session',
-            ajax: {
-                url: '{{ route("coursefee.sessions") }}',
-                dataType: 'json',
-                processResults: data => ({
-                    results: data.map(s => ({ id: s, text: s }))
-                })
-            }
-        });
+                placeholder: 'Select Session',
+                ajax: {
+                    url: '{{ route("coursefee.sessions") }}',
+                    dataType: 'json',
+                    processResults: function(data) {
+
+                        console.log("Session API Response:", data); // 🔥 LOG THE DATA HERE
+
+                        return {
+                            results: (data.sessions || []).map(s => ({
+                                id: s,
+                                text: s
+                            }))
+                        };
+                    }
+                }
+            });
     });
 
     $('#session_name').on('change', function () {

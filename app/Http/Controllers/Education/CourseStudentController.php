@@ -10,6 +10,7 @@ use App\Models\Fee\StudentCourseFee;
 use App\Models\Student\StudentProfile;
 use App\Models\Education\CollegeCourse;
 use App\Models\Education\StudentCourse;
+use App\Models\Fee\StudentFeeInstallment;
 
 class CourseStudentController extends Controller
 {
@@ -153,12 +154,19 @@ class CourseStudentController extends Controller
             ->addIndexColumn()
             ->addColumn('action', function ($row) use ($courseId, $collegeId, $session) {
 
-                // Check if student already has assigned fees
+                // Check: Has assigned fee?
                 $alreadyAssigned = StudentCourseFee::where('student_id', $row->id)
                     ->where('course_id', $courseId)
                     ->where('session_one_name', $session)
                     ->exists();
 
+                // Check: Has installment summary?
+                $installmentExists = StudentFeeInstallment::where('student_id', $row->id)
+                    ->where('course_id', $courseId)
+                    ->where('session_year_name', $session)
+                    ->exists();
+
+                // URLs
                 $assignUrl = route("fee.studentfee.index", [
                     "student_id"        => $row->id,
                     "course_id"         => $courseId,
@@ -173,18 +181,50 @@ class CourseStudentController extends Controller
                     "session_year_name" => $session
                 ]);
 
+                $scheduleUrl = route("fee.FeeSchdule.index", [
+                    "student_id"        => $row->id,
+                    "course_id"         => $courseId,
+                    "session_year_name" => $session
+                ]);
+
+                $paymentUrl = route("fee.payment.index", [
+                    "student_id"        => $row->id,
+                    "course_id"         => $courseId,
+                    "session_year_name" => $session
+                ]);
+
                 $btns = '';
 
-                // Show Assign button ONLY if no data assigned
+                // 1️⃣ Assign Fee Button (show only if not assigned)
                 if (!$alreadyAssigned) {
                     $btns .= '<a href="' . $assignUrl . '" class="btn btn-sm btn-primary me-1">Assign Fee</a>';
                 }
 
-                // Always show View button
-                $btns .= '<a href="' . $viewUrl . '" class="btn btn-sm btn-success">View Fee</a>';
+                // 2️⃣ View Fee Button (always show)
+                $btns .= '<a href="' . $viewUrl . '" class="btn btn-sm btn-success me-1">View Fee</a>';
+
+                // 3️⃣ Payment Schedule Button (show only if installments exist)
+                if ($installmentExists) {
+                    $btns .= '<a href="' . $scheduleUrl . '" class="btn btn-sm btn-warning me-1">Payment Schedule</a>';
+                } else {
+                    // If Assign Fee button is not rendered, show after View Fee
+                    if ($alreadyAssigned) {
+                        $btns .= '<a href="' . $scheduleUrl . '" class="btn btn-sm btn-warning me-1">Payment Schedule</a>';
+                    }
+                }
+
+                // 4️⃣ Payment Button (show only if installments exist)
+                if ($installmentExists) {
+                    $btns .= '<a href="' . $paymentUrl . '" class="btn btn-sm btn-info">Payment</a>';
+                } else {
+                    if ($alreadyAssigned) {
+                        $btns .= '<a href="' . $paymentUrl . '" class="btn btn-sm btn-info">Payment</a>';
+                    }
+                }
 
                 return $btns;
             })
+
             ->rawColumns(['action'])
             ->make(true);
     }
