@@ -133,12 +133,12 @@
                         <li class="{{ in_array(Route::currentRouteName(), ['fee.feemaster.index']) ? 'active' : '' }}">
                             <a href="{{ route('fee.feemaster.index') }}"><span>Fee Master</span></a>
                         </li>
-                        <li class="{{ in_array(Route::currentRouteName(), ['fee.studentfee.index']) ? 'active' : '' }}">
+                        <!-- <li class="{{ in_array(Route::currentRouteName(), ['fee.studentfee.index']) ? 'active' : '' }}">
                             <a href="{{ route('fee.studentfee.index') }}"><span>Student Fee </span></a>
                         </li>
                         <li class="{{ in_array(Route::currentRouteName(), ['fee.FeeSchdule.index']) ? 'active' : '' }}">
                             <a href="{{ route('fee.FeeSchdule.index') }}"><span>Fee Schdule </span></a>
-                        </li>
+                        </li> -->
                         <li class="{{ in_array(Route::currentRouteName(), ['coursefee.index']) ? 'active' : '' }}">
                             <a href="{{ route('coursefee.index') }}"><span>College Course Fee</span></a>
                         </li>
