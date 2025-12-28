@@ -149,12 +149,16 @@
                     url: '{{ route("coursefee.sessions") }}',
                     dataType: 'json',
                     delay: 200,
-                    processResults: data => ({
-                        results: data.map(s => ({
-                            id: s,
-                            text: s
-                        }))
-                    })
+                    processResults: function(data) {
+                        return {
+                            results: data.sessions.map(function(s) {
+                                return {
+                                    id: s,
+                                    text: s
+                                };
+                            })
+                        };
+                    }
                 }
             });
         });

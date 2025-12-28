@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\FeeManagement;
 
+use Carbon\Carbon;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -28,183 +29,80 @@ class CourseFeeController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'student_id'        => 'required|integer',
-            'student_name'      => 'required|string',
-            'college_id'        => 'required|integer',
-            'course_id'         => 'required|integer',
-            'session_year_name' => 'required|string',
-            'fees'              => 'required|array|min:1',
+            'college_id'         => 'required|integer',
+            'course_id'          => 'required|integer',
+            'course_code'        => 'required|string',
+            'duration_in_years'  => 'required|integer',
+            'session_name'       => 'required|string',
+            'session_start_date' => 'required|date_format:d-m-Y',
+            'session_end_date'   => 'required|date_format:d-m-Y',
 
-            'fees.*.fee_head'        => 'required|string',
-            'fees.*.fee_type'        => 'required|in:0,1',
-            'fees.*.collection_type' => 'required|in:mandatory,optional',
-            'fees.*.amount'          => 'required|numeric|min:0',
-            'fees.*.times'           => 'required|integer|min:1',
+            'fees'                       => 'required|array|min:1',
+            'fees.*.fee_id'              => 'required|integer',
+            'fees.*.fee_head'            => 'required|string',
+            'fees.*.collection_type'     => 'required|in:mandatory,optional',
+            'fees.*.amount'              => 'required|numeric|min:0',
+            'fees.*.times_in_year'       => 'required|integer|min:1',
+            'fees.*.total_amount'        => 'required|numeric|min:0',
         ]);
 
         return DB::transaction(function () use ($request): JsonResponse {
 
-            $studentId   = (int) $request->student_id;
-            $studentName = (string) $request->student_name;
-            $collegeId   = (int) $request->college_id;
-            $courseId    = (int) $request->course_id;
-            $session     = (string) $request->session_year_name;
-            $fees        = $request->fees;
+            // 🔁 Normalize dates for MySQL
+            $sessionStart = Carbon::createFromFormat('d-m-Y', $request->session_start_date)
+                ->format('Y-m-d');
 
-            $course = CollegeCourse::where('college_id', $collegeId)
-                ->where('course_id', $courseId)
+            $sessionEnd = Carbon::createFromFormat('d-m-Y', $request->session_end_date)
+                ->format('Y-m-d');
+
+            // 🔍 Fetch course
+            $course = CollegeCourse::where('college_id', $request->college_id)
+                ->where('course_id', $request->course_id)
                 ->firstOrFail();
 
+            // 🔍 Fetch parent course
             if (!$course->parent_course_id) {
                 return response()->json([
                     'status'  => false,
-                    'message' => 'Parent course does not exist.'
+                    'message' => 'Parent course not found.'
                 ], 422);
             }
 
-            $parent = CollegeCourse::where('college_id', $collegeId)
+            $parent = CollegeCourse::where('college_id', $request->college_id)
                 ->where('course_id', $course->parent_course_id)
                 ->firstOrFail();
 
-            StudentCourse::firstOrCreate(
-                [
-                    'student_id'        => $studentId,
-                    'course_id'         => $parent->course_id,
-                    'session_year_name' => $session,
-                ],
-                [
-                    'college_id'         => $collegeId,
-                    'course_name'        => $parent->course_name,
-                    'parent_course_id'   => null,
-                    'parent_course_name' => null,
-                    'is_parent'          => 1,
-                    'course_code'        => $parent->course_code,
-                    'duration_in_years'  => $parent->duration_in_years,
-                    'student_name'       => $studentName,
-                    'session_start'      => $course->session_start,
-                    'session_end'        => $course->session_end,
-                ]
-            );
+            // 💾 Save each fee
+            foreach ($request->fees as $fee) {
 
-            StudentCourse::firstOrCreate(
-                [
-                    'student_id'        => $studentId,
-                    'course_id'         => $course->course_id,
-                    'session_year_name' => $session,
-                ],
-                [
-                    'college_id'         => $collegeId,
-                    'course_name'        => $course->course_name,
-                    'parent_course_id'   => $parent->course_id,
-                    'parent_course_name' => $parent->course_name,
-                    'is_parent'          => 0,
-                    'course_code'        => $course->course_code,
-                    'duration_in_years'  => $course->duration_in_years,
-                    'student_name'       => $studentName,
-                    'session_start'      => $course->session_start,
-                    'session_end'        => $course->session_end,
-                ]
-            );
-
-            StudentCourseFee::firstOrCreate(
-                [
-                    'student_id'       => $studentId,
-                    'course_id'        => $course->course_id,
-                    'session_one_name' => $session,
-                    'is_parent'        => 1
-                ],
-                [
-                    'college_id'         => $collegeId,
-                    'course_name'        => $parent->course_name,
-                    'course_code'        => $parent->course_code,
-                    'parent_course_id'   => null,
-                    'parent_course_name' => null,
-                    'is_parent'          => 1,
-                    'duration_in_years'  => $course->duration_in_years,
-                    'student_name'       => $studentName,
-                    'fee_id'             => null,
-                    'fee_head'           => null,
-                    'fee_type'           => null,
-                    'collection_type'    => null,
-                    'times_in_year'      => null,
-                    'session_one_amount' => null,
-                ]
-            );
-
-            $total = 0;
-
-            foreach ($fees as $fee) {
-
-                $feeHead     = (string) $fee['fee_head'];
-                $feeType     = (int) $fee['fee_type'];
-                $feeAmount   = (float) $fee['amount'];
-                $feeTimes    = (int) $fee['times'];
-                $collection  = (string) $fee['collection_type'];
-
-                $exists = StudentCourseFee::where('student_id', $studentId)
-                    ->where('course_id', $course->course_id)
-                    ->where('session_one_name', $session)
-                    ->where('fee_head', $feeHead)
-                    ->exists();
-
-                if ($exists) {
-                    return response()->json([
-                        'status'  => false,
-                        'message' => "Fee '{$feeHead}' already exists for this student and session."
-                    ], 409);
-                }
-
-                $lineAmount = $feeAmount * $feeTimes;
-                $total += $lineAmount;
-
-                StudentCourseFee::create([
-                    'college_id'         => $collegeId,
-                    'course_id'          => $course->course_id,
-                    'course_name'        => $course->course_name,
-                    'course_code'        => $course->course_code,
-                    'parent_course_id'   => $parent->course_id,
-                    'parent_course_name' => $parent->course_name,
-                    'is_parent'          => 0,
-                    'duration_in_years'  => $course->duration_in_years,
-                    'student_id'         => $studentId,
-                    'student_name'       => $studentName,
-                    'fee_id'             => $fee['fee_id'] ?? null,
-                    'fee_head'           => $feeHead,
-                    'fee_type'           => (string) $feeType,
-                    'collection_type'    => $collection,
-                    'times_in_year'      => $feeTimes,
-                    'session_one_name'   => $session,
-                    'session_one_amount' => $lineAmount,
-                ]);
+                CollegeCourseFee::updateOrCreate(
+                    [
+                        'college_id'   => $request->college_id,
+                        'course_id'    => $course->course_id,
+                        'fee_id'       => $fee['fee_id'],
+                        'session_name' => $request->session_name,
+                    ],
+                    [
+                        'course_name'        => $course->course_name,
+                        'parent_course_id'   => $parent->course_id,
+                        'parent_course_name' => $parent->course_name,
+                        'is_parent'          => 0,
+                        'course_code'        => $request->course_code,
+                        'duration_in_years'  => $request->duration_in_years,
+                        'fee_head'           => $fee['fee_head'],
+                        'collection_type'    => $fee['collection_type'],
+                        'times_in_year'      => $fee['times_in_year'],
+                        'amount'             => $fee['amount'],
+                        'total_amount'       => $fee['total_amount'],
+                        'session_start_date' => $sessionStart,
+                        'session_end_date'   => $sessionEnd,
+                    ]
+                );
             }
-
-
-            StudentFeeInstallment::updateOrCreate(
-                [
-                    'student_id'        => $studentId,
-                    'course_id'         => $course->course_id,
-                    'session_year_name' => $session,
-                    'is_parent'         => 1
-                ],
-                [
-                    'college_id'         => $collegeId,
-                    'course_name'        => $course->course_name,
-                    'course_code'        => $course->course_code,
-                    'parent_course_id'   => $parent->course_id,
-                    'parent_course_name' => $parent->course_name,
-                    'total_due'          => $total,
-                    'balance_due'        => $total,
-                    'installment_amount' => null,
-                    'installment_no'     => null,
-                    'installment_title'  => null,
-                    'due_date'           => null,
-                    'student_name'       => $studentName
-                ]
-            );
 
             return response()->json([
                 'status'  => true,
-                'message' => 'Fees assigned successfully.'
+                'message' => 'Course fees saved successfully.'
             ]);
         });
     }
